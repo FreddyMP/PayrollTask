@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\UserRequest;
+use App\Models\Holiday;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -47,6 +49,15 @@ class PayrollController extends Controller
         return view('payroll.bonuses', compact('employees'));
     }
 
+    public function benefits()
+    {
+        $employees = Employee::where('company_id', Auth::user()->company_id)
+            ->with('user')
+            ->get();
+
+        return view('payroll.benefits', compact('employees'));
+    }
+
     /**
      * API: Devuelve horas extra aprobadas y monto segun CT dominicano
      * para un empleado en un periodo (Y-m) dado.
@@ -54,42 +65,110 @@ class PayrollController extends Controller
     public function apiOvertimeData(Request $request)
     {
         $employeeId = $request->input('employee_id');
-        $period     = $request->input('period', date('Y-m')); // e.g. "2026-04"
+        $period     = $request->input('period', date('Y-m'));
+        $user       = Auth::user();
 
-        $employee = Employee::where('company_id', Auth::user()->company_id)
+        $employee = Employee::where('company_id', $user->company_id)
             ->where('id', $employeeId)
             ->with('user')
             ->firstOrFail();
 
-        // Buscar en requests: tipo overtime, aprobadas, del usuario del empleado, en el mes del periodo
+        $company = $user->company;
+
         [$year, $month] = explode('-', $period);
 
-        $overtimeHours = UserRequest::where('company_id', Auth::user()->company_id)
+        $requests = UserRequest::where('company_id', $user->company_id)
             ->where('user_id', $employee->user_id)
             ->where('type', 'overtime')
             ->where('status', 'approved')
             ->whereYear('overtime_date', $year)
             ->whereMonth('overtime_date', $month)
-            ->sum('overtime_hours');
+            ->get();
 
-        $overtimeHours = round((float) $overtimeHours, 2);
+        $holidays = Holiday::where('company_id', $user->company_id)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->pluck('date')
+            ->map(fn($d) => $d->format('Y-m-d'))
+            ->toArray();
 
-        // --- Calculo segun Codigo de Trabajo RD (Art. 203) ---
-        // Hora ordinaria = salario_mensual / 173.33  (40h/semana * 52 semanas / 12 meses)
-        // Hora extra (dias laborables) = hora_ordinaria * 1.35
-        // Nota: horas en dia de descanso = hora_ordinaria * 2.0
-        // Para este calculo usamos el recargo de dias laborables (35%) como
-        // valor general; el admin puede ajustar si corresponde dia de descanso.
-        $monthlySalary   = (float) $employee->salary;
-        $hourlyRate      = $monthlySalary / 173.33;
-        $overtimeRate    = $hourlyRate * 1.35;          // +35% recargo CT-RD
-        $overtimePay     = round($overtimeRate * $overtimeHours, 2);
+        $monthlySalary = (float) $employee->salary;
+        $hourlyRate    = ($monthlySalary / 23.83)/8;
+
+        $totalOvertimePay = 0;
+        $totalHours = 0;
+        
+        $details = [
+            'diurnas' => 0,
+            'nocturnas' => 0,
+            'feriados_descanso' => 0,
+        ];
+
+        foreach ($requests as $req) {
+            $date = $req->overtime_date->format('Y-m-d');
+            $dayOfWeek = $req->overtime_date->dayOfWeek; // 0 (Sun) to 6 (Sat)
+            
+            $isRestDay = ($dayOfWeek === 0 && $company->sunday_rest) || ($dayOfWeek === 6 && $company->saturday_rest);
+            $isHoliday = in_array($date, $holidays);
+
+            $hours = (float) $req->overtime_hours;
+            $totalHours += $hours;
+
+            if ($isRestDay || $isHoliday) {
+                // All hours are at 100% surcharge (2.0x)
+                $totalOvertimePay += ($hourlyRate * 2.0) * $hours;
+                $details['feriados_descanso'] += $hours;
+            } else {
+                // Split logic: Day (07:00-21:00) @ 1.35x, Night (21:00-07:00) @ 2.0x
+                $start = Carbon::parse($req->overtime_start);
+                $end   = Carbon::parse($req->overtime_end);
+
+                // Default night boundaries for the same day
+                $nightStart = Carbon::parse($req->overtime_start)->setTime(21, 0, 0);
+                $dayStart   = Carbon::parse($req->overtime_start)->setTime(7, 0, 0);
+
+                $dayHours = 0;
+                $nightHours = 0;
+
+                // Simple interval intersection logic for a single day
+                // We assume start < end as validated in RequestController
+                
+                // Night part (before 7 AM)
+                if ($start->lt($dayStart)) {
+                    $nightEndRef = $end->lt($dayStart) ? $end : $dayStart;
+                    $nightHours += $start->diffInMinutes($nightEndRef) / 60;
+                    $current = $nightEndRef;
+                } else {
+                    $current = $start;
+                }
+
+                // Day part (7 AM to 9 PM)
+                if ($current->lt($nightStart) && $end->gt($dayStart)) {
+                    $dayEndRef = $end->lt($nightStart) ? $end : $nightStart;
+                    $dayStartRef = $current->gt($dayStart) ? $current : $dayStart;
+                    if ($dayEndRef->gt($dayStartRef)) {
+                        $dayHours += $dayStartRef->diffInMinutes($dayEndRef) / 60;
+                    }
+                    $current = $dayEndRef;
+                }
+
+                // Night part (after 9 PM)
+                if ($end->gt($nightStart)) {
+                    $nightStartRef = $current->gt($nightStart) ? $current : $nightStart;
+                    $nightHours += $nightStartRef->diffInMinutes($end) / 60;
+                }
+
+                $totalOvertimePay += ($hourlyRate * 1.35 * $dayHours) + ($hourlyRate * 2.0 * $nightHours);
+                $details['diurnas'] += $dayHours;
+                $details['nocturnas'] += $nightHours;
+            }
+        }
 
         return response()->json([
-            'overtime_hours' => $overtimeHours,
-            'overtime_pay'   => $overtimePay,
+            'overtime_hours' => round($totalHours, 2),
+            'overtime_pay'   => round($totalOvertimePay, 2),
             'hourly_rate'    => round($hourlyRate, 4),
-            'overtime_rate'  => round($overtimeRate, 4),
+            'details'        => $details,
         ]);
     }
 
@@ -117,7 +196,9 @@ class PayrollController extends Controller
         $total_extras = $extras + $overtime_pay;
         
         // Recalculate taxes on server-side for integrity
-        $ars = $salary * 0.0304;
+        $employeeRecord = Employee::find($data['employee_id']);
+        $ars_extra = $employeeRecord->total_ars_extra;
+        $ars = ($salary * 0.0304) + $ars_extra;
         $afp = $salary * 0.0287;
         
         // base_imponible = (salario * 12) - ((ARS * 12) + (AFP * 12))

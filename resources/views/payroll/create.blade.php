@@ -17,7 +17,7 @@
                             <select class="form-select" name="employee_id" id="employeeSelect" required>
                                 <option value="">Seleccionar...</option>
                                 @foreach($employees as $emp)
-                                <option value="{{ $emp->id }}" data-salary="{{ $emp->salary }}">{{ $emp->user->name }} — {{ $emp->department }}</option>
+                                <option value="{{ $emp->id }}" data-salary="{{ $emp->salary }}" data-ars-extra="{{ $emp->total_ars_extra }}">{{ $emp->user->name }} — {{ $emp->department }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -54,7 +54,7 @@
                             <span class="fw-semibold" style="color: #fb923c; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em;">
                                 Horas Extra Aprobadas — Período
                             </span>
-                            <span id="overtimePeriodLabel" class="text-muted" style="font-size: 0.78rem;"></span>
+                            <span id="overtimePeriodLabel" class="text-white" style="font-size: 0.78rem;"></span>
                         </div>
                         <div class="row g-3 align-items-end">
                             <div class="col-md-4">
@@ -86,17 +86,29 @@
                                 <label class="form-label" style="height: 1.2rem;"></label>
                                 <div class="p-2 rounded-2 text-center" style="background: rgba(251,146,60,0.1); border: 1px solid rgba(251,146,60,0.2); font-size: 0.75rem; color: #94a3b8; line-height: 1.5;">
                                     <i class="bi bi-book me-1 text-warning"></i>
-                                    <strong style="color: #fb923c;">Art. 203 CT-RD</strong><br>
-                                    Hora extra = hora ordinaria × 1.35<br>
-                                    <span style="font-size:0.68rem;">(Salario mensual ÷ 173.33 h)</span>
+                                    <strong style="color: #fb923c;">Art. 203/204 CT-RD</strong><br>
+                                    Diurna: x1.35 | Nocturna: x2.00<br>
+                                    Feriados/Descanso: x2.00
                                 </div>
                             </div>
                         </div>
+                        <div id="overtimeDetails" class="mt-3 pt-3 border-top border-warning-20 d-flex flex-wrap gap-2" style="display:none !important;">
+                            <div class="px-2 py-1 rounded-2" style="background:rgba(255,255,255,0.05); border:1px solid rgba(251,146,60,0.1); font-size:0.75rem;">
+                                <span class="text-white">Diurnas:</span> <span id="detailDiurnas" class="fw-semibold text-white">0</span>h
+                            </div>
+                            <div class="px-2 py-1 rounded-2" style="background:rgba(255,255,255,0.05); border:1px solid rgba(251,146,60,0.1); font-size:0.75rem;">
+                                <span class="text-white">Nocturnas:</span> <span id="detailNocturnas" class="fw-semibold text-white">0</span>h
+                            </div>
+                            <div class="px-2 py-1 rounded-2" style="background:rgba(251,146,60,0.1); border:1px solid rgba(251,146,60,0.2); font-size:0.75rem;">
+                                <span class="text-white">Feriados/Descanso:</span> <span id="detailFeriados" class="fw-semibold text-white">0</span>h
+                            </div>
+                        </div>
+
                         <div id="overtimeLoadingMsg" class="text-muted small mt-2" style="display:none;">
                             <span class="spinner-border spinner-border-sm me-1"></span> Consultando horas extra...
                         </div>
-                        <div id="overtimeEmptyMsg" class="text-muted small mt-2" style="display:none;">
-                            <i class="bi bi-info-circle me-1"></i> No hay horas extra aprobadas para este empleado en el período seleccionado.
+                        <div id="overtimeEmptyMsg" class=" text-white small mt-2" style="display:none;">
+                            <i class="bi bi-info-circle me-1 text-white"></i> No hay horas extra aprobadas para este empleado en el período seleccionado.
                         </div>
                     </div>
 
@@ -138,8 +150,9 @@ $(document).ready(function() {
     // ── Cálculo de impuestos ──────────────────────────────────────────
     function calculateTaxes() {
         let salary = parseFloat($('#grossSalary').val()) || 0;
+        let arsExtra = parseFloat($('#employeeSelect option:selected').data('ars-extra')) || 0;
 
-        let arsValue = salary * 0.0304;
+        let arsValue = (salary * 0.0304) + arsExtra;
         $('#ars').val(arsValue.toFixed(2));
 
         let afpValue = salary * 0.0287;
@@ -200,12 +213,21 @@ $(document).ready(function() {
                         parseFloat(data.overtime_pay).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     );
                     $('#overtimePayHidden').val(data.overtime_pay);
+                    
+                    if (data.details) {
+                        $('#detailDiurnas').text(data.details.diurnas.toFixed(2));
+                        $('#detailNocturnas').text(data.details.nocturnas.toFixed(2));
+                        $('#detailFeriados').text(data.details.feriados_descanso.toFixed(2));
+                        $('#overtimeDetails').attr('style', 'display: flex !important;');
+                    }
+
                     $('#overtimeEmptyMsg').hide();
                 } else {
                     $('#overtimeHoursDisplay').val('0.00');
                     $('#overtimePayDisplay').val('0.00');
                     $('#overtimePayHidden').val('0');
                     $('#overtimeEmptyMsg').show();
+                    $('#overtimeDetails').attr('style', 'display: none !important;');
                 }
             },
             error: function(xhr) {
@@ -224,6 +246,7 @@ $(document).ready(function() {
         $('#overtimePeriodLabel').text('');
         $('#overtimeEmptyMsg').hide();
         $('#overtimeLoadingMsg').hide();
+        $('#overtimeDetails').attr('style', 'display: none !important;');
     }
 
     // ── Eventos ──────────────────────────────────────────────────────

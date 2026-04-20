@@ -14,6 +14,11 @@
             Bonificaciones de Ley
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('payroll.benefits') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
+            Prestaciones Laborales
+        </a>
+    </li>
 </ul>
 
 <div class="d-flex justify-content-between align-items-center mb-4">

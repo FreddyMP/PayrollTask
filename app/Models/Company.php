@@ -8,7 +8,13 @@ class Company extends Model
 {
     protected $fillable = [
         'name', 'rnc', 'email', 'phone', 'address', 'logo', 'plan', 'status',
+        'saturday_rest', 'sunday_rest',
     ];
+
+    public function holidays()
+    {
+        return $this->hasMany(Holiday::class);
+    }
 
     public function users()
     {

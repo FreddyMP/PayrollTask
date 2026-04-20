@@ -14,6 +14,11 @@
             Bonificaciones de Ley
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('payroll.benefits') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
+            Prestaciones Laborales
+        </a>
+    </li>
 </ul>
 
 <div class="row mb-4">
@@ -54,7 +59,7 @@
 </div>
 
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center text-white">
         <span>Cálculo por Empleado</span>
         <span class="badge badge-status badge-info" id="employeeCount">{{ count($employees) }} Empleados</span>
     </div>

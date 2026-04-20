@@ -33,4 +33,14 @@ class Employee extends Model
     {
         return $this->hasMany(Payroll::class);
     }
+
+    public function arsExtras()
+    {
+        return $this->hasMany(EmployeeArsExtra::class);
+    }
+
+    public function getTotalArsExtraAttribute()
+    {
+        return $this->arsExtras()->sum('ars_amount');
+    }
 }

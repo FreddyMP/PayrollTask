@@ -139,9 +139,9 @@
         <div class="col-md-6 col-xl-4">
             <div class="task-card-modern" id="card-task-{{ $task->id }}">
                 <div class="task-card-header">
-                    <span class="badge-status badge-{{ $task->priority }}">{{ ucfirst($task->priority) }}</span>
+                    <span class="badge-status badge-{{ $task->priority }} ">{{ ucfirst($task->priority) }}</span>
                     <div class="dropdown">
-                        <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">

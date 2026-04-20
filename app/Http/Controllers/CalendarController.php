@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\CalendarEvent;
 use App\Models\CalendarEventLink;
+use App\Models\Holiday;
 use Illuminate\Http\Request;
 
 class CalendarController extends Controller
 {
     public function index()
     {
-        return view('calendar.index');
+        $company = auth()->user()->company;
+        return view('calendar.index', compact('company'));
     }
 
     /**
@@ -180,5 +182,65 @@ class CalendarController extends Controller
         $calendar->delete();
 
         return redirect()->route('calendar.index')->with('success', 'Actividad eliminada exitosamente.');
+    }
+
+    public function apiHolidays(Request $request)
+    {
+        $year  = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
+        $user  = auth()->user();
+
+        $holidays = Holiday::where('company_id', $user->company_id)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->get();
+
+        return response()->json($holidays);
+    }
+
+    public function toggleHoliday(Request $request)
+    {
+        $user = auth()->user();
+        if ($user->role !== 'super' && $user->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $date = $request->input('date');
+        $name = $request->input('name', 'Feriado');
+
+        $holiday = Holiday::where('company_id', $user->company_id)
+            ->where('date', $date)
+            ->first();
+
+        if ($holiday) {
+            $holiday->delete();
+            return response()->json(['status' => 'removed']);
+        } else {
+            Holiday::create([
+                'company_id' => $user->company_id,
+                'date' => $date,
+                'name' => $name,
+            ]);
+            return response()->json(['status' => 'added']);
+        }
+    }
+
+    public function toggleWeekendRest(Request $request)
+    {
+        $user = auth()->user();
+        if ($user->role !== 'super' && $user->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $type = $request->input('type'); // 'sat' or 'sun'
+        $company = $user->company;
+
+        if ($type === 'sat') {
+            $company->update(['saturday_rest' => ! $company->saturday_rest]);
+        } elseif ($type === 'sun') {
+            $company->update(['sunday_rest' => ! $company->sunday_rest]);
+        }
+
+        return response()->json(['status' => 'success', 'saturday_rest' => $company->saturday_rest, 'sunday_rest' => $company->sunday_rest]);
     }
 }

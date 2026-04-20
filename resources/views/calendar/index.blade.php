@@ -143,6 +143,59 @@
 
     .day-more:hover { color: var(--primary-light); }
 
+    /* Holiday & Rest Styles */
+    .calendar-day.holiday {
+        background: rgba(239, 68, 68, 0.08);
+    }
+    .calendar-day.holiday .day-number {
+        color: #f87171;
+    }
+    .holiday-badge {
+        font-size: 0.62rem;
+        padding: 2px 5px;
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border-radius: 4px;
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 600;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .calendar-day.rest-day {
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .rest-day-indicator {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        font-size: 0.6rem;
+        color: var(--dark-4);
+        font-style: italic;
+    }
+
+    .rest-config-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .rest-config-btn.active {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: var(--primary-light);
+        color: white;
+    }
+    .rest-config-btn:hover {
+        border-color: var(--primary-light);
+        color: white;
+    }
+
     /* Event Detail Modal */
     .event-modal-overlay {
         display: none;
@@ -382,6 +435,14 @@
     </div>
     <div class="d-flex align-items-center gap-2">
         @if(auth()->user()->role !== 'usuario')
+        <div class="d-flex gap-1 me-2 pe-2 border-end border-white-10">
+            <button class="rest-config-btn {{ $company->saturday_rest ? 'active' : '' }}" onclick="toggleRest('sat')" title="Sábados como descanso">
+                <i class="bi bi-calendar-week"></i> Sáb <span class="d-none d-md-inline">Descanso</span>
+            </button>
+            <button class="rest-config-btn {{ $company->sunday_rest ? 'active' : '' }}" onclick="toggleRest('sun')" title="Domingos como descanso">
+                <i class="bi bi-calendar-week-fill"></i> Dom <span class="d-none d-md-inline">Descanso</span>
+            </button>
+        </div>
         <button class="view-toggle" id="viewToggle" onclick="toggleView()" title="Ver actividades del equipo">
             <i class="bi bi-people-fill"></i> <span id="viewToggleText">Ver equipo</span>
         </button>
@@ -425,7 +486,11 @@
     let currentYear  = today.getFullYear();
     let currentMonth = today.getMonth(); // 0-indexed
     let eventsCache  = {};
+    let holidaysCache = {};
     let currentView  = 'mine'; // 'mine' or 'team'
+    let satRest = {{ $company->saturday_rest ? 'true' : 'false' }};
+    let sunRest = {{ $company->sunday_rest ? 'true' : 'false' }};
+    const isSpecialUser = {{ (auth()->user()->role === 'super' || auth()->user()->role === 'admin') ? 'true' : 'false' }};
 
     function toggleView() {
         currentView = currentView === 'mine' ? 'team' : 'mine';
@@ -456,16 +521,61 @@
 
     function loadCalendar() {
         document.getElementById('calendarTitle').textContent = MONTHS[currentMonth] + ' ' + currentYear;
-        fetch(`{{ route('calendar.apiEvents') }}?year=${currentYear}&month=${currentMonth + 1}&view=${currentView}`)
-            .then(r => r.json())
-            .then(events => {
+        
+        const eventsReq = fetch(`{{ route('calendar.apiEvents') }}?year=${currentYear}&month=${currentMonth + 1}&view=${currentView}`).then(r => r.json());
+        const holidaysReq = fetch(`{{ route('calendar.apiHolidays') }}?year=${currentYear}&month=${currentMonth + 1}`).then(r => r.json());
+
+        Promise.all([eventsReq, holidaysReq])
+            .then(([events, holidays]) => {
                 eventsCache = {};
                 events.forEach(e => {
                     if (!eventsCache[e.day]) eventsCache[e.day] = [];
                     eventsCache[e.day].push(e);
                 });
+
+                holidaysCache = {};
+                holidays.forEach(h => {
+                    const d = new Date(h.date).getDate() + 1; // Basic normalization for TZ
+                    // Actually, let's use the actual day from the string to avoid TZ issues
+                    const dayNum = parseInt(h.date.split('-')[2]);
+                    holidaysCache[dayNum] = h;
+                });
+
                 renderGrid();
             });
+    }
+
+    function toggleRest(type) {
+        fetch(`{{ route('calendar.toggleWeekendRest') }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ type })
+        })
+        .then(r => r.json())
+        .then(data => {
+            satRest = data.saturday_rest;
+            sunRest = data.sunday_rest;
+            location.reload(); // Easier than re-rendering everything and updating buttons
+        });
+    }
+
+    function toggleHoliday(date, name) {
+        fetch(`{{ route('calendar.toggleHoliday') }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ date, name })
+        })
+        .then(r => r.json())
+        .then(data => {
+            loadCalendar();
+            closeModal();
+        });
     }
 
     function renderGrid() {
@@ -489,9 +599,21 @@
             const isToday = (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear());
             const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const dayEvents = eventsCache[d] || [];
+            const holiday = holidaysCache[d];
+            
+            const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+            const isRest = (dayOfWeek === 6 && satRest) || (dayOfWeek === 0 && sunRest);
 
-            html += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="dayClick(${d}, '${dateStr}')">`;
+            html += `<div class="calendar-day ${isToday ? 'today' : ''} ${holiday ? 'holiday' : ''} ${isRest ? 'rest-day' : ''}" onclick="dayClick(${d}, '${dateStr}')">`;
             html += `<div class="day-number">${d}</div>`;
+
+            if (holiday) {
+                html += `<div class="holiday-badge" title="${holiday.name}"><i class="bi bi-star-fill me-1"></i>${holiday.name}</div>`;
+            }
+            
+            if (isRest) {
+                html += `<div class="rest-day-indicator">Descanso</div>`;
+            }
 
             const maxShow = 2;
             dayEvents.slice(0, maxShow).forEach(e => {
@@ -557,6 +679,21 @@
         }
 
         html += `<a href="{{ route('calendar.create') }}?date=${dateStr}" class="add-event-btn mt-2"><i class="bi bi-plus-circle"></i> Agregar actividad</a>`;
+
+        if (isSpecialUser) {
+            const holiday = holidaysCache[day];
+            const btnClass = holiday ? 'btn-delete-event' : 'btn-edit-event';
+            const btnText = holiday ? 'Quitar feriado' : 'Marcar como feriado';
+            const holidayName = holiday ? holiday.name : '';
+            
+            html += `<div class="mt-3 pt-3 border-top border-white-10">`;
+            if (!holiday) {
+                html += `<input type="text" id="holidayNameInput" class="form-control form-control-sm mb-2" placeholder="Nombre del feriado..." style="background:rgba(0,0,0,0.2);border-color:rgba(255,255,255,0.1);color:white;">`;
+            }
+            html += `<button class="add-event-btn ${btnClass}" style="border-style:solid" onclick="const name = document.getElementById('holidayNameInput')?.value || 'Feriado'; toggleHoliday('${dateStr}', name)">`;
+            html += `<i class="bi bi-star${holiday ? '' : '-fill'} me-1"></i> ${btnText}`;
+            html += `</button></div>`;
+        }
 
         modalBody.innerHTML = html;
         modal.classList.add('show');

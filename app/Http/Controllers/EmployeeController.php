@@ -53,6 +53,15 @@ class EmployeeController extends Controller
             'id_number' => 'nullable|string|max:20',
             'work_start' => 'nullable|date_format:H:i',
             'work_end' => 'nullable|date_format:H:i',
+            'ars_extras' => 'nullable|array',
+            'ars_extras.*.name' => 'required|string|max:255',
+            'ars_extras.*.id_number' => 'nullable|string|max:20',
+            'ars_extras.*.relationship' => 'nullable|string|max:255',
+            'ars_extras.*.birth_date' => 'nullable|date',
+            'ars_extras.*.sex' => 'nullable|string|max:20',
+            'ars_extras.*.phone' => 'nullable|string|max:50',
+            'ars_extras.*.address' => 'nullable|string',
+            'ars_extras.*.ars_amount' => 'required|numeric|min:0',
         ]);
 
         $companyId = Auth::user()->company_id;
@@ -68,7 +77,7 @@ class EmployeeController extends Controller
             'status' => 'active',
         ]);
 
-        Employee::create([
+        $employee = Employee::create([
             'user_id' => $user->id,
             'company_id' => $companyId,
             'department' => $data['department'] ?? null,
@@ -80,6 +89,12 @@ class EmployeeController extends Controller
             'work_start' => $data['work_start'] ?? '08:00',
             'work_end' => $data['work_end'] ?? '17:00',
         ]);
+
+        if (!empty($data['ars_extras'])) {
+            foreach ($data['ars_extras'] as $extra) {
+                $employee->arsExtras()->create($extra);
+            }
+        }
 
         return redirect()->route('employees.index')->with('success', 'Empleado creado exitosamente.');
     }
@@ -125,6 +140,15 @@ class EmployeeController extends Controller
             'work_start' => 'nullable|date_format:H:i',
             'work_end' => 'nullable|date_format:H:i',
             'status' => 'nullable|in:active,inactive',
+            'ars_extras' => 'nullable|array',
+            'ars_extras.*.name' => 'required|string|max:255',
+            'ars_extras.*.id_number' => 'nullable|string|max:20',
+            'ars_extras.*.relationship' => 'nullable|string|max:255',
+            'ars_extras.*.birth_date' => 'nullable|date',
+            'ars_extras.*.sex' => 'nullable|string|max:20',
+            'ars_extras.*.phone' => 'nullable|string|max:50',
+            'ars_extras.*.address' => 'nullable|string',
+            'ars_extras.*.ars_amount' => 'required|numeric|min:0',
         ]);
 
         $employee->user->update([
@@ -146,6 +170,13 @@ class EmployeeController extends Controller
             'work_start' => $data['work_start'] ?? '08:00',
             'work_end' => $data['work_end'] ?? '17:00',
         ]);
+
+        $employee->arsExtras()->delete();
+        if (!empty($data['ars_extras'])) {
+            foreach ($data['ars_extras'] as $extra) {
+                $employee->arsExtras()->create($extra);
+            }
+        }
 
         return redirect()->route('employees.index')->with('success', 'Empleado actualizado exitosamente.');
     }

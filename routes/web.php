@@ -49,6 +49,9 @@ Route::middleware('auth')->group(function () {
     // Calendar
     Route::resource('calendar', CalendarController::class)->except('show');
     Route::get('/api/calendar/events', [CalendarController::class, 'apiEvents'])->name('calendar.apiEvents');
+    Route::get('/api/calendar/holidays', [CalendarController::class, 'apiHolidays'])->name('calendar.apiHolidays');
+    Route::post('/api/calendar/holidays/toggle', [CalendarController::class, 'toggleHoliday'])->name('calendar.toggleHoliday');
+    Route::post('/api/calendar/rest-days/toggle', [CalendarController::class, 'toggleWeekendRest'])->name('calendar.toggleWeekendRest');
 
     // Access Logs (Admin+)
     Route::get('/access-logs', [AccessLogController::class , 'index'])
@@ -74,6 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:admin')->group(function () {
             Route::get('/payroll', [PayrollController::class , 'index'])->name('payroll.index');
             Route::get('/payroll/bonuses', [PayrollController::class , 'bonuses'])->name('payroll.bonuses');
+            Route::get('/payroll/benefits', [PayrollController::class , 'benefits'])->name('payroll.benefits');
             Route::get('/payroll/create', [PayrollController::class , 'create'])->name('payroll.create');
             Route::post('/payroll', [PayrollController::class , 'store'])->name('payroll.store');
             Route::patch('/payroll/{payroll}/paid', [PayrollController::class , 'markPaid'])->name('payroll.markPaid');
