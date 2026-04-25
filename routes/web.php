@@ -14,6 +14,9 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\RecruitmentController;
+use App\Http\Controllers\CompanyFieldController;
+use App\Http\Controllers\DocumentController;
 
 // Auth routes
 Route::get('/', function () {
@@ -79,6 +82,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/payroll/bonuses', [PayrollController::class , 'bonuses'])->name('payroll.bonuses');
             Route::get('/payroll/benefits', [PayrollController::class , 'benefits'])->name('payroll.benefits');
             Route::get('/payroll/create', [PayrollController::class , 'create'])->name('payroll.create');
+            Route::get('/payroll/tss', [PayrollController::class , 'tss'])->name('payroll.tss');
             Route::post('/payroll', [PayrollController::class , 'store'])->name('payroll.store');
             Route::patch('/payroll/{payroll}/paid', [PayrollController::class , 'markPaid'])->name('payroll.markPaid');
             Route::delete('/payroll/{payroll}', [PayrollController::class , 'destroy'])->name('payroll.destroy');
@@ -106,5 +110,38 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:super')->group(function () {
             Route::get('/company', [CompanyController::class , 'edit'])->name('company.edit');
             Route::post('/company', [CompanyController::class , 'update'])->name('company.update');
-        }
-        );    });
+        });
+
+        // Recruitment
+        Route::prefix('recruitment')->name('recruitment.')->group(function () {
+            Route::get('/', [RecruitmentController::class, 'index'])->name('index');
+            Route::post('/', [RecruitmentController::class, 'store'])->name('store');
+            Route::get('/{vacancy}', [RecruitmentController::class, 'show'])->name('show');
+            Route::post('/{vacancy}/steps', [RecruitmentController::class, 'addStep'])->name('steps.store');
+            Route::post('/{vacancy}/candidates', [RecruitmentController::class, 'addCandidate'])->name('candidates.store');
+            Route::post('/candidates/{candidate}/progress', [RecruitmentController::class, 'updateProgress'])->name('candidates.progress');
+            Route::get('/{vacancy}/ranking', [RecruitmentController::class, 'ranking'])->name('ranking');
+            
+            // Application Form
+            Route::post('/application-form/{applicationForm}/fields', [RecruitmentController::class, 'storeField'])->name('application-form.fields.store');
+            Route::delete('/application-form/fields/{field}', [RecruitmentController::class, 'deleteField'])->name('application-form.fields.destroy');
+            Route::get('/application-form/{applicationForm}/print', [RecruitmentController::class, 'printForm'])->name('application-form.print');
+        });
+
+        // Company Fields (Global Variables)
+        Route::prefix('company-fields')->name('company-fields.')->group(function () {
+            Route::get('/', [CompanyFieldController::class, 'index'])->name('index');
+            Route::post('/', [CompanyFieldController::class, 'store'])->name('store');
+            Route::patch('/{field}', [CompanyFieldController::class, 'update'])->name('update');
+            Route::delete('/{field}', [CompanyFieldController::class, 'destroy'])->name('destroy');
+        });
+
+        // Documents & Templates
+        Route::prefix('documents')->name('documents.')->group(function () {
+            Route::get('/', [DocumentController::class, 'index'])->name('index');
+            Route::post('/', [DocumentController::class, 'store'])->name('store');
+            Route::get('/{template}', [DocumentController::class, 'show'])->name('show');
+            Route::post('/{template}/generate', [DocumentController::class, 'generate'])->name('generate');
+            Route::delete('/{template}', [DocumentController::class, 'destroy'])->name('destroy');
+        });
+    });

@@ -5,7 +5,7 @@
 @section('content')
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card">
+         <div class="card">
             <div class="card-header text-secondary"><i class="bi bi-cash-stack me-2"></i>Registrar Nómina</div>
             <div class="card-body">
                 <form method="POST" action="{{ route('payroll.store') }}">
@@ -23,7 +23,13 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Período</label>
-                            <input type="text" class="form-control" name="period" id="periodInput" placeholder="2024-03" required value="{{ $currentPeriod }}">
+                            <select class="form-select" name="period" id="periodInput" required>
+                                @foreach($periods as $period)
+                                <option value="{{ $period['value'] }}" {{ $period['value'] == $currentPeriod ? 'selected' : '' }}>
+                                    {{ $period['label'] }}
+                                </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Fecha de Pago</label>
@@ -263,11 +269,9 @@ $(document).ready(function() {
         calculateTaxes();
     });
 
-    // Usar debounce en el período para no disparar petición en cada tecla
-    let periodTimer;
-    $('#periodInput').on('input', function() {
-        clearTimeout(periodTimer);
-        periodTimer = setTimeout(loadOvertimeData, 600);
+    // Al ser un select, usamos el evento change
+    $('#periodInput').on('change', function() {
+        loadOvertimeData();
     });
 });
 </script>

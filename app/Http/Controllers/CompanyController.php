@@ -21,6 +21,7 @@ class CompanyController extends Controller
             'email' => 'nullable|email',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
+            'srl_rate' => 'nullable|numeric|min:1.0|max:1.5',
         ]);
 
         Auth::user()->company->update($data);

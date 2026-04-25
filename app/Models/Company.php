@@ -8,7 +8,7 @@ class Company extends Model
 {
     protected $fillable = [
         'name', 'rnc', 'email', 'phone', 'address', 'logo', 'plan', 'status',
-        'saturday_rest', 'sunday_rest',
+        'saturday_rest', 'sunday_rest', 'srl_rate',
     ];
 
     public function holidays()

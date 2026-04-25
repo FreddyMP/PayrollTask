@@ -37,7 +37,18 @@ class PayrollController extends Controller
 
         $currentPeriod = date('Y-m');
 
-        return view('payroll.create', compact('employees', 'currentPeriod'));
+        // Generar lista de periodos (últimos 12 meses y próximo)
+        $periods = [];
+        for ($i = -12; $i <= 1; $i++) {
+            $date = Carbon::now()->addMonths($i);
+            $periods[] = [
+                'value' => $date->format('Y-m'),
+                'label' => ucfirst($date->translatedFormat('F Y'))
+            ];
+        }
+        $periods = array_reverse($periods);
+
+        return view('payroll.create', compact('employees', 'currentPeriod', 'periods'));
     }
 
     public function bonuses()
@@ -260,5 +271,59 @@ class PayrollController extends Controller
 
         $payroll->delete();
         return redirect()->route('payroll.index')->with('success', 'Nómina eliminada.');
+    }
+
+    public function tss(Request $request)
+    {
+        $company = Auth::user()->company;
+        $period = $request->get('period', date('Y-m'));
+
+        $payrollData = Payroll::where('company_id', $company->id)
+            ->where('period', $period)
+            ->with('employee.user')
+            ->get();
+
+        // Topes 2026 (Basados en salario mínimo nacional de RD$ 23,223.00)
+        $topes = [
+            'sfs' => 232230.00, // 10 salarios
+            'afp' => 464460.00, // 20 salarios
+            'srl' => 92892.00,  // 4 salarios
+        ];
+
+        $report = $payrollData->map(function ($p) use ($topes, $company) {
+            $salary = $p->gross_salary;
+            
+            // Bases Cotizables
+            $baseSFS = min($salary, $topes['sfs']);
+            $baseAFP = min($salary, $topes['afp']);
+            $baseSRL = min($salary, $topes['srl']);
+            $baseINFOTEP = $salary;
+
+            return [
+                'employee' => $p->employee->user->name,
+                'salary'   => $salary,
+                // SFS (ARS)
+                'sfs_emp'  => $baseSFS * 0.0304,
+                'sfs_pat'  => $baseSFS * 0.0709,
+                // AFP
+                'afp_emp'  => $baseAFP * 0.0287,
+                'afp_pat'  => $baseAFP * 0.0710,
+                // SRL
+                'srl_pat'  => $baseSRL * (($company->srl_rate ?? 1.10) / 100),
+                // INFOTEP
+                'infotep_pat' => $baseINFOTEP * 0.0100,
+            ];
+        });
+
+        $availablePeriods = Payroll::where('company_id', $company->id)
+            ->distinct()
+            ->pluck('period')
+            ->sortDesc();
+
+        if (!$availablePeriods->contains($period)) {
+            $availablePeriods->prepend($period);
+        }
+
+        return view('payroll.tss', compact('report', 'period', 'availablePeriods', 'company'));
     }
 }

@@ -19,6 +19,11 @@
             Prestaciones Laborales
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('payroll.tss') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
+            TSS
+        </a>
+    </li>
 </ul>
 
 <div class="row mb-4">

@@ -35,11 +35,16 @@
                         <textarea class="form-control" name="address" rows="3">{{ old('address', $company->address) }}</textarea>
                     </div>
                     <div class="row g-3 mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label">Tasa SRL (%)</label>
+                            <input type="number" step="0.01" class="form-control" name="srl_rate" value="{{ old('srl_rate', $company->srl_rate) }}" min="1.0" max="1.5">
+                            <small class="text-muted">Riesgos Laborales (Promedio 1.10% - 1.30%)</small>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label">Plan</label>
                             <input type="text" class="form-control" value="{{ ucfirst($company->plan) }}" disabled>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Estado</label>
                             <input type="text" class="form-control" value="{{ ucfirst($company->status) }}" disabled>
                         </div>

@@ -502,6 +502,10 @@
             <a href="{{ route('access-logs.index') }}" class="nav-link {{ request()->routeIs('access-logs.*') ? 'active' : '' }}">
                 <i class="bi bi-clock-history"></i> Registro de Accesos
             </a>
+            <a href="{{ route('recruitment.index') }}" class="nav-link {{ request()->routeIs('recruitment.*') ? 'active' : '' }}">
+                <i class="bi bi-person-plus-fill"></i> Reclutamiento
+            </a>
+
             <a href="{{ route('employees.index') }}" class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i> Empleados
             </a>
@@ -510,6 +514,14 @@
             </a>
             <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow"></i> Reportes
+            </a>
+
+            <div class="nav-section">Documentación</div>
+            <a href="{{ route('company-fields.index') }}" class="nav-link {{ request()->routeIs('company-fields.*') ? 'active' : '' }}">
+                <i class="bi bi-tags-fill"></i> Variables Globales
+            </a>
+            <a href="{{ route('documents.index') }}" class="nav-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-richtext-fill"></i> Plantillas y Contratos
             </a>
             @endif
 
