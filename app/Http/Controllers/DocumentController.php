@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DocumentTemplate;
 use App\Models\Employee;
+use App\Models\CompanyField;
 use App\Services\DocumentProcessorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,8 @@ class DocumentController extends Controller
     {
         $this->authorizeAccess($template);
         $employees = Employee::where('company_id', Auth::user()->company_id)->with('user')->get();
-        return view('documents.show', compact('template', 'employees'));
+        $fields = $template->variables;
+        return view('documents.show', compact('template', 'employees', 'fields'));
     }
 
     public function generate(Request $request, DocumentTemplate $template)
@@ -68,11 +70,11 @@ class DocumentController extends Controller
         }
 
         if ($template->file_path && str_ends_with($template->file_path, '.docx')) {
-            $tempFile = $this->processor->processDocx($template->file_path, Auth::user()->company, $employee);
+            $tempFile = $this->processor->processDocx($template->file_path, $template, $employee);
             return response()->download($tempFile, $template->title . '.docx')->deleteFileAfterSend(true);
         }
 
-        $processedContent = $this->processor->process($template->content ?? '', Auth::user()->company, $employee);
+        $processedContent = $this->processor->process($template->content ?? '', $template, $employee);
 
         if ($request->format === 'pdf') {
             $pdf = Pdf::loadHTML($processedContent);

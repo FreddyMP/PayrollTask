@@ -19,10 +19,12 @@ class CompanyFieldController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'value' => 'nullable|string',
+            'document_template_id' => 'required|exists:document_templates,id',
         ]);
 
         CompanyField::create([
             'company_id' => Auth::user()->company_id,
+            'document_template_id' => $request->document_template_id,
             'name' => $request->name,
             'value' => $request->value,
             'is_bold' => $request->has('is_bold'),

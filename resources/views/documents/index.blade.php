@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Plantillas de Documentos')
-@section('page-title', 'Contratos y Documentos')
+@section('title', 'Generación de Documentos')
+@section('page-title', 'Generación de Documentos')
 
 @section('content')
 <div class="row mb-4">
@@ -30,7 +30,7 @@
                         <small class="badge badge-status badge-supervisor">{{ ucfirst($template->category) }}</small>
                     </div>
                 </div>
-                <p class="text-muted small mb-4">
+                <p class="text-white small mb-4">
                     {{ Str::limit(strip_tags($template->content), 100) }}
                 </p>
                 <div class="d-flex gap-2">
@@ -87,11 +87,11 @@
                     <div class="mb-4">
                         <label class="form-label">Archivo de Plantilla (.docx)</label>
                         <input type="file" name="file" class="form-control" accept=".docx">
-                        <div class="mt-1 extra-small text-muted">Sube un archivo Word con etiquetas tipo <code>&lt;# variable #&gt;</code>.</div>
+                        <div class="mt-1 extra-small ">Sube un archivo Word con etiquetas tipo <code>&lt;# variable #&gt;</code>.</div>
                     </div>
 
                     <div class="text-center my-3">
-                        <span class="text-muted small">--- O escribe el contenido ---</span>
+                        <span class=" small">--- O escribe el contenido ---</span>
                     </div>
 
                     <div class="mb-3">

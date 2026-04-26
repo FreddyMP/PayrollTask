@@ -8,7 +8,7 @@
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div>
             <h5 class="text-white mb-1">Vista Previa</h5>
-            <p class="text-muted small">El documento ha sido generado con los valores correspondientes.</p>
+            <p class="small">El documento ha sido generado con los valores correspondientes.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('documents.show', $template) }}" class="btn btn-outline-custom">

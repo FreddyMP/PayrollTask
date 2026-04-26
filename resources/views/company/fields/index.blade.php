@@ -21,7 +21,7 @@
                     <div class="mb-3">
                         <label class="form-label">Nombre de la Variable</label>
                         <input type="text" name="name" class="form-control" placeholder="Ej: Representante Legal" required>
-                        <small class="text-muted">Usa este nombre exacto entre <# y #> en tus documentos.</small>
+                        <small class="text-white">Usa este nombre exacto entre <# y #> en tus documentos.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Valor</label>

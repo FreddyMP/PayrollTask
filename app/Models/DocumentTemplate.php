@@ -12,4 +12,9 @@ class DocumentTemplate extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function variables()
+    {
+        return $this->hasMany(CompanyField::class, 'document_template_id');
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Models\CompanyField;
+use App\Models\DocumentTemplate;
 use Illuminate\Database\Eloquent\Model;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Illuminate\Support\Facades\Storage;
@@ -13,9 +14,9 @@ class DocumentProcessorService
     /**
      * Process a template content or file replacing placeholders with actual values.
      */
-    public function process(string $content, Company $company, ?Model $contextModel = null): string
+    public function process(string $content, DocumentTemplate $template, ?Model $contextModel = null): string
     {
-        $replacements = $this->getReplacements($company, $contextModel);
+        $replacements = $this->getReplacements($template, $contextModel);
         
         // Match <# variable #>
         preg_match_all('/<#\s*(.*?)\s*#>/', $content, $matches);
@@ -45,9 +46,9 @@ class DocumentProcessorService
     /**
      * Process a .docx file using PHPWord TemplateProcessor.
      */
-    public function processDocx(string $filePath, Company $company, ?Model $contextModel = null): string
+    public function processDocx(string $filePath, DocumentTemplate $template, ?Model $contextModel = null): string
     {
-        $replacements = $this->getReplacements($company, $contextModel);
+        $replacements = $this->getReplacements($template, $contextModel);
         $fullPath = storage_path('app/public/' . $filePath);
         
         $tempFile = tempnam(sys_get_temp_dir(), 'docx');
@@ -89,13 +90,13 @@ class DocumentProcessorService
         return $tempFile;
     }
 
-    private function getReplacements(Company $company, ?Model $contextModel = null): array
+    private function getReplacements(DocumentTemplate $template, ?Model $contextModel = null): array
     {
         $replacements = [];
+        $company = $template->company;
 
-        // Custom Company Fields
-        $companyFields = CompanyField::where('company_id', $company->id)->get();
-        foreach ($companyFields as $field) {
+        // Custom Template Variables
+        foreach ($template->variables as $field) {
             $replacements[$field->name] = [
                 'value' => $field->value,
                 'is_bold' => $field->is_bold

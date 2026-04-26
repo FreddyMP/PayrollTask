@@ -517,11 +517,8 @@
             </a>
 
             <div class="nav-section">Documentación</div>
-            <a href="{{ route('company-fields.index') }}" class="nav-link {{ request()->routeIs('company-fields.*') ? 'active' : '' }}">
-                <i class="bi bi-tags-fill"></i> Variables Globales
-            </a>
             <a href="{{ route('documents.index') }}" class="nav-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">
-                <i class="bi bi-file-earmark-richtext-fill"></i> Plantillas y Contratos
+                <i class="bi bi-file-earmark-richtext-fill"></i> Generación de Documentos
             </a>
             @endif
 

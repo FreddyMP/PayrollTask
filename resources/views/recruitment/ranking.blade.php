@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <h4 class="text-white mb-1">{{ $candidate->name }}</h4>
-                <p class="text-muted small mb-3">Puesto #{{ $loop->iteration }}</p>
+                <p class="text-white small mb-3">Puesto #{{ $loop->iteration }}</p>
                 <div class="display-5 fw-bold text-white mb-3">{{ $candidate->total_points }}</div>
                 <p class="text-white small mb-0">puntos acumulados</p>
             </div>
