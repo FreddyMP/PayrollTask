@@ -8,7 +8,7 @@
         <div class="card">
             <div class="card-header text-secondary"><i class="bi bi-person-plus me-2"></i>Registrar Empleado</div>
             <div class="card-body">
-                <form method="POST" action="{{ route('employees.store') }}">
+                <form method="POST" action="{{ route('employees.store') }}" enctype="multipart/form-data">
                     @csrf
                     
                     <ul class="nav nav-tabs mb-4" id="employeeTabs" role="tablist">
@@ -20,6 +20,11 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="ars-extras-tab" data-bs-toggle="tab" data-bs-target="#ars-extras" type="button" role="tab">
                                 <i class="bi bi-plus-circle me-1"></i> ARS Extras
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">
+                                <i class="bi bi-file-earmark-text me-1"></i> Documentos
                             </button>
                         </li>
                     </ul>
@@ -119,8 +124,63 @@
                                 {{-- Las filas se agregarán dinámicamente aquí --}}
                             </div>
 
-                            <div id="noExtrasMsg" class="text-center py-4 text-muted border rounded-3 bg-light bg-opacity-10 mb-4">
+                            <div id="noExtrasMsg" class="text-center py-4 text-white border rounded-3 bg-light bg-opacity-10 mb-4">
                                 <i class="bi bi-info-circle me-1"></i> No se han agregado dependientes extras.
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Documentos -->
+                        <div class="tab-pane fade" id="documents" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-secondary">Documentos del Empleado</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddDocument">
+                                    <i class="bi bi-plus-lg me-1"></i> Agregar Otro Documento
+                                </button>
+                            </div>
+
+                            <div id="documentsContainer">
+                                <div class="document-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label class="form-label small">Nombre del Documento</label>
+                                                <input type="text" class="form-control form-control-sm" name="documents[0][name]" value="Cedula parte frontal" readonly>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <label class="form-label small">Archivo</label>
+                                                <input type="file" class="form-control form-control-sm" name="documents[0][file]">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="document-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label class="form-label small">Nombre del Documento</label>
+                                                <input type="text" class="form-control form-control-sm" name="documents[1][name]" value="Contrato de trabajo" readonly>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <label class="form-label small">Archivo</label>
+                                                <input type="file" class="form-control form-control-sm" name="documents[1][file]">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="document-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label class="form-label small">Nombre del Documento</label>
+                                                <input type="text" class="form-control form-control-sm" name="documents[2][name]" value="Hoja de solicitud de empleo" readonly>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <label class="form-label small">Archivo</label>
+                                                <input type="file" class="form-control form-control-sm" name="documents[2][file]">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -185,6 +245,29 @@
                         </div>
                     </div>
                 </template>
+
+                {{-- Template para filas de documentos --}}
+                <template id="documentRowTemplate">
+                    <div class="document-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
+                        <div class="card-body p-3">
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <label class="form-label small">Nombre del Documento</label>
+                                    <input type="text" class="form-control form-control-sm" name="documents[INDEX][name]" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">Archivo</label>
+                                    <input type="file" class="form-control form-control-sm" name="documents[INDEX][file]" required>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <button type="button" class="btn btn-sm btn-outline-danger w-100 btnRemoveDocument">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -217,6 +300,21 @@ $(document).ready(function() {
     $(document).on('click', '.btnRemoveExtra', function() {
         $(this).closest('.extra-row').remove();
         updateNoExtrasMsg();
+    });
+
+    // Documentos
+    let docIndex = 3; // Empezamos en 3 porque ya hay 3 fijos
+    const docContainer = $('#documentsContainer');
+    const docTemplate = $('#documentRowTemplate').html();
+
+    $('#btnAddDocument').on('click', function() {
+        const newRow = docTemplate.replace(/INDEX/g, docIndex);
+        docContainer.append(newRow);
+        docIndex++;
+    });
+
+    $(document).on('click', '.btnRemoveDocument', function() {
+        $(this).closest('.document-row').remove();
     });
 });
 </script>

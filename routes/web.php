@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
     // Employees (Admin+)
     Route::middleware('role:admin')->group(function () {
             Route::resource('employees', EmployeeController::class);
+            Route::delete('/employees/documents/{document}', [EmployeeController::class, 'destroyDocument'])->name('employees.documents.destroy');
         }
         );
 
@@ -81,8 +82,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/payroll', [PayrollController::class , 'index'])->name('payroll.index');
             Route::get('/payroll/bonuses', [PayrollController::class , 'bonuses'])->name('payroll.bonuses');
             Route::get('/payroll/benefits', [PayrollController::class , 'benefits'])->name('payroll.benefits');
+            Route::get('/payroll/christmas', [PayrollController::class , 'christmas'])->name('payroll.christmas');
             Route::get('/payroll/create', [PayrollController::class , 'create'])->name('payroll.create');
             Route::get('/payroll/tss', [PayrollController::class , 'tss'])->name('payroll.tss');
+            Route::get('/payroll/ir17', [PayrollController::class , 'ir17'])->name('payroll.ir17');
             Route::post('/payroll', [PayrollController::class , 'store'])->name('payroll.store');
             Route::patch('/payroll/{payroll}/paid', [PayrollController::class , 'markPaid'])->name('payroll.markPaid');
             Route::delete('/payroll/{payroll}', [PayrollController::class , 'destroy'])->name('payroll.destroy');
@@ -126,6 +129,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/application-form/{applicationForm}/fields', [RecruitmentController::class, 'storeField'])->name('application-form.fields.store');
             Route::delete('/application-form/fields/{field}', [RecruitmentController::class, 'deleteField'])->name('application-form.fields.destroy');
             Route::get('/application-form/{applicationForm}/print', [RecruitmentController::class, 'printForm'])->name('application-form.print');
+
+            // Hiring & Closing
+            Route::post('/candidates/{candidate}/hire', [RecruitmentController::class, 'hireCandidate'])->name('candidates.hire');
+            Route::post('/vacancies/{vacancy}/close', [RecruitmentController::class, 'closeVacancy'])->name('vacancies.close');
         });
 
         // Company Fields (Global Variables)

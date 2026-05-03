@@ -68,15 +68,21 @@
                                     <span class="badge badge-status badge-in_progress">{{ $vacancy->candidates_count }} postulados</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-status badge-{{ $vacancy->status === 'open' ? 'active' : 'inactive' }}">
-                                        {{ ucfirst($vacancy->status) }}
+                                    <span class="badge badge-status badge-{{ $vacancy->status === 'open' ? 'active' : 'rejected' }}">
+                                        {{ $vacancy->status === 'open' ? 'Abierta' : 'Cerrada' }}
                                     </span>
                                 </td>
                                 <td>{{ $vacancy->created_at->format('d/m/Y') }}</td>
                                 <td class="text-end">
-                                    <a href="{{ route('recruitment.show', $vacancy) }}" class="btn btn-outline-custom btn-sm">
-                                        <i class="bi bi-eye me-1"></i> Gestionar
-                                    </a>
+                                    @if($vacancy->status === 'open')
+                                        <a href="{{ route('recruitment.show', $vacancy) }}" class="btn btn-outline-custom btn-sm">
+                                            <i class="bi bi-eye me-1"></i> Gestionar
+                                        </a>
+                                    @else
+                                        <button class="btn btn-outline-custom btn-sm" disabled>
+                                            <i class="bi bi-lock-fill me-1"></i> Cerrada
+                                        </button>
+                                    @endif
                                 </td>
                             </tr>
                             @empty

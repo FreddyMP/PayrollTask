@@ -68,6 +68,40 @@
             </div>
         </div>
 
+        <div class="card mb-3">
+            <div class="card-header text-secondary">Documentos del Empleado</div>
+            <div class="card-body p-0">
+                @if($employee->documents->count() > 0)
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Documento</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($employee->documents as $doc)
+                            <tr>
+                                <td>{{ $doc->name }}</td>
+                                <td>{{ $doc->created_at->format('d/m/Y') }}</td>
+                                <td class="text-end">
+                                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="p-3 text-center text-muted">No hay documentos registrados para este empleado.</div>
+                @endif
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center text-secondary">
                 <span>Historial de Nómina</span>

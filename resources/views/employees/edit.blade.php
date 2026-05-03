@@ -8,7 +8,7 @@
         <div class="card">
             <div class="card-header text-secondary"><i class="bi bi-pencil me-2"></i>Editar Empleado: {{ $employee->user->name }}</div>
             <div class="card-body">
-                <form method="POST" action="{{ route('employees.update', $employee) }}">
+                <form method="POST" action="{{ route('employees.update', $employee) }}" enctype="multipart/form-data">
                     @csrf @method('PUT')
 
                     <ul class="nav nav-tabs mb-4" id="employeeTabs" role="tablist">
@@ -20,6 +20,11 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="ars-extras-tab" data-bs-toggle="tab" data-bs-target="#ars-extras" type="button" role="tab">
                                 <i class="bi bi-plus-circle me-1"></i> ARS Extras
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">
+                                <i class="bi bi-file-earmark-text me-1"></i> Documentos
                             </button>
                         </li>
                     </ul>
@@ -174,8 +179,58 @@
                                 @endforeach
                             </div>
 
-                            <div id="noExtrasMsg" class="text-center py-4 text-muted border rounded-3 bg-light bg-opacity-10 mb-4" style="{{ $employee->arsExtras->count() > 0 ? 'display: none;' : '' }}">
+                            <div id="noExtrasMsg" class="text-center py-4 text-white border rounded-3 bg-light bg-opacity-10 mb-4" style="{{ $employee->arsExtras->count() > 0 ? 'display: none;' : '' }}">
                                 <i class="bi bi-info-circle me-1"></i> No se han agregado dependientes extras.
+                            </div>
+                        </div>
+
+                        <!-- Pestaña Documentos -->
+                        <div class="tab-pane fade" id="documents" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-secondary">Documentos del Empleado</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddDocument">
+                                    <i class="bi bi-plus-lg me-1"></i> Agregar Otro Documento
+                                </button>
+                            </div>
+
+                            <div id="existingDocuments" class="mb-4">
+                                @if($employee->documents->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Documento</th>
+                                                    <th>Fecha</th>
+                                                    <th class="text-end">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($employee->documents as $doc)
+                                                <tr>
+                                                    <td>{{ $doc->name }}</td>
+                                                    <td>{{ $doc->created_at->format('d/m/Y') }}</td>
+                                                    <td class="text-end">
+                                                        <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info me-1">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger btnDeleteExistingDoc" data-id="{{ $doc->id }}">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="text-center py-3 text-white border rounded-3 bg-light bg-opacity-10 mb-3">
+                                        <i class="bi bi-info-circle me-1"></i> No hay documentos guardados.
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div id="documentsContainer">
+                                {{-- Las nuevas filas se agregarán aquí --}}
                             </div>
                         </div>
                     </div>
@@ -240,6 +295,34 @@
                         </div>
                     </div>
                 </template>
+
+                {{-- Template para filas de documentos --}}
+                <template id="documentRowTemplate">
+                    <div class="document-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
+                        <div class="card-body p-3">
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <label class="form-label small">Nombre del Documento</label>
+                                    <input type="text" class="form-control form-control-sm" name="documents[INDEX][name]" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">Archivo</label>
+                                    <input type="file" class="form-control form-control-sm" name="documents[INDEX][file]" required>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <button type="button" class="btn btn-sm btn-outline-danger w-100 btnRemoveDocument">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Formulario oculto para eliminar documentos --}}
+                <form id="deleteDocForm" method="POST" style="display: none;">
+                    @csrf @method('DELETE')
+                </form>
             </div>
         </div>
     </div>
@@ -273,6 +356,30 @@ $(document).ready(function() {
     $(document).on('click', '.btnRemoveExtra', function() {
         $(this).closest('.extra-row').remove();
         updateNoExtrasMsg();
+    });
+
+    // Documentos
+    let docIndex = 0;
+    const docContainer = $('#documentsContainer');
+    const docTemplate = $('#documentRowTemplate').html();
+
+    $('#btnAddDocument').on('click', function() {
+        const newRow = docTemplate.replace(/INDEX/g, docIndex);
+        docContainer.append(newRow);
+        docIndex++;
+    });
+
+    $(document).on('click', '.btnRemoveDocument', function() {
+        $(this).closest('.document-row').remove();
+    });
+
+    $('.btnDeleteExistingDoc').on('click', function() {
+        if (confirm('¿Estás seguro de eliminar este documento?')) {
+            const id = $(this).data('id');
+            const form = $('#deleteDocForm');
+            form.attr('action', `/employees/documents/${id}`);
+            form.submit();
+        }
     });
 });
 </script>

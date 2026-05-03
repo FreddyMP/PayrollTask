@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vacancy extends Model
 {
-    protected $fillable = ['company_id', 'title', 'description', 'department', 'status'];
+    protected $fillable = ['company_id', 'title', 'description', 'department', 'status', 'selected_candidate_id'];
 
     public function company()
     {
@@ -21,5 +21,10 @@ class Vacancy extends Model
     public function candidates()
     {
         return $this->hasMany(Candidate::class);
+    }
+
+    public function selectedCandidate()
+    {
+        return $this->belongsTo(Candidate::class, 'selected_candidate_id');
     }
 }

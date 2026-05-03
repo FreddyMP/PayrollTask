@@ -33,15 +33,23 @@
 @endpush
 
 @section('content')
+@if($vacancy->status === 'closed')
+    <div class="alert alert-warning mb-4">
+        <i class="bi bi-lock-fill me-2"></i>Esta vacante se encuentra <strong>Cerrada</strong>. No se pueden realizar más cambios en el proceso.
+    </div>
+@endif
+
 <div class="row">
     <!-- Left Column: Steps and Config -->
     <div class="col-lg-4">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="text-white">Pasos del Proceso</span>
+                @if($vacancy->status === 'open')
                 <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#addStepModal">
                     <i class="bi bi-plus-lg"></i>
                 </button>
+                @endif
             </div>
             <div class="card-body">
                 <div class="list-group list-group-flush bg-transparent">
@@ -51,10 +59,10 @@
                             <h6 class="text-white mb-1">{{ $loop->iteration }}. {{ $step->name }}</h6>
                             <span class="badge badge-status badge-primary">{{ $step->points }} pts</span>
                         </div>
-                        <p class="small text-muted mb-0">Resp: {{ $step->responsible->name }}</p>
+                        <p class="small text-white mb-0">Resp: {{ $step->responsible->name }}</p>
                     </div>
                     @empty
-                    <p class="text-muted text-center py-3">Define los pasos para esta vacante.</p>
+                    <p class="text-white text-center py-3">Define los pasos para esta vacante.</p>
                     @endforelse
                 </div>
                 
@@ -72,12 +80,12 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
                 <span class="text-white">Información General</span>
             </div>
             <div class="card-body">
-                <p class="text-muted small mb-3">{{ $vacancy->description }}</p>
+                <p class="text-white small mb-3">{{ $vacancy->description }}</p>
                 <div class="d-grid">
                     <a href="{{ route('recruitment.ranking', $vacancy) }}" class="btn btn-outline-custom">
                         <i class="bi bi-trophy-fill me-2 text-warning"></i>Ver Ranking
@@ -85,6 +93,33 @@
                 </div>
             </div>
         </div>
+
+        @if($vacancy->selected_candidate_id)
+        <div class="card" style="border: 2px solid #4510d6  ;">
+            <div class="card-header  py-3" style="background-color: #4510d6;">
+                <span class="text-white fw-bold">Seleccionado para Contrato</span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                        <i class="bi bi-person-check-fill text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white mb-0">{{ $vacancy->selectedCandidate->name }}</h6>
+                        <small class="text-muted">{{ $vacancy->selectedCandidate->email }}</small>
+                    </div>
+                </div>
+                <div class="d-grid">
+                    <form action="{{ route('recruitment.vacancies.close', $vacancy) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-success w-100" onclick="return confirm('¿Seguro que desea cerrar esta vacante? No podrá gestionarla más.')">
+                            <i class="bi bi-door-closed-fill me-2"></i>Cerrar Vacante
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Right Column: Candidates -->
@@ -92,9 +127,11 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="text-white mb-0">Candidatos Postulados</h5>
+                @if($vacancy->status === 'open')
                 <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#addCandidateModal">
                     <i class="bi bi-person-plus-fill me-2"></i>Agregar Candidato
                 </button>
+                @endif
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -135,9 +172,13 @@
                                     <span class="badge badge-status badge-review">{{ $candidate->total_points }} pts</span>
                                 </td>
                                 <td class="text-end">
+                                    @if($vacancy->status === 'open')
                                     <button class="btn btn-outline-custom btn-sm" onclick="showProgressModal({{ $candidate->toJson() }}, {{ $candidate->current_step ? $candidate->current_step->toJson() : 'null' }})">
                                         <i class="bi bi-gear"></i> Procesar
                                     </button>
+                                    @else
+                                    <span class="text-muted small">Finalizado</span>
+                                    @endif
                                 </td>
                             </tr>
                             @empty

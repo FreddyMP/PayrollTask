@@ -20,8 +20,18 @@
         </a>
     </li>
     <li class="nav-item">
+        <a class="nav-link" href="{{ route('payroll.christmas') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
+            Salario Navidad
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link active" href="{{ route('payroll.tss') }}" style="color: white; border-bottom: 2px solid var(--primary); background: transparent; border-top: 0; border-left: 0; border-right: 0; padding: 0.75rem 1.25rem;">
             TSS
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('payroll.ir17') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
+            IR-17
         </a>
     </li>
 </ul>

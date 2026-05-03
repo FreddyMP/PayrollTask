@@ -69,6 +69,109 @@ class PayrollController extends Controller
         return view('payroll.benefits', compact('employees'));
     }
 
+    public function christmas()
+    {
+        $employees = Employee::where('company_id', Auth::user()->company_id)
+            ->with('user')
+            ->get();
+
+        $now = \Carbon\Carbon::now();
+
+        $employees->each(function ($employee) use ($now) {
+            if (!$employee->hire_date) {
+                $employee->christmas_salary = 0;
+                $employee->months_worked = 0;
+                return;
+            }
+
+            $hireDate = \Carbon\Carbon::parse($employee->hire_date);
+            $months = $hireDate->diffInMonths($now);
+            
+            if ($months >= 12) {
+                $employee->christmas_salary = $employee->salary;
+                $employee->months_worked = '12+';
+            } else {
+                $floatMonths = $hireDate->floatDiffInMonths($now);
+                $monthsWorked = max(1, (int) ceil($floatMonths));
+                $employee->christmas_salary = ($employee->salary * $monthsWorked) / 12;
+                $employee->months_worked = $monthsWorked;
+            }
+        });
+
+        return view('payroll.christmas', compact('employees'));
+    }
+
+    public function ir17(Request $request)
+    {
+        $company = Auth::user()->company;
+        $period = $request->get('period', date('Y-m'));
+
+        $payrollData = Payroll::where('company_id', $company->id)
+            ->where('period', $period)
+            ->with('employee.user', 'employee.arsExtras')
+            ->get();
+
+        $report = $payrollData->map(function ($p) {
+            $salary = (float) $p->gross_salary;
+            $extras = (float) ($p->extras ?? 0);
+            $remuneracionBruta = $salary + $extras;
+
+            // Aportes TSS del empleado
+            $sfs = $salary * 0.0304;
+            $afp = $salary * 0.0287;
+            $arsExtra = $p->employee->total_ars_extra ?? 0;
+            $totalTSS = $sfs + $afp + $arsExtra;
+
+            // Renta neta imponible (anualizada)
+            $baseAnual = ($salary * 12) - (($sfs + $arsExtra) * 12 + $afp * 12);
+
+            // Escala ISR vigente
+            $isrAnual = 0;
+            $tramo = 'Exento';
+            if ($baseAnual <= 416220) {
+                $isrAnual = 0;
+                $tramo = 'Exento';
+            } elseif ($baseAnual < 624329) {
+                $isrAnual = ($baseAnual - 416220) * 0.15;
+                $tramo = '15%';
+            } elseif ($baseAnual < 867123) {
+                $isrAnual = ($baseAnual - 624329) * 0.20 + 31216.35;
+                $tramo = '20%';
+            } else {
+                $isrAnual = ($baseAnual - 867123) * 0.25 + (31216.35 + 48558.80);
+                $tramo = '25%';
+            }
+
+            $isrMensual = $isrAnual / 12;
+
+            return [
+                'cedula'             => $p->employee->id_number ?? '—',
+                'nombre'             => $p->employee->user->name,
+                'remuneracion_bruta' => $remuneracionBruta,
+                'otros_ingresos'     => $extras,
+                'sfs'                => $sfs + $arsExtra,
+                'afp'                => $afp,
+                'total_tss'          => $totalTSS,
+                'ingreso_gravable'   => $remuneracionBruta - $totalTSS,
+                'base_anual'         => $baseAnual,
+                'tramo'              => $tramo,
+                'isr_retenido'       => $isrMensual,
+                'neto'               => $remuneracionBruta - $totalTSS - $isrMensual,
+            ];
+        });
+
+        $availablePeriods = Payroll::where('company_id', $company->id)
+            ->distinct()
+            ->pluck('period')
+            ->sortDesc();
+
+        if (!$availablePeriods->contains($period)) {
+            $availablePeriods->prepend($period);
+        }
+
+        return view('payroll.ir17', compact('report', 'period', 'availablePeriods', 'company'));
+    }
+
     /**
      * API: Devuelve horas extra aprobadas y monto segun CT dominicano
      * para un empleado en un periodo (Y-m) dado.

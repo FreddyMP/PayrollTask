@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\User;
+use App\Models\EmployeeDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeController extends Controller
 {
@@ -62,6 +64,9 @@ class EmployeeController extends Controller
             'ars_extras.*.phone' => 'nullable|string|max:50',
             'ars_extras.*.address' => 'nullable|string',
             'ars_extras.*.ars_amount' => 'required|numeric|min:0',
+            'documents' => 'nullable|array',
+            'documents.*.name' => 'required|string|max:255',
+            'documents.*.file' => 'nullable|file|max:10240',
         ]);
 
         $companyId = Auth::user()->company_id;
@@ -93,6 +98,20 @@ class EmployeeController extends Controller
         if (!empty($data['ars_extras'])) {
             foreach ($data['ars_extras'] as $extra) {
                 $employee->arsExtras()->create($extra);
+            }
+        }
+
+        $uploadedDocuments = $request->file('documents');
+        if (is_array($uploadedDocuments)) {
+            foreach ($uploadedDocuments as $index => $docData) {
+                if (isset($docData['file'])) {
+                    $path = $docData['file']->store('employee_documents', 'public');
+                    $employee->documents()->create([
+                        'company_id' => $companyId,
+                        'name' => $request->input("documents.$index.name"),
+                        'file_path' => $path,
+                    ]);
+                }
             }
         }
 
@@ -149,6 +168,9 @@ class EmployeeController extends Controller
             'ars_extras.*.phone' => 'nullable|string|max:50',
             'ars_extras.*.address' => 'nullable|string',
             'ars_extras.*.ars_amount' => 'required|numeric|min:0',
+            'documents' => 'nullable|array',
+            'documents.*.name' => 'required|string|max:255',
+            'documents.*.file' => 'nullable|file|max:10240',
         ]);
 
         $employee->user->update([
@@ -178,6 +200,20 @@ class EmployeeController extends Controller
             }
         }
 
+        $uploadedDocuments = $request->file('documents');
+        if (is_array($uploadedDocuments)) {
+            foreach ($uploadedDocuments as $index => $docData) {
+                if (isset($docData['file'])) {
+                    $path = $docData['file']->store('employee_documents', 'public');
+                    $employee->documents()->create([
+                        'company_id' => $employee->company_id,
+                        'name' => $request->input("documents.$index.name"),
+                        'file_path' => $path,
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('employees.index')->with('success', 'Empleado actualizado exitosamente.');
     }
 
@@ -191,5 +227,17 @@ class EmployeeController extends Controller
         $employee->delete();
 
         return redirect()->route('employees.index')->with('success', 'Empleado eliminado exitosamente.');
+    }
+
+    public function destroyDocument(EmployeeDocument $document)
+    {
+        if ($document->company_id !== Auth::user()->company_id) {
+            abort(403);
+        }
+
+        Storage::disk('public')->delete($document->file_path);
+        $document->delete();
+
+        return redirect()->back()->with('success', 'Documento eliminado correctamente.');
     }
 }

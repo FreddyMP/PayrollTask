@@ -11,7 +11,7 @@
                 <span class="badge-status badge-{{ $project->status }}">{{ ucfirst(str_replace('_', ' ', $project->status)) }}</span>
             </div>
             <div class="card-body p-4">
-                <p class="text-muted mb-4" style="line-height: 1.8; white-space: pre-line;">
+                <p class="text-white mb-4" style="line-height: 1.8; white-space: pre-line;">
                     {{ $project->description ?? 'Sin descripción adicional para este proyecto.' }}
                 </p>
 

@@ -76,6 +76,7 @@
                         <th>Candidato</th>
                         <th>Desglose por Pasos</th>
                         <th class="text-end">Puntaje Total</th>
+                        <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,6 +108,18 @@
                         <td class="text-end">
                             <span class="text-white fw-bold h5 mb-0">{{ $candidate->total_points }}</span>
                             <small class="text-muted px-1">/ {{ $vacancy->steps->sum('points') }}</small>
+                        </td>
+                        <td class="text-end">
+                            @if($candidate->status === 'hired')
+                                <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Seleccionado</span>
+                            @elseif($vacancy->status === 'open')
+                                <form action="{{ route('recruitment.candidates.hire', $candidate) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary-custom btn-sm">
+                                        <i class="bi bi-person-check-fill me-1"></i>Contratar
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

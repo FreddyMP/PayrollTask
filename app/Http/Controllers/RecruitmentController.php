@@ -166,7 +166,7 @@ class RecruitmentController extends Controller
         $this->authorizeAccess($vacancy);
         // Get candidates who are NOT discarded and have completed all steps?
         // Or just all candidates sorted by total points.
-        $candidates = $candidateResults = $vacancy->candidates()
+        $candidates = $vacancy->candidates()
             ->where('status', '!=', 'discarded')
             ->get()
             ->sortByDesc(function ($candidate) {
@@ -174,6 +174,26 @@ class RecruitmentController extends Controller
             });
 
         return view('recruitment.ranking', compact('vacancy', 'candidates'));
+    }
+
+    public function hireCandidate(Candidate $candidate)
+    {
+        if ($candidate->vacancy->company_id !== auth()->user()->company_id) {
+            abort(403);
+        }
+
+        $candidate->update(['status' => 'hired']);
+        $candidate->vacancy->update(['selected_candidate_id' => $candidate->id]);
+
+        return redirect()->route('documents.index')->with('success', 'Candidato marcado para contratación. Proceda a generar el contrato.');
+    }
+
+    public function closeVacancy(Vacancy $vacancy)
+    {
+        $this->authorizeAccess($vacancy);
+        $vacancy->update(['status' => 'closed']);
+
+        return redirect()->route('recruitment.index')->with('success', 'Vacante cerrada correctamente.');
     }
 
     public function storeField(Request $request, ApplicationForm $applicationForm)
