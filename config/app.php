@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'GestionPro'),
+    'name' => env('APP_NAME', 'PayrollTask'),
 
     /*
     |--------------------------------------------------------------------------

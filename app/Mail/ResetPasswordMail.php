@@ -30,7 +30,7 @@ class ResetPasswordMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Recuperar Contraseña | GestiónPro',
+            subject: 'Recuperar Contraseña | PayrollTask',
         );
     }
 

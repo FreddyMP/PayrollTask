@@ -1,7 +1,7 @@
 <x-mail::message>
 # Hola,
 
-Si recibiste este correo es porque solicitaste un cambio de contraseña para tu cuenta en **GestiónPro**.
+Si recibiste este correo es porque solicitaste un cambio de contraseña para tu cuenta en **PayrollTask**.
 
 <x-mail::button :url="url(route('password.reset', ['token' => $token, 'email' => $email], false))">
 Restablecer Contraseña

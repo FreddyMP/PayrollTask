@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión | GestiónPro</title>
+    <title>Iniciar Sesión | PayrollTask</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -192,7 +192,7 @@
     <div class="login-card">
         <div class="login-brand">
             <div class="brand-icon"><i class="bi bi-rocket-takeoff"></i></div>
-            <h3>GestiónPro</h3>
+            <h3>PayrollTask</h3>
             <p>Plataforma de Gestión Empresarial</p>
         </div>
 
