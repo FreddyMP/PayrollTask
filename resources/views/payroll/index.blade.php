@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Nómina')
-@section('page-title', 'Gestión de Nómina')
+@section('page-title', 'Nómina')
 
 @section('content')
 <ul class="nav nav-tabs mb-4 px-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
@@ -26,12 +26,12 @@
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ route('payroll.tss') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
-            TSS
+           Exportar TSS
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ route('payroll.ir17') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
-            IR-17
+           Generar IR-17
         </a>
     </li>
 </ul>

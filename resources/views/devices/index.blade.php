@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Dispositivos')
-@section('page-title', 'Gestión de Dispositivos')
+@section('page-title', 'Dispositivos')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">

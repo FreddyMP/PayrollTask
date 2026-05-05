@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Dashboard')
-@section('page-title', 'Dashboard — Nómina & Reclutamiento')
+@section('page-title', 'Dashboard')
 
 @section('content')
 {{-- KPI CARDS --}}

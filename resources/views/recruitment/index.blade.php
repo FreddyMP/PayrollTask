@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('title', 'Reclutamiento')
-@section('page-title', 'Módulo de Reclutamiento')
+@section('page-title', 'Reclutamiento')
 
 @section('content')
 <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div>
-            <h5 class="text-white mb-1">Módulo de Reclutamiento</h5>
+            <h5 class="text-white mb-1">Reclutamiento</h5>
             <p class="text-white small mb-0">Gestiona vacantes y configura la hoja de solicitud.</p>
         </div>
         <div class="d-flex gap-2">
