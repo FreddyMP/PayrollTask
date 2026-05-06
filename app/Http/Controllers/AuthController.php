@@ -96,6 +96,16 @@ class AuthController extends Controller
 
             $request->session()->put('just_logged_in', true);
 
+            if ($request->expectsJson()) {
+                $user = Auth::user();
+                $token = $user->createToken($request->device_name ?? 'Web API')->plainTextToken;
+                return response()->json([
+                    'token' => $token,
+                    'user' => $user->load('company'),
+                    'message' => 'Inicio de sesión exitoso.'
+                ]);
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
@@ -118,6 +128,12 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Cierre de sesión exitoso.'
+            ]);
+        }
 
         return redirect()->route('login');
     }
