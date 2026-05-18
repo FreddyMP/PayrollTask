@@ -191,8 +191,8 @@
 <body>
     <div class="login-card">
         <div class="login-brand">
-            <div class="brand-icon"><i class="bi bi-rocket-takeoff"></i></div>
-            <h3>PayrollTask</h3>
+            
+            <img src="{{ asset('storage/logo.png') }}" alt="Logo" width="200">
             <p>Plataforma de Gestión Empresarial</p>
         </div>
 
