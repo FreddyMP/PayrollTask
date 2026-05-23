@@ -132,7 +132,7 @@
                             </div>
                             @endforeach
                         @else
-                            <p class="text-muted" style="font-size:0.85rem;">Sin datos de deducciones</p>
+                            <p  style="font-size:0.85rem;">Sin datos de deducciones</p>
                         @endif
                     </div>
                 </div>

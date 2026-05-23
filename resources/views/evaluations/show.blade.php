@@ -32,6 +32,7 @@
                                 <td>{{ $question->question_text }}</td>
                                 <td>
                                     @if($question->type === 'scale') Escala 1-10
+                                    @elseif($question->type === 'boolean') Sí o No
                                     @elseif($question->type === 'text') Texto Corto
                                     @else Texto Largo @endif
                                 </td>
@@ -138,6 +139,7 @@
                         <label class="form-label">Tipo de Respuesta</label>
                         <select name="type" class="form-select" required>
                             <option value="scale">Escala del 1 al 10</option>
+                            <option value="boolean">Sí o No</option>
                             <option value="text">Texto Corto (Una línea)</option>
                             <option value="textarea">Texto Largo (Párrafo)</option>
                         </select>

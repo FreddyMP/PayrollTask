@@ -85,7 +85,7 @@ class EvaluationController extends Controller
         $this->authorizeAccess($evaluation);
         $request->validate([
             'question_text' => 'required|string',
-            'type' => 'required|in:scale,text,textarea',
+            'type' => 'required|in:scale,text,textarea,boolean',
         ]);
 
         $order = $evaluation->questions()->max('order') + 1;
@@ -189,11 +189,14 @@ class EvaluationController extends Controller
 
         $rules = [];
         foreach ($evaluation->questions as $question) {
+            $key = 'q_' . $question->id;
             if ($question->is_required) {
-                $rules['q_' . $question->id] = 'required';
+                $rules[$key] = 'required';
             }
             if ($question->type === 'scale') {
-                $rules['q_' . $question->id] .= '|nullable|integer|min:1|max:10';
+                $rules[$key] = ($rules[$key] ?? 'nullable') . '|integer|min:1|max:10';
+            } elseif ($question->type === 'boolean') {
+                $rules[$key] = ($rules[$key] ?? 'nullable') . '|in:1,0';
             }
         }
 
@@ -208,8 +211,9 @@ class EvaluationController extends Controller
             if ($value !== null) {
                 $response->answers()->create([
                     'evaluation_question_id' => $question->id,
-                    'answer_text' => $question->type !== 'scale' ? $value : null,
+                    'answer_text' => !in_array($question->type, ['scale', 'boolean']) ? $value : null,
                     'answer_scale' => $question->type === 'scale' ? $value : null,
+                    'answer_boolean' => $question->type === 'boolean' ? (bool) $value : null,
                 ]);
             }
         }

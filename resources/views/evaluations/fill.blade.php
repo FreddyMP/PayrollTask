@@ -37,6 +37,21 @@
                                 // Set initial value display
                                 document.getElementById('range_{{ $question->id }}').value = 5;
                             </script>
+                        @elseif($question->type === 'boolean')
+                            <div class="d-flex gap-4 mt-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="q_{{ $question->id }}" id="q_{{ $question->id }}_yes" value="1" {{ $question->is_required ? 'required' : '' }}>
+                                    <label class="form-check-label text-white" for="q_{{ $question->id }}_yes">
+                                        <i class="bi bi-check-circle text-success me-1"></i>Sí
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="q_{{ $question->id }}" id="q_{{ $question->id }}_no" value="0">
+                                    <label class="form-check-label text-white" for="q_{{ $question->id }}_no">
+                                        <i class="bi bi-x-circle text-danger me-1"></i>No
+                                    </label>
+                                </div>
+                            </div>
                         @elseif($question->type === 'text')
                             <input type="text" name="q_{{ $question->id }}" class="form-control" placeholder="Escribe tu respuesta aquí..." {{ $question->is_required ? 'required' : '' }}>
                         @elseif($question->type === 'textarea')
