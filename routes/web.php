@@ -151,4 +151,25 @@ Route::middleware('auth')->group(function () {
             Route::post('/{template}/generate', [DocumentController::class, 'generate'])->name('generate');
             Route::delete('/{template}', [DocumentController::class, 'destroy'])->name('destroy');
         });
+
+        // Evaluations (Admin/Super)
+        Route::middleware('role:admin')->prefix('evaluations')->name('evaluations.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\EvaluationController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\EvaluationController::class, 'store'])->name('store');
+            Route::get('/{evaluation}/show', [\App\Http\Controllers\EvaluationController::class, 'show'])->name('show');
+            Route::patch('/{evaluation}', [\App\Http\Controllers\EvaluationController::class, 'update'])->name('update');
+            Route::delete('/{evaluation}', [\App\Http\Controllers\EvaluationController::class, 'destroy'])->name('destroy');
+            
+            Route::post('/{evaluation}/questions', [\App\Http\Controllers\EvaluationController::class, 'storeQuestion'])->name('questions.store');
+            Route::delete('/{evaluation}/questions/{question}', [\App\Http\Controllers\EvaluationController::class, 'destroyQuestion'])->name('questions.destroy');
+            
+            Route::post('/{evaluation}/assignments', [\App\Http\Controllers\EvaluationController::class, 'storeAssignments'])->name('assignments.store');
+            Route::delete('/{evaluation}/assignments/{assignment}', [\App\Http\Controllers\EvaluationController::class, 'destroyAssignment'])->name('assignments.destroy');
+            
+            Route::get('/{evaluation}/results', [\App\Http\Controllers\EvaluationController::class, 'results'])->name('results');
+        });
+
+        // Evaluations (Employee)
+        Route::get('/evaluations/{evaluation}/fill', [\App\Http\Controllers\EvaluationController::class, 'fill'])->name('evaluations.fill');
+        Route::post('/evaluations/{evaluation}/submit', [\App\Http\Controllers\EvaluationController::class, 'submit'])->name('evaluations.submit');
     });

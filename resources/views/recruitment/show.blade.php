@@ -219,7 +219,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Puntos que vale este paso (Máx {{ 100 - $vacancy->steps->sum('points') }})</label>
+                        <label class="form-label">Puntos que vale este paso (Máx 100 )</label>
                         <input type="number" name="points" class="form-control" min="1" max="100" required>
                     </div>
                 </div>

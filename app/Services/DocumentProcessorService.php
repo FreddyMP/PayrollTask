@@ -128,4 +128,50 @@ class DocumentProcessorService
 
         return $replacements;
     }
+
+    /**
+     * Extract variables from a template content or file.
+     */
+    public function extractVariables(DocumentTemplate $template): array
+    {
+        $variables = [];
+
+        if ($template->file_path && str_ends_with($template->file_path, '.docx')) {
+            $fullPath = storage_path('app/public/' . $template->file_path);
+            if (file_exists($fullPath)) {
+                $zip = new \ZipArchive();
+                if ($zip->open($fullPath) === true) {
+                    $files = ['word/document.xml'];
+                    for ($i = 1; $i <= 10; $i++) {
+                        $files[] = "word/header{$i}.xml";
+                        $files[] = "word/footer{$i}.xml";
+                    }
+
+                    foreach ($files as $file) {
+                        $xml = $zip->getFromName($file);
+                        if ($xml !== false) {
+                            $text = strip_tags($xml);
+                            // Match &lt;# variable #&gt; and <# variable #>
+                            preg_match_all('/(?:&lt;|<)#\s*(.*?)\s*#(?:&gt;|>)/', $text, $matches);
+                            if (!empty($matches[1])) {
+                                foreach ($matches[1] as $var) {
+                                    $variables[] = trim($var);
+                                }
+                            }
+                        }
+                    }
+                    $zip->close();
+                }
+            }
+        } elseif ($template->content) {
+            preg_match_all('/<#\s*(.*?)\s*#>/', $template->content, $matches);
+            if (!empty($matches[1])) {
+                foreach ($matches[1] as $var) {
+                    $variables[] = trim($var);
+                }
+            }
+        }
+
+        return array_values(array_unique($variables));
+    }
 }

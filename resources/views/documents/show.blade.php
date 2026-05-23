@@ -42,6 +42,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $configuredFieldNames = $fields->pluck('name')->map(fn($n) => strtolower($n))->toArray();
+                                        $systemVars = ['empresa_nombre', 'empresa_rnc', 'empresa_direccion', 'nombre_empleado', 'email_empleado'];
+                                        
+                                        $unconfiguredVariables = collect($extractedVariables ?? [])->filter(function($var) use ($configuredFieldNames, $systemVars) {
+                                            return !in_array(strtolower($var), $configuredFieldNames) && !in_array(strtolower($var), $systemVars);
+                                        })->unique();
+                                    @endphp
+
+                                    @foreach($unconfiguredVariables as $index => $unconfiguredVar)
+                                    <tr class="table-warning opacity-75">
+                                        <td><code class="text-primary-light">&lt;# {{ $unconfiguredVar }} #&gt;</code> <span class="badge bg-warning text-dark ms-2 extra-small">No configurada</span></td>
+                                        <td class="text-muted fst-italic">Sin valor</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-primary-custom btn-sm border-0" data-bs-toggle="modal" data-bs-target="#addVariableModal" onclick="document.getElementById('newVarName').value='{{ $unconfiguredVar }}'">
+                                                <i class="bi bi-plus-circle"></i> Configurar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
                                     @forelse($fields as $field)
                                     <tr>
                                         <td><code class="text-primary-light">&lt;# {{ $field->name }} #&gt;</code></td>
@@ -53,9 +74,11 @@
                                         </td>
                                     </tr>
                                     @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center py-4 text-muted">No hay variables configuradas.</td>
-                                    </tr>
+                                        @if($unconfiguredVariables->isEmpty())
+                                        <tr>
+                                            <td colspan="3" class="text-center py-4 text-muted">No hay variables configuradas ni detectadas en la plantilla.</td>
+                                        </tr>
+                                        @endif
                                     @endforelse
                                 </tbody>
                             </table>
@@ -87,7 +110,9 @@
             <div class="card-body">
                 <form action="{{ route('documents.generate', $template) }}" method="POST">
                     @csrf
+                    <!--
                     <div class="mb-4">
+                        
                         <label class="form-label">Contexto (Opcional)</label>
                         <select name="employee_id" class="form-select">
                             <option value="">Ninguno (Solo variables globales)</option>
@@ -113,7 +138,7 @@
                             </div>
                         </div>
                     </div>
-
+-->
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary-custom py-2">
                             <i class="bi bi-play-fill me-2"></i>Generar Documento
@@ -122,7 +147,7 @@
                 </form>
             </div>
         </div>
-
+<!--
         <div class="card shadow-sm border-0">
             <div class="card-header bg-dark-2 py-3">
                 <span class="text-white fw-bold">Ayuda de Variables</span>
@@ -139,6 +164,7 @@
                 </ul>
             </div>
         </div>
+        -->
     </div>
 </div>
 
@@ -194,7 +220,7 @@
                     <input type="hidden" name="document_template_id" value="{{ $template->id }}">
                     <div class="mb-3">
                         <label class="form-label">Nombre de la Variable</label>
-                        <input type="text" name="name" class="form-control" placeholder="Ej: Representante Legal" required>
+                        <input type="text" name="name" id="newVarName" class="form-control" placeholder="Ej: Representante Legal" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Valor</label>

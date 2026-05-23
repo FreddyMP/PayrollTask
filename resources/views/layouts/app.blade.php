@@ -509,6 +509,9 @@
             <a href="{{ route('employees.index') }}" class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i> Empleados
             </a>
+            <a href="{{ route('evaluations.index') }}" class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">
+                <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
+            </a>
             <a href="{{ route('payroll.index') }}" class="nav-link {{ request()->routeIs('payroll.*') ? 'active' : '' }}">
                 <i class="bi bi-cash-stack"></i> Nómina
             </a>

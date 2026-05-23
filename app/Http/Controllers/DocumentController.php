@@ -55,7 +55,8 @@ class DocumentController extends Controller
         $this->authorizeAccess($template);
         $employees = Employee::where('company_id', Auth::user()->company_id)->with('user')->get();
         $fields = $template->variables;
-        return view('documents.show', compact('template', 'employees', 'fields'));
+        $extractedVariables = $this->processor->extractVariables($template);
+        return view('documents.show', compact('template', 'employees', 'fields', 'extractedVariables'));
     }
 
     public function generate(Request $request, DocumentTemplate $template)
