@@ -192,7 +192,7 @@
     <div class="login-card">
         <div class="login-brand">
             
-            <img src="{{ asset('storage/logo.png') }}" alt="Logo" width="200">
+            <img src="https://payrolltask-s3-cloud-852128327213-us-east-2-an.s3.us-east-2.amazonaws.com/logo-payrooltask.png" alt="Logo" width="200">
             <p>Plataforma de Gestión Empresarial</p>
         </div>
 

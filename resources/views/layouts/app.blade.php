@@ -465,9 +465,8 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon"><i class="bi bi-rocket-takeoff"></i></div>
             <div>
-                <h5>PayrollTask</h5>
+                <img src="https://payrolltask-s3-cloud-852128327213-us-east-2-an.s3.us-east-2.amazonaws.com/logo-payrooltask.png" alt="Logo" width="200">
                 <small>Panel Empresarial</small>
             </div>
         </div>
