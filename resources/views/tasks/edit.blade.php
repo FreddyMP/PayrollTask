@@ -32,10 +32,10 @@
                                         <span class="ms-2 text-muted" style="font-size: 0.65rem;">— {{ $att->user->name }}</span>
                                     </div>
                                     @if(Auth::user()->isSupervisor() || Auth::id() === $att->user_id)
-                                    <form method="POST" action="{{ route('tasks.attachments.destroy', $att) }}" class="ms-2">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-link text-danger p-0" onclick="return confirm('¿Eliminar archivo?')"><i class="bi bi-x-lg"></i></button>
-                                    </form>
+                                    <button type="button" class="btn btn-link text-danger p-0 ms-2"
+                                        onclick="deleteAttachment({{ $att->id }}, this)">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
                                     @endif
                                 </div>
                                 @empty
@@ -54,10 +54,10 @@
                                         <span class="ms-2 text-muted" style="font-size: 0.65rem;">— {{ $att->user->name }}</span>
                                     </div>
                                     @if(Auth::user()->isSupervisor() || Auth::id() === $att->user_id)
-                                    <form method="POST" action="{{ route('tasks.attachments.destroy', $att) }}" class="ms-2">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-link text-danger p-0" onclick="return confirm('¿Eliminar archivo?')"><i class="bi bi-x-lg"></i></button>
-                                    </form>
+                                    <button type="button" class="btn btn-link text-danger p-0 ms-2"
+                                        onclick="deleteAttachment({{ $att->id }}, this)">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
                                     @endif
                                 </div>
                                 @empty
@@ -123,3 +123,36 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function deleteAttachment(id, btn) {
+    if (!confirm('¿Eliminar archivo?')) return;
+
+    const row = btn.closest('.d-flex');
+    btn.disabled = true;
+
+    fetch(`/tasks/attachments/${id}`, {
+        method: 'POST',
+        headers: {
+            'X-HTTP-Method-Override': 'DELETE',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: '_method=DELETE'
+    })
+    .then(res => {
+        if (res.ok || res.redirected) {
+            row.remove();
+        } else {
+            alert('Error al eliminar el archivo.');
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        alert('Error de conexión.');
+        btn.disabled = false;
+    });
+}
+</script>
+@endpush

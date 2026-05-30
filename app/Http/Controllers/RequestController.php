@@ -81,7 +81,7 @@ class RequestController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('requests/attachments', 'public');
+                $path = $file->store('requests/attachments', config('filesystems.default'));
                 \App\Models\RequestAttachment::create([
                     'user_request_id' => $userRequest->id,
                     'user_id' => Auth::id(),

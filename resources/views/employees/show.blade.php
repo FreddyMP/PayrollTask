@@ -87,7 +87,7 @@
                                 <td>{{ $doc->name }}</td>
                                 <td>{{ $doc->created_at->format('d/m/Y') }}</td>
                                 <td class="text-end">
-                                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
                                         <i class="bi bi-eye"></i> Ver
                                     </a>
                                 </td>

@@ -299,11 +299,17 @@
     </div>
 </div>
 
-{{-- Chart.js CDN --}}
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Verificar que Chart.js esté cargado
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js no se ha cargado correctamente');
+        return;
+    }
+
     const chartTextColor = '#adb5bd';
     const gridColor = 'rgba(255,255,255,0.06)';
 
@@ -313,6 +319,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─── Scale Bar Chart ───
     @if($scaleQuestions->count() > 0)
     (function() {
+        const scaleBarCanvas = document.getElementById('scaleBarChart');
+        if (!scaleBarCanvas) {
+            console.error('Elemento scaleBarChart no encontrado');
+            return;
+        }
+
         const labels = @json($scaleQuestions->values()->map(fn($q) => 'P' . $q->order . ': ' . Str::limit($q->question_text, 25)));
         const avgData = [];
         const bgColors = [];
@@ -340,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
             @endif
         @endforeach
 
-        new Chart(document.getElementById('scaleBarChart'), {
+        new Chart(scaleBarCanvas, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -386,7 +398,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     @endphp
     (function() {
-        new Chart(document.getElementById('boolChart_{{ $bq->id }}'), {
+        const boolCanvas = document.getElementById('boolChart_{{ $bq->id }}');
+        if (!boolCanvas) {
+            console.error('Elemento boolChart_{{ $bq->id }} no encontrado');
+            return;
+        }
+
+        new Chart(boolCanvas, {
             type: 'doughnut',
             data: {
                 labels: ['Sí', 'No'],
@@ -422,6 +440,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─── Score Distribution Chart ───
     @if($scaleQuestions->count() > 0)
     (function() {
+        const scoreDistCanvas = document.getElementById('scoreDistributionChart');
+        if (!scoreDistCanvas) {
+            console.error('Elemento scoreDistributionChart no encontrado');
+            return;
+        }
+
         const distribution = [0,0,0,0,0,0,0,0,0,0]; // index 0 = score 1, index 9 = score 10
         @foreach($evaluation->responses as $response)
             @foreach($scaleQuestions as $sq)
@@ -434,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function () {
             @endforeach
         @endforeach
 
-        new Chart(document.getElementById('scoreDistributionChart'), {
+        new Chart(scoreDistCanvas, {
             type: 'line',
             data: {
                 labels: ['1','2','3','4','5','6','7','8','9','10'],
@@ -466,6 +490,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ─── Participation Horizontal Bar Chart ───
     (function() {
+        const participationCanvas = document.getElementById('participationChart');
+        if (!participationCanvas) {
+            console.error('Elemento participationChart no encontrado');
+            return;
+        }
+
         const empLabels = [];
         const empStatus = [];
         const empColors = [];
@@ -476,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function () {
             empColors.push({{ $assignment->is_completed ? "'rgba(46, 204, 113, 0.7)'" : "'rgba(241, 196, 15, 0.7)'" }});
         @endforeach
 
-        new Chart(document.getElementById('participationChart'), {
+        new Chart(participationCanvas, {
             type: 'bar',
             data: {
                 labels: empLabels,
@@ -517,6 +547,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─── Radar Chart ───
     @if($scaleQuestions->count() >= 3 && $totalResponses > 0)
     (function() {
+        const radarCanvas = document.getElementById('radarChart');
+        if (!radarCanvas) {
+            console.error('Elemento radarChart no encontrado');
+            return;
+        }
+
         const radarLabels = @json($scaleQuestions->values()->map(fn($q) => 'P' . $q->order));
         const radarColors = [
             'rgba(52, 152, 219, 0.8)',
@@ -553,8 +589,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })();
         @endforeach
 
-        const radarCtx = document.getElementById('radarChart');
-        const radarChart = new Chart(radarCtx, {
+        const radarChart = new Chart(radarCanvas, {
             type: 'radar',
             data: {
                 labels: radarLabels,
@@ -593,4 +628,5 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 });
 </script>
+@endpush
 @endsection

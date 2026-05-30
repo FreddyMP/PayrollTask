@@ -154,7 +154,7 @@
                                 </td>
                                 <td>
                                     @if($candidate->cv_path)
-                                    <a href="{{ asset('storage/' . $candidate->cv_path) }}" target="_blank" class="text-primary-light">
+                                    <a href="{{ Storage::url($candidate->cv_path) }}" target="_blank" class="text-primary-light">
                                         <i class="bi bi-file-earmark-pdf"></i> PDF
                                     </a>
                                     @endif

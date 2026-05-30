@@ -83,7 +83,7 @@ class TaskController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('tasks/attachments', 'public');
+                $path = $file->store('tasks/attachments', config('filesystems.default'));
                 $user = Auth::user();
                 $group = $user->isSupervisor() ? 'supervisor' : 'assigned';
                 
@@ -134,7 +134,7 @@ class TaskController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('tasks/attachments', 'public');
+                $path = $file->store('tasks/attachments', config('filesystems.default'));
                 $user = Auth::user();
                 $group = $user->isSupervisor() ? 'supervisor' : 'assigned';
 
@@ -163,8 +163,12 @@ class TaskController extends Controller
             abort(403);
         }
 
-        \Illuminate\Support\Facades\Storage::disk('public')->delete($attachment->file_path);
+        \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($attachment->file_path);
         $attachment->delete();
+
+        if (request()->expectsJson() || request()->header('X-HTTP-Method-Override') === 'DELETE') {
+            return response()->json(['success' => true, 'message' => 'Archivo eliminado.']);
+        }
 
         return back()->with('success', 'Archivo eliminado.');
     }

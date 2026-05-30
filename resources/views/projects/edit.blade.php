@@ -48,7 +48,7 @@
                         <div class="col-12">
                             <hr class="my-4 border-light opacity-10">
                             <h6 class="text-white mb-3">Equipo del Proyecto</h6>
-                            <p class="text-muted small mb-3">Actualice los miembros asignados a este proyecto.</p>
+                            <p class=" text-white small mb-3">Actualice los miembros asignados a este proyecto.</p>
                             
                             <div class="row g-2" style="max-height: 250px; overflow-y: auto;">
                                 @foreach($users as $user)

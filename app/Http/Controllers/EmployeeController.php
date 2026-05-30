@@ -105,7 +105,7 @@ class EmployeeController extends Controller
         if (is_array($uploadedDocuments)) {
             foreach ($uploadedDocuments as $index => $docData) {
                 if (isset($docData['file'])) {
-                    $path = $docData['file']->store('employee_documents', 'public');
+                    $path = $docData['file']->store('employee_documents', config('filesystems.default'));
                     $employee->documents()->create([
                         'company_id' => $companyId,
                         'name' => $request->input("documents.$index.name"),
@@ -204,7 +204,7 @@ class EmployeeController extends Controller
         if (is_array($uploadedDocuments)) {
             foreach ($uploadedDocuments as $index => $docData) {
                 if (isset($docData['file'])) {
-                    $path = $docData['file']->store('employee_documents', 'public');
+                    $path = $docData['file']->store('employee_documents', config('filesystems.default'));
                     $employee->documents()->create([
                         'company_id' => $employee->company_id,
                         'name' => $request->input("documents.$index.name"),
@@ -235,7 +235,7 @@ class EmployeeController extends Controller
             abort(403);
         }
 
-        Storage::disk('public')->delete($document->file_path);
+        Storage::disk(config('filesystems.default'))->delete($document->file_path);
         $document->delete();
 
         return redirect()->back()->with('success', 'Documento eliminado correctamente.');

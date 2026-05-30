@@ -36,7 +36,7 @@ class DocumentController extends Controller
 
         $filePath = null;
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('templates', 'public');
+            $filePath = $request->file('file')->store('templates', config('filesystems.default'));
         }
 
         DocumentTemplate::create([

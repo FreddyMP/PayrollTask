@@ -44,15 +44,12 @@ class DocumentProcessorService
     }
 
     /**
-     * Process a .docx file using PHPWord TemplateProcessor.
-     */
     public function processDocx(string $filePath, DocumentTemplate $template, ?Model $contextModel = null): string
     {
         $replacements = $this->getReplacements($template, $contextModel);
-        $fullPath = storage_path('app/public/' . $filePath);
         
         $tempFile = tempnam(sys_get_temp_dir(), 'docx');
-        copy($fullPath, $tempFile);
+        file_put_contents($tempFile, Storage::get($filePath));
 
         $zip = new \ZipArchive();
         if ($zip->open($tempFile) === true) {
@@ -137,10 +134,11 @@ class DocumentProcessorService
         $variables = [];
 
         if ($template->file_path && str_ends_with($template->file_path, '.docx')) {
-            $fullPath = storage_path('app/public/' . $template->file_path);
-            if (file_exists($fullPath)) {
+            if (Storage::exists($template->file_path)) {
+                $tempFile = tempnam(sys_get_temp_dir(), 'docx');
+                file_put_contents($tempFile, Storage::get($template->file_path));
                 $zip = new \ZipArchive();
-                if ($zip->open($fullPath) === true) {
+                if ($zip->open($tempFile) === true) {
                     $files = ['word/document.xml'];
                     for ($i = 1; $i <= 10; $i++) {
                         $files[] = "word/header{$i}.xml";
@@ -162,6 +160,7 @@ class DocumentProcessorService
                     }
                     $zip->close();
                 }
+                unlink($tempFile);
             }
         } elseif ($template->content) {
             preg_match_all('/<#\s*(.*?)\s*#>/', $template->content, $matches);

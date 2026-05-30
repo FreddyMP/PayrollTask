@@ -210,7 +210,7 @@
                                                     <td>{{ $doc->name }}</td>
                                                     <td>{{ $doc->created_at->format('d/m/Y') }}</td>
                                                     <td class="text-end">
-                                                        <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info me-1">
+                                                        <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info me-1">
                                                             <i class="bi bi-eye"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-sm btn-outline-danger btnDeleteExistingDoc" data-id="{{ $doc->id }}">
