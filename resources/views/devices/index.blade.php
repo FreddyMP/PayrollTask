@@ -37,7 +37,7 @@
                             </div>
                         </td>
                         <td><code>{{ $device->ip_address }}</code></td>
-                        <td class="text-muted small">{{ Str::limit($device->description, 50) }}</td>
+                        <td class="text-white small">{{ Str::limit($device->description, 50) }}</td>
                         <td>{{ $device->created_at->format('d/m/Y') }}</td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-1">
@@ -55,7 +55,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-5">
+                        <td colspan="5" class="text-center text-white py-5">
                             <i class="bi bi-cpu mb-3 d-block" style="font-size: 3rem; opacity: 0.2;"></i>
                             No hay dispositivos registrados
                         </td>

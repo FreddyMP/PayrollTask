@@ -64,7 +64,7 @@
                     </tr>
                     @endif
                     @empty
-                    <tr><td colspan="5" class="text-center text-muted py-4">Sin datos</td></tr>
+                    <tr><td colspan="5" class="text-center text-white py-4">Sin datos</td></tr>
                     @endforelse
                 </tbody>
             </table>

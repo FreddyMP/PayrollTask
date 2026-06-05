@@ -28,9 +28,9 @@
 
                         @if($question->type === 'scale')
                             <div class="d-flex align-items-center gap-3">
-                                <span class="text-muted small">1</span>
+                                <span class="text-white small">1</span>
                                 <input type="range" class="form-range flex-grow-1" name="q_{{ $question->id }}" min="1" max="10" step="1" id="range_{{ $question->id }}" oninput="document.getElementById('val_{{ $question->id }}').innerText = this.value" {{ $question->is_required ? 'required' : '' }}>
-                                <span class="text-muted small">10</span>
+                                <span class="text-white small">10</span>
                                 <span class="badge bg-primary fs-6 ms-3" id="val_{{ $question->id }}" style="min-width: 40px;">5</span>
                             </div>
                             <script>

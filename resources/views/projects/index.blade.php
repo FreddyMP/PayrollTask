@@ -26,7 +26,7 @@
                         </a>
                         @endif
                         <div class="dropdown">
-                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                            <button class="btn btn-link text-white p-0" data-bs-toggle="dropdown">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
                         <ul class="dropdown-menu dropdown-menu-dark">
@@ -53,7 +53,7 @@
 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-1 small">
-                        <span class="text-muted">Progreso</span>
+                        <span class="text-white">Progreso</span>
                         <span class="text-white fw-bold">{{ $project->progress }}%</span>
                     </div>
                     <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
@@ -83,8 +83,8 @@
     </div>
     @empty
     <div class="col-12 text-center py-5">
-        <div class="mb-3"><i class="bi bi-folder-x display-4 text-muted"></i></div>
-        <h5 class="text-muted">No hay proyectos registrados</h5>
+        <div class="mb-3"><i class="bi bi-folder-x display-4 text-white"></i></div>
+        <h5 class="text-white">No hay proyectos registrados</h5>
         @if(auth()->user()->isSupervisor()|| auth()->user()->isAdmin() || auth()->user()->isSuper())
         <a href="{{ route('projects.create') }}" class="btn btn-primary-custom mt-3">Crear primer proyecto</a>
         @endif

@@ -86,12 +86,12 @@
                             @if($loop->iteration <= 3)
                                 <i class="bi bi-star-fill text-{{ $loop->iteration === 1 ? 'warning' : ($loop->iteration === 2 ? 'secondary' : 'danger') }}"></i>
                             @else
-                                <span class="text-muted">#{{ $loop->iteration }}</span>
+                                <span class="text-white">#{{ $loop->iteration }}</span>
                             @endif
                         </td>
                         <td>
                             <div class="text-white fw-bold">{{ $candidate->name }}</div>
-                            <small class="text-muted">{{ $candidate->email }}</small>
+                            <small class="text-white">{{ $candidate->email }}</small>
                         </td>
                         <td>
                             <div class="d-flex gap-1 flex-wrap">
@@ -99,7 +99,7 @@
                                     @php 
                                         $prog = $candidate->progress->firstWhere('recruitment_step_id', $step->id);
                                     @endphp
-                                    <div class="badge bg-dark-3 text-muted" style="font-size: 0.65rem;">
+                                    <div class="badge bg-dark-3 text-white" style="font-size: 0.65rem;">
                                         {{ $step->name }}: {{ $prog ? ($prog->score ?? 0) : 0 }}
                                     </div>
                                 @endforeach
@@ -107,7 +107,7 @@
                         </td>
                         <td class="text-end">
                             <span class="text-white fw-bold h5 mb-0">{{ $candidate->total_points }}</span>
-                            <small class="text-muted px-1">/ {{ $vacancy->steps->sum('points') }}</small>
+                            <small class="text-white px-1">/ {{ $vacancy->steps->sum('points') }}</small>
                         </td>
                         <td class="text-end">
                             @if($candidate->status === 'hired')
@@ -124,7 +124,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">No hay candidatos para mostrar.</td>
+                        <td colspan="4" class="text-center py-4 text-white">No hay candidatos para mostrar.</td>
                     </tr>
                     @endforelse
                 </tbody>

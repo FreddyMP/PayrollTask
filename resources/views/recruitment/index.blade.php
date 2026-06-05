@@ -87,7 +87,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-white">
                                     <i class="bi bi-inboxes display-4 d-block mb-3 opacity-50"></i>
                                     No hay vacantes registradas.
                                 </td>
@@ -167,7 +167,7 @@
                                             @if($field->type === 'table')
                                                 <div class="mt-1">
                                                     @foreach($field->options['columns'] ?? [] as $col)
-                                                        <span class="badge bg-dark-3 text-muted border border-secondary" style="font-size: 0.65rem;">{{ $col }}</span>
+                                                        <span class="badge bg-dark-3 text-white border border-secondary" style="font-size: 0.65rem;">{{ $col }}</span>
                                                     @endforeach
                                                 </div>
                                             @endif
@@ -186,7 +186,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-5 text-muted">No has configurado campos para tu hoja de solicitud.</td>
+                                        <td colspan="4" class="text-center py-5 text-white">No has configurado campos para tu hoja de solicitud.</td>
                                     </tr>
                                     @endforelse
                                 </tbody>

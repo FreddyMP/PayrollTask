@@ -110,7 +110,7 @@
                             </div>
                         </div>
 
-                        <div id="overtimeLoadingMsg" class="text-muted small mt-2" style="display:none;">
+                        <div id="overtimeLoadingMsg" class="text-white small mt-2" style="display:none;">
                             <span class="spinner-border spinner-border-sm me-1"></span> Consultando horas extra...
                         </div>
                         <div id="overtimeEmptyMsg" class=" text-white small mt-2" style="display:none;">

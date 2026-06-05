@@ -71,14 +71,14 @@
                         <td style="font-size: 0.85rem;">
                             @if($log->device_name !== $log->ip_address)
                                 <div class="fw-semibold text-secondary"><i class="bi bi-laptop me-1 small "></i>{{ $log->device_name }}</div>
-                                <div class="text-muted small" style="font-family: monospace; font-size: 0.7rem;">{{ $log->ip_address }}</div>
+                                <div class="text-white small" style="font-family: monospace; font-size: 0.7rem;">{{ $log->ip_address }}</div>
                             @else
                                 <span style="font-family: monospace; color: #94a3b8;">{{ $log->ip_address ?? '—' }}</span>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="text-center text-muted py-4">No hay registros</td></tr>
+                    <tr><td colspan="7" class="text-center text-white py-4">No hay registros</td></tr>
                     @endforelse
                 </tbody>
             </table>

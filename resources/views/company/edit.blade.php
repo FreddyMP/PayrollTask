@@ -38,7 +38,7 @@
                         <div class="col-md-4">
                             <label class="form-label">Tasa SRL (%)</label>
                             <input type="number" step="0.01" class="form-control" name="srl_rate" value="{{ old('srl_rate', $company->srl_rate) }}" min="1.0" max="1.5">
-                            <small class="text-muted">Riesgos Laborales (Promedio 1.10% - 1.30%)</small>
+                            <small class="text-white">Riesgos Laborales (Promedio 1.10% - 1.30%)</small>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Plan</label>

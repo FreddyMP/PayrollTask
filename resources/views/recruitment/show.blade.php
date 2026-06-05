@@ -68,7 +68,7 @@
                 
                 @if($vacancy->steps->count() > 0)
                 <div class="mt-3">
-                    <div class="d-flex justify-content-between small text-muted mb-2">
+                    <div class="d-flex justify-content-between small text-white mb-2">
                         <span>Puntuación Total</span>
                         <span>{{ $vacancy->steps->sum('points') }} / 100</span>
                     </div>
@@ -106,7 +106,7 @@
                     </div>
                     <div>
                         <h6 class="text-white mb-0">{{ $vacancy->selectedCandidate->name }}</h6>
-                        <small class="text-muted">{{ $vacancy->selectedCandidate->email }}</small>
+                        <small class="text-white">{{ $vacancy->selectedCandidate->email }}</small>
                     </div>
                 </div>
                 <div class="d-grid">
@@ -177,13 +177,13 @@
                                         <i class="bi bi-gear"></i> Procesar
                                     </button>
                                     @else
-                                    <span class="text-muted small">Finalizado</span>
+                                    <span class="text-white small">Finalizado</span>
                                     @endif
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">No hay candidatos registrados.</td>
+                                <td colspan="5" class="text-center py-4 text-white">No hay candidatos registrados.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -368,7 +368,7 @@ function showProgressModal(candidate, currentStep) {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-white small fw-bold">${step.name}</div>
-                        <div class="text-muted" style="font-size: 0.7rem;">${step.responsible ? step.responsible.name : ''}</div>
+                        <div class="text-white" style="font-size: 0.7rem;">${step.responsible ? step.responsible.name : ''}</div>
                     </div>
                     <span class="badge badge-status badge-${statusClass || 'pending'}">${badgeText}</span>
                 </div>

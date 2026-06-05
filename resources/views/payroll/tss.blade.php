@@ -116,7 +116,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
+                        <td colspan="7" class="text-center py-5 text-white">
                             <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
                             No hay registros de nómina para el período {{ $period }}.
                         </td>

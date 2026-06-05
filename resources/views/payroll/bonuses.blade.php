@@ -45,7 +45,7 @@
                     <span class="input-group-text bg-dark-3 text-white border-0">RD$</span>
                     <input type="number" id="utilidadInput" class="form-control" placeholder="0.00" step="0.01">
                 </div>
-                <small class="text-muted mt-2 d-block">Monto total de utilidades a distribuir (se tomará el 10%)</small>
+                <small class="text-white mt-2 d-block">Monto total de utilidades a distribuir (se tomará el 10%)</small>
             </div>
         </div>
     </div>

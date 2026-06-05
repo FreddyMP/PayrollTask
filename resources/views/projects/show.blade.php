@@ -18,19 +18,19 @@
                 <div class="row g-4 mb-4">
                     <div class="col-md-4">
                         <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
-                            <div class="text-muted small mb-1">Fecha Inicio</div>
+                            <div class="text-white small mb-1">Fecha Inicio</div>
                             <div class="text-white fw-bold"><i class="bi bi-calendar-check me-2 text-primary"></i>{{ $project->start_date ? $project->start_date->format('d M, Y') : '—' }}</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
-                            <div class="text-muted small mb-1">Fecha Fin</div>
+                            <div class="text-white small mb-1">Fecha Fin</div>
                             <div class="text-white fw-bold"><i class="bi bi-calendar-x me-2 text-danger"></i>{{ $project->end_date ? $project->end_date->format('d M, Y') : '—' }}</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
-                            <div class="text-muted small mb-1">Tareas</div>
+                            <div class="text-white small mb-1">Tareas</div>
                             <div class="text-white fw-bold"><i class="bi bi-check2-all me-2 text-success"></i>{{ $project->tasks->count() }} totales</div>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                         </div>
                         <div>
                             <div class="text-white fw-bold">{{ $member->name }}</div>
-                            <div class="text-muted small">{{ ucfirst($member->role) }}</div>
+                            <div class="text-white small">{{ ucfirst($member->role) }}</div>
                         </div>
                     </div>
                     @endforeach
@@ -87,7 +87,7 @@
                 <div class="table-responsive">
                     <table class="table table-dark table-hover mb-0">
                         <thead class="bg-dark-3">
-                            <tr class="text-muted small text-uppercase">
+                            <tr class="text-white small text-uppercase">
                                 <th class="border-0 px-4 py-3">Tarea</th>
                                 <th class="border-0 px-4 py-3">Estado</th>
                                 <th class="border-0 px-4 py-3">Responsable</th>
@@ -114,7 +114,7 @@
                                     <span class="badge-status badge-{{ $task->priority }}">{{ ucfirst($task->priority) }}</span>
                                 </td>
                                 <td class="px-4 py-3 align-middle text-end">
-                                    <a href="{{ route('tasks.edit', $task) }}" class="btn btn-link p-0 text-muted"><i class="bi bi-pencil"></i></a>
+                                    <a href="{{ route('tasks.edit', $task) }}" class="btn btn-link p-0 text-white"><i class="bi bi-pencil"></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -138,7 +138,7 @@
             <form action="{{ route('projects.updateTeam', $project) }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
-                    <p class="text-muted small mb-4">Seleccione los supervisores y usuarios que formarán parte de este proyecto.</p>
+                    <p class="text-white small mb-4">Seleccione los supervisores y usuarios que formarán parte de este proyecto.</p>
                     
                     <div class="row g-2" style="max-height: 400px; overflow-y: auto;">
                         @php $teamIds = $project->team->pluck('id')->toArray(); @endphp
@@ -152,7 +152,7 @@
                                     </div>
                                     <div>
                                         <div class="text-white fw-bold">{{ $user->name }}</div>
-                                        <div class="text-muted small">{{ ucfirst($user->role) }}</div>
+                                        <div class="text-white small">{{ ucfirst($user->role) }}</div>
                                     </div>
                                 </label>
                             </div>

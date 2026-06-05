@@ -67,7 +67,7 @@
                         <td><span class="badge-status badge-{{ $p->status }}">{{ ucfirst($p->status) }}</span></td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center text-muted py-4">Sin datos</td></tr>
+                    <tr><td colspan="6" class="text-center text-white py-4">Sin datos</td></tr>
                     @endforelse
                 </tbody>
             </table>

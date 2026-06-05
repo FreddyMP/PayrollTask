@@ -8,7 +8,7 @@
         <div class="card bg-dark-2 border-0 shadow-lg">
             <div class="card-header border-bottom border-light bg-transparent p-4">
                 <h5 class="mb-0 text-white">Editar Información del Proyecto</h5>
-                <p class="text-muted small mb-0">Actualice los detalles y el equipo del proyecto.</p>
+                <p class="text-white small mb-0">Actualice los detalles y el equipo del proyecto.</p>
             </div>
             <div class="card-body p-4">
                 <form action="{{ route('projects.update', $project) }}" method="POST">
@@ -63,7 +63,7 @@
                                             </div>
                                             <div>
                                                 <div class="text-white small fw-bold">{{ $user->name }}</div>
-                                                <div class="text-muted" style="font-size: 0.65rem;">{{ ucfirst($user->role) }}</div>
+                                                <div class="text-white" style="font-size: 0.65rem;">{{ ucfirst($user->role) }}</div>
                                             </div>
                                         </label>
                                     </div>

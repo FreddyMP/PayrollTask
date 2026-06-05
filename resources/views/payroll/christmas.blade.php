@@ -70,7 +70,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">No hay empleados registrados.</td>
+                            <td colspan="5" class="text-center py-4 text-white">No hay empleados registrados.</td>
                         </tr>
                     @endforelse
                 </tbody>

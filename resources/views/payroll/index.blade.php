@@ -97,7 +97,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center text-muted py-4">No hay registros de nómina</td></tr>
+                    <tr><td colspan="8" class="text-center text-white py-4">No hay registros de nómina</td></tr>
                     @endforelse
                 </tbody>
             </table>

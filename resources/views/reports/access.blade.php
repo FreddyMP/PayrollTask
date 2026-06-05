@@ -64,7 +64,7 @@
                         <td style="font-family: monospace; font-size: 0.8rem;">{{ $log->ip_address ?? '—' }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center text-muted py-4">Sin registros</td></tr>
+                    <tr><td colspan="5" class="text-center text-white py-4">Sin registros</td></tr>
                     @endforelse
                 </tbody>
             </table>

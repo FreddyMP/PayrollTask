@@ -27,15 +27,15 @@
                         {{ ucfirst($evaluation->status) }}
                     </span>
                 </div>
-                <p class="small text-muted mb-3">{{ Str::limit($evaluation->description, 100) }}</p>
+                <p class="small text-white mb-3">{{ Str::limit($evaluation->description, 100) }}</p>
                 <div class="d-flex gap-3 mb-4">
                     <div class="text-center">
                         <span class="d-block h5 text-white mb-0">{{ $evaluation->questions_count }}</span>
-                        <span class="small text-muted" style="font-size:0.75rem;">Preguntas</span>
+                        <span class="small text-white" style="font-size:0.75rem;">Preguntas</span>
                     </div>
                     <div class="text-center">
                         <span class="d-block h5 text-white mb-0">{{ $evaluation->assignments_count }}</span>
-                        <span class="small text-muted" style="font-size:0.75rem;">Asignados</span>
+                        <span class="small text-white" style="font-size:0.75rem;">Asignados</span>
                     </div>
                 </div>
                 <div class="d-flex gap-2">
@@ -58,7 +58,7 @@
     @empty
     <div class="col-12 text-center py-5">
         <i class="bi bi-clipboard2-check display-1 opacity-25"></i>
-        <p class="mt-3 text-muted">No hay evaluaciones creadas.</p>
+        <p class="mt-3 text-white">No hay evaluaciones creadas.</p>
     </div>
     @endforelse
 </div>

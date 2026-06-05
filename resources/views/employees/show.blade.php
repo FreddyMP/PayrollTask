@@ -97,7 +97,7 @@
                     </table>
                 </div>
                 @else
-                <div class="p-3 text-center text-muted">No hay documentos registrados para este empleado.</div>
+                <div class="p-3 text-center text-white">No hay documentos registrados para este empleado.</div>
                 @endif
             </div>
         </div>
@@ -128,7 +128,7 @@
                                 <td><span class="badge-status badge-{{ $payroll->status }}">{{ ucfirst($payroll->status) }}</span></td>
                             </tr>
                             @empty
-                            <tr><td colspan="5" class="text-center text-muted py-3">Sin registros de nómina</td></tr>
+                            <tr><td colspan="5" class="text-center text-white py-3">Sin registros de nómina</td></tr>
                             @endforelse
                         </tbody>
                     </table>

@@ -75,7 +75,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="6" class="text-center text-muted py-4">Sin registros de nómina</td></tr>
+                            <tr><td colspan="6" class="text-center text-white py-4">Sin registros de nómina</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -176,7 +176,7 @@
                     </div>
                 </div>
                 @empty
-                <p class="text-muted text-center py-4" style="font-size:0.85rem;">No hay vacantes abiertas</p>
+                <p class="text-white text-center py-4" style="font-size:0.85rem;">No hay vacantes abiertas</p>
                 @endforelse
             </div>
         </div>
@@ -211,7 +211,7 @@
                     @endforeach
                 </div>
                 @empty
-                <p class="text-muted text-center py-3" style="font-size:0.85rem;">Sin solicitudes</p>
+                <p class="text-white text-center py-3" style="font-size:0.85rem;">Sin solicitudes</p>
                 @endforelse
                 <a href="{{ route('requests.index') }}" class="btn btn-outline-custom btn-sm w-100 mt-2">Ver solicitudes</a>
             </div>
@@ -231,7 +231,7 @@
                     <span style="font-size:0.78rem;font-weight:700;color:white;min-width:20px;text-align:right;">{{ $dept->count }}</span>
                 </div>
                 @empty
-                <p class="text-muted text-center py-2" style="font-size:0.85rem;">Sin departamentos</p>
+                <p class="text-white text-center py-2" style="font-size:0.85rem;">Sin departamentos</p>
                 @endforelse
             </div>
         </div>
@@ -251,7 +251,7 @@
                     </div>
                 </div>
                 @empty
-                <div class="p-3 text-center text-muted" style="font-size:0.85rem;">Sin registros</div>
+                <div class="p-3 text-center text-white" style="font-size:0.85rem;">Sin registros</div>
                 @endforelse
             </div>
         </div>
@@ -272,7 +272,7 @@
                     <span class="badge-status badge-{{ $c->status }}">{{ $c->status }}</span>
                 </div>
                 @empty
-                <div class="p-3 text-center text-muted" style="font-size:0.85rem;">Sin candidatos</div>
+                <div class="p-3 text-center text-white" style="font-size:0.85rem;">Sin candidatos</div>
                 @endforelse
             </div>
         </div>
@@ -293,7 +293,7 @@
                     <span style="font-size:0.68rem;color:#34d399;"><i class="bi bi-check-circle-fill me-1"></i>Contratado</span>
                 </div>
                 @empty
-                <div class="p-3 text-center text-muted" style="font-size:0.85rem;">Sin contrataciones</div>
+                <div class="p-3 text-center text-white" style="font-size:0.85rem;">Sin contrataciones</div>
                 @endforelse
             </div>
         </div>

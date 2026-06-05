@@ -53,9 +53,9 @@
                     <i class="bi bi-people-fill text-primary fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small">Participación</div>
+                    <div class="text-white small">Participación</div>
                     <div class="text-white fw-bold fs-4">{{ $completionRate }}%</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">{{ $totalResponses }}/{{ $totalAssignments }} empleados</div>
+                    <div class="text-white" style="font-size: 0.7rem;">{{ $totalResponses }}/{{ $totalAssignments }} empleados</div>
                 </div>
             </div>
         </div>
@@ -67,9 +67,9 @@
                     <i class="bi bi-question-circle-fill text-success fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small">Preguntas</div>
+                    <div class="text-white small">Preguntas</div>
                     <div class="text-white fw-bold fs-4">{{ $evaluation->questions->count() }}</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">{{ $scaleQuestions->count() }} escala · {{ $booleanQuestions->count() }} sí/no · {{ $textQuestions->count() }} texto</div>
+                    <div class="text-white" style="font-size: 0.7rem;">{{ $scaleQuestions->count() }} escala · {{ $booleanQuestions->count() }} sí/no · {{ $textQuestions->count() }} texto</div>
                 </div>
             </div>
         </div>
@@ -81,9 +81,9 @@
                     <i class="bi bi-star-fill text-warning fs-4"></i>
                 </div>
                 <div>
-                    <div class="text-muted small">Promedio General</div>
-                    <div class="text-white fw-bold fs-4">{{ $overallScaleAvg }}<span class="fs-6 text-muted">/10</span></div>
-                    <div class="text-muted" style="font-size: 0.7rem;">Preguntas tipo escala</div>
+                    <div class="text-white small">Promedio General</div>
+                    <div class="text-white fw-bold fs-4">{{ $overallScaleAvg }}<span class="fs-6 text-white">/10</span></div>
+                    <div class="text-white" style="font-size: 0.7rem;">Preguntas tipo escala</div>
                 </div>
             </div>
         </div>
@@ -95,9 +95,9 @@
                     <i class="bi bi-clipboard-check-fill fs-4" style="color: #9b59b6;"></i>
                 </div>
                 <div>
-                    <div class="text-muted small">Estado</div>
+                    <div class="text-white small">Estado</div>
                     <div class="text-white fw-bold fs-5 text-capitalize">{{ $evaluation->status }}</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">Última respuesta: {{ $evaluation->responses->last()?->created_at?->diffForHumans() ?? 'N/A' }}</div>
+                    <div class="text-white" style="font-size: 0.7rem;">Última respuesta: {{ $evaluation->responses->last()?->created_at?->diffForHumans() ?? 'N/A' }}</div>
                 </div>
             </div>
         </div>
@@ -149,7 +149,7 @@
                                  <div class="chart-container" style="position: relative; height:180px;">
                                     <canvas id="boolChart_{{ $bq->id }}" style="width:100%;height:100%;"></canvas>
                                  </div>
-                                <p class="text-muted small mt-2 mb-0 px-2" title="{{ $bq->question_text }}">{{ Str::limit($bq->question_text, 40) }}</p>
+                                <p class="text-white small mt-2 mb-0 px-2" title="{{ $bq->question_text }}">{{ Str::limit($bq->question_text, 40) }}</p>
                             </div>
                         </div>
                     @endforeach
@@ -256,7 +256,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="text-muted small">{{ $response->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-white small">{{ $response->created_at->format('d/m/Y H:i') }}</td>
                                 @foreach($evaluation->questions as $question)
                                     @php
                                         $answer = $response->answers->where('evaluation_question_id', $question->id)->first();
@@ -279,14 +279,14 @@
                                                 </span>
                                             @endif
                                         @else
-                                            <span class="text-muted fst-italic small">N/A</span>
+                                            <span class="text-white fst-italic small">N/A</span>
                                         @endif
                                     </td>
                                 @endforeach
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="{{ 2 + $evaluation->questions->count() }}" class="text-center py-5 text-muted">
+                                <td colspan="{{ 2 + $evaluation->questions->count() }}" class="text-center py-5 text-white">
                                     Aún no hay respuestas para esta evaluación.
                                 </td>
                             </tr>

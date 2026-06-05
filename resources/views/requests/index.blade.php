@@ -65,7 +65,7 @@
                                 @if($req->overtime_date)
                                     <div class="fw-semibold" style="font-size:0.85rem;">{{ $req->overtime_date->format('d/m/Y') }}</div>
                                     @if($req->overtime_start && $req->overtime_end)
-                                        <div class="text-muted" style="font-size:0.78rem;">
+                                        <div class="text-white" style="font-size:0.78rem;">
                                             <i class="bi bi-clock me-1"></i>
                                             {{ \Carbon\Carbon::parse($req->overtime_start)->format('H:i') }}
                                             —
@@ -108,7 +108,7 @@
                                     <i class="bi bi-person-check me-1"></i>{{ $req->reviewer->name }}
                                 </span>
                             @else
-                                <span class="text-muted small">—</span>
+                                <span class="text-white small">—</span>
                             @endif
                         </td>
                         <td>
@@ -119,7 +119,7 @@
                                     <i class="bi bi-paperclip"></i> {{ $req->attachments->count() }}
                                 </button>
                             @else
-                                <span class="text-muted small">Sin adjuntos</span>
+                                <span class="text-white small">Sin adjuntos</span>
                             @endif
                         </td>
                         <td>
@@ -148,7 +148,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="text-center text-muted py-4">No hay solicitudes</td></tr>
+                    <tr><td colspan="7" class="text-center text-white py-4">No hay solicitudes</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -218,7 +218,7 @@ $('.view-request-attachments').on('click', function() {
                     }
                     <div class="p-2 small text-center bg-dark-2">
                         <a href="${att.path}" target="_blank" class="text-white opacity-75 text-decoration-none">Ver pantalla completa</a>
-                        <div class="text-muted" style="font-size: 0.65rem;">Subido por ${att.user}</div>
+                        <div class="text-white" style="font-size: 0.65rem;">Subido por ${att.user}</div>
                     </div>
                 </div>
             </div>

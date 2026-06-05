@@ -180,7 +180,7 @@ $(document).ready(function() {
         const exitDateStr = $exitDate.val();
 
         if (!hireDateStr || !exitDateStr || salary <= 0) {
-            $benefitsTableBody.empty().append('<tr><td colspan="4" class="text-center py-4 text-muted">Complete los datos para ver el cálculo</td></tr>');
+            $benefitsTableBody.empty().append('<tr><td colspan="4" class="text-center py-4 text-white">Complete los datos para ver el cálculo</td></tr>');
             $totalValue.text('RD$ 0.00');
             $dailyValueText.text('RD$ 0.00');
             return;
@@ -322,7 +322,7 @@ $(document).ready(function() {
             }
         }
 
-        if (html === '') html = '<tr><td colspan="4" class="text-center py-4 text-muted">Ningún concepto activo o aplicable para este tiempo.</td></tr>';
+        if (html === '') html = '<tr><td colspan="4" class="text-center py-4 text-white">Ningún concepto activo o aplicable para este tiempo.</td></tr>';
         
         $benefitsTableBody.html(html);
         $totalValue.text('RD$ ' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));

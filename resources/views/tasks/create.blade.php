@@ -17,7 +17,7 @@
                     <div class="mb-3">
                         <label class="form-label">Adjuntar Imágenes o Videos</label>
                         <input type="file" class="form-control" name="attachments[]" accept="image/*,video/*" multiple>
-                        <div class="form-text text-muted small">Puedes seleccionar varios archivos a la vez (Máx 30MB cada uno).</div>
+                        <div class="form-text text-white small">Puedes seleccionar varios archivos a la vez (Máx 30MB cada uno).</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>

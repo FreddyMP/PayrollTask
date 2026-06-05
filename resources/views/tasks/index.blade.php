@@ -123,7 +123,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="text-center text-muted py-4">No hay tareas registradas</td></tr>
+                    <tr><td colspan="7" class="text-center text-white py-4">No hay tareas registradas</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -205,7 +205,7 @@
             </div>
         </div>
         @empty
-        <div class="col-12 text-center text-muted py-5">
+        <div class="col-12 text-center text-white py-5">
             <i class="bi bi-kanban mb-3 d-block" style="font-size: 3rem; opacity: 0.2;"></i>
             No hay tareas registradas
         </div>
@@ -488,7 +488,7 @@ $(document).ready(function() {
                             }
                             <div class="p-2 small text-center bg-dark-2">
                                 <a href="${att.path}" target="_blank" class="text-white opacity-75 text-decoration-none">Ver pantalla completa</a>
-                                <div class="text-muted" style="font-size: 0.65rem;">Subido por ${att.user}</div>
+                                <div class="text-white" style="font-size: 0.65rem;">Subido por ${att.user}</div>
                             </div>
                         </div>
                     </div>

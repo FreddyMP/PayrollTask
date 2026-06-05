@@ -17,7 +17,7 @@
                     <div class="mb-3">
                         <label class="form-label">Adjuntar Más Imágenes o Videos</label>
                         <input type="file" class="form-control" name="attachments[]" accept="image/*,video/*" multiple>
-                        <div class="form-text text-muted small">Puedes seleccionar varios archivos a la vez (Máx 30MB cada uno).</div>
+                        <div class="form-text text-white small">Puedes seleccionar varios archivos a la vez (Máx 30MB cada uno).</div>
                     </div>
                     
                     <div class="row g-3 mb-4">
@@ -29,7 +29,7 @@
                                     <div class="text-truncate flex-grow-1 small">
                                         <i class="bi {{ $att->file_type == 'video' ? 'bi-play-circle' : 'bi-image' }} me-2"></i>
                                         <a href="{{ Storage::url($att->file_path) }}" target="_blank" class="text-white opacity-75 text-decoration-none">Ver archivo</a>
-                                        <span class="ms-2 text-muted" style="font-size: 0.65rem;">— {{ $att->user->name }}</span>
+                                        <span class="ms-2 text-white" style="font-size: 0.65rem;">— {{ $att->user->name }}</span>
                                     </div>
                                     @if(Auth::user()->isSupervisor() || Auth::id() === $att->user_id)
                                     <button type="button" class="btn btn-link text-danger p-0 ms-2"
@@ -39,7 +39,7 @@
                                     @endif
                                 </div>
                                 @empty
-                                <div class="text-muted small p-2 text-center opacity-50">Sin archivos</div>
+                                <div class="text-white small p-2 text-center opacity-50">Sin archivos</div>
                                 @endforelse
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                                     <div class="text-truncate flex-grow-1 small">
                                         <i class="bi {{ $att->file_type == 'video' ? 'bi-play-circle' : 'bi-image' }} me-2"></i>
                                         <a href="{{ Storage::url($att->file_path) }}" target="_blank" class="text-white opacity-75 text-decoration-none">Ver archivo</a>
-                                        <span class="ms-2 text-muted" style="font-size: 0.65rem;">— {{ $att->user->name }}</span>
+                                        <span class="ms-2 text-white" style="font-size: 0.65rem;">— {{ $att->user->name }}</span>
                                     </div>
                                     @if(Auth::user()->isSupervisor() || Auth::id() === $att->user_id)
                                     <button type="button" class="btn btn-link text-danger p-0 ms-2"
@@ -61,7 +61,7 @@
                                     @endif
                                 </div>
                                 @empty
-                                <div class="text-muted small p-2 text-center opacity-50">Sin archivos</div>
+                                <div class="text-white small p-2 text-center opacity-50">Sin archivos</div>
                                 @endforelse
                             </div>
                         </div>

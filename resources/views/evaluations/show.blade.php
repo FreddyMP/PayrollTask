@@ -51,7 +51,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">No hay preguntas configuradas.</td>
+                                <td colspan="5" class="text-center py-4 text-white">No hay preguntas configuradas.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -78,7 +78,7 @@
                                 @endif
                             @endforeach
                         </select>
-                        <small class="text-muted d-block mt-2">Mantén presionado Ctrl/Cmd para seleccionar múltiples.</small>
+                        <small class="text-white d-block mt-2">Mantén presionado Ctrl/Cmd para seleccionar múltiples.</small>
                     </div>
                     <button type="submit" class="btn btn-primary-custom w-100">
                         <i class="bi bi-send-fill me-2"></i>Asignar y Notificar
@@ -112,7 +112,7 @@
                         </form>
                     </li>
                     @empty
-                    <li class="list-group-item bg-transparent text-center text-muted py-3">Ningún empleado asignado.</li>
+                    <li class="list-group-item bg-transparent text-center text-white py-3">Ningún empleado asignado.</li>
                     @endforelse
                 </ul>
             </div>

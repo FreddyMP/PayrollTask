@@ -54,7 +54,7 @@
                                     @foreach($unconfiguredVariables as $index => $unconfiguredVar)
                                     <tr class="table-warning opacity-75">
                                         <td><code class="text-primary-light">&lt;# {{ $unconfiguredVar }} #&gt;</code> <span class="badge bg-warning text-dark ms-2 extra-small">No configurada</span></td>
-                                        <td class="text-muted fst-italic">Sin valor</td>
+                                        <td class="text-white fst-italic">Sin valor</td>
                                         <td class="text-end">
                                             <button class="btn btn-primary-custom btn-sm border-0" data-bs-toggle="modal" data-bs-target="#addVariableModal" onclick="document.getElementById('newVarName').value='{{ $unconfiguredVar }}'">
                                                 <i class="bi bi-plus-circle"></i> Configurar
@@ -76,7 +76,7 @@
                                     @empty
                                         @if($unconfiguredVariables->isEmpty())
                                         <tr>
-                                            <td colspan="3" class="text-center py-4 text-muted">No hay variables configuradas ni detectadas en la plantilla.</td>
+                                            <td colspan="3" class="text-center py-4 text-white">No hay variables configuradas ni detectadas en la plantilla.</td>
                                         </tr>
                                         @endif
                                     @endforelse
