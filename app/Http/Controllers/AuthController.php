@@ -30,12 +30,24 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $messages = [
+            'email.unique' => 'Ese correo no está disponible.',
+        ];
+
         $request->validate([
             'company_name' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
+                    return $query->where('status', 'active');
+                })
+            ],
             'password' => 'required|string|min:8|confirmed',
-        ]);
+        ], $messages);
 
         try {
             DB::beginTransaction();
@@ -83,6 +95,7 @@ class AuthController extends Controller
         ]);
 
         $credentials['email'] = strtolower($credentials['email']);
+        $credentials['status'] = 'active';
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();

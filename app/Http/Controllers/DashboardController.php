@@ -157,6 +157,12 @@ class DashboardController extends Controller
             session()->put('today_modal_shown', true);
         }
 
+        // ─── Payroll Frequency Modal ──────────────────────────
+        // Si el usuario es 'super' y la empresa aún no tiene frecuencia definida,
+        // mostramos el modal obligatorio de selección (no se puede cerrar sin elegir).
+        $showPayrollFrequencyModal = $user->isSuper()
+            && is_null($user->company->payroll_frequency ?? null);
+
         // ─── Task stats (keep for compatibility) ─────────────
         $taskStats = [
             'pending' => Task::where('company_id', $companyId)->where('status', 'pending')->count(),
@@ -172,7 +178,7 @@ class DashboardController extends Controller
             'vacancyPipeline', 'recentCandidates', 'recentHires',
             'requestsByType', 'pendingRequests',
             'recentAccess', 'todayEvents', 'showTodayModal',
-            'taskStats'
+            'taskStats', 'showPayrollFrequencyModal'
         ));
     }
 }

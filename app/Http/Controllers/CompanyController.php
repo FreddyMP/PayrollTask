@@ -16,16 +16,32 @@ class CompanyController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'rnc' => 'nullable|string|max:20',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'srl_rate' => 'nullable|numeric|min:1.0|max:1.5',
+            'name'              => 'required|string|max:255',
+            'rnc'               => 'nullable|string|max:20',
+            'email'             => 'nullable|email',
+            'phone'             => 'nullable|string|max:20',
+            'address'           => 'nullable|string',
+            'srl_rate'          => 'nullable|numeric|min:1.0|max:1.5',
+            'payroll_frequency' => 'nullable|in:monthly,biweekly',
         ]);
 
         Auth::user()->company->update($data);
 
         return back()->with('success', 'Información de empresa actualizada.');
+    }
+
+    /**
+     * Actualiza exclusivamente la frecuencia de nómina desde el modal del dashboard.
+     * Solo accesible para usuarios con rol "super".
+     */
+    public function updatePayrollFrequency(Request $request)
+    {
+        $data = $request->validate([
+            'payroll_frequency' => 'required|in:monthly,biweekly',
+        ]);
+
+        Auth::user()->company->update($data);
+
+        return redirect()->route('dashboard')->with('success', 'Frecuencia de nómina configurada correctamente.');
     }
 }

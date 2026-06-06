@@ -153,10 +153,19 @@ $(document).ready(function() {
         new bootstrap.Tooltip(this);
     });
 
+    // Bandera de modo quincenal (pasada desde PHP)
+    const isBiweekly = {{ $isBiweekly ? 'true' : 'false' }};
+    // Multiplicador: 24 para quincenal, 12 para mensual
+    const multiplier = isBiweekly ? 24 : 12;
+
     // ── Cálculo de impuestos ──────────────────────────────────────────
     function calculateTaxes() {
-        let salary = parseFloat($('#grossSalary').val()) || 0;
+        let salary   = parseFloat($('#grossSalary').val()) || 0;
         let arsExtra = parseFloat($('#employeeSelect option:selected').data('ars-extra')) || 0;
+        
+        let extrasAmount = parseFloat($('#extras').val()) || 0;
+        let overtimeAmount = parseFloat($('#overtimePayHidden').val()) || 0;
+        let totalExtras = extrasAmount + overtimeAmount;
 
         let arsValue = (salary * 0.0304) + arsExtra;
         $('#ars').val(arsValue.toFixed(2));
@@ -164,7 +173,8 @@ $(document).ready(function() {
         let afpValue = salary * 0.0287;
         $('#afp').val(afpValue.toFixed(2));
 
-        let base_imponible = (salary * 12) - ((arsValue * 12) + (afpValue * 12));
+        // Anualizar con el multiplicador correcto (12 mensual / 24 quincenal)
+        let base_imponible = ((salary + totalExtras) * multiplier) - ((arsValue * multiplier) + (afpValue * multiplier));
         let isrAnnual = 0;
         if (base_imponible <= 416220) {
             isrAnnual = 0;
@@ -176,7 +186,7 @@ $(document).ready(function() {
             isrAnnual = (base_imponible - 867123) * 0.25 + (31216.35 + 48558.80);
         }
 
-        $('#isr').val((isrAnnual / 12).toFixed(2));
+        $('#isr').val((isrAnnual / multiplier).toFixed(2));
     }
 
     // ── Consulta de horas extra aprobadas ────────────────────────────
@@ -186,18 +196,19 @@ $(document).ready(function() {
         const employeeId = $('#employeeSelect').val();
         const period     = $('#periodInput').val().trim();
 
-        // Validar formato Y-m
-        if (!employeeId || !/^\d{4}-\d{2}$/.test(period)) {
+        // Aceptar formato Y-m (mensual) o Y-m-Q1/Q2 (quincenal)
+        if (!employeeId || !/^(\d{4}-\d{2})(-Q[12])?$/.test(period)) {
             resetOvertimeDisplay();
             return;
         }
 
         // Actualizar label del período
-        const [year, month] = period.split('-');
+        const basePeriod = period.replace(/-Q[12]$/, '');
+        const [year, month] = basePeriod.split('-');
         const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-        $('#overtimePeriodLabel').text(`${monthNames[parseInt(month) - 1]} ${year}`);
+        const quincenaLabel = period.endsWith('-Q1') ? ' — 1ª Quincena' : period.endsWith('-Q2') ? ' — 2ª Quincena' : '';
+        $('#overtimePeriodLabel').text(`${monthNames[parseInt(month) - 1]} ${year}${quincenaLabel}`);
 
-        // Cancelar petición anterior si existe
         if (overtimeXhr) overtimeXhr.abort();
 
         $('#overtimeLoadingMsg').show();
@@ -219,7 +230,8 @@ $(document).ready(function() {
                         parseFloat(data.overtime_pay).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     );
                     $('#overtimePayHidden').val(data.overtime_pay);
-                    
+                    calculateTaxes();
+
                     if (data.details) {
                         $('#detailDiurnas').text(data.details.diurnas.toFixed(2));
                         $('#detailNocturnas').text(data.details.nocturnas.toFixed(2));
@@ -253,23 +265,25 @@ $(document).ready(function() {
         $('#overtimeEmptyMsg').hide();
         $('#overtimeLoadingMsg').hide();
         $('#overtimeDetails').attr('style', 'display: none !important;');
+        calculateTaxes();
     }
 
     // ── Eventos ──────────────────────────────────────────────────────
     $('#employeeSelect').on('change', function() {
-        var salary = $(this).find(':selected').data('salary');
-        if (salary !== undefined) {
-            $('#grossSalary').val(salary);
+        var rawSalary = parseFloat($(this).find(':selected').data('salary')) || 0;
+        // En modo quincenal el salario bruto es la mitad del salario mensual del empleado
+        var salary = isBiweekly ? rawSalary / 2 : rawSalary;
+        if (rawSalary > 0) {
+            $('#grossSalary').val(salary.toFixed(2));
             calculateTaxes();
         }
         loadOvertimeData();
     });
 
-    $('#grossSalary').on('input', function() {
+    $('#grossSalary, #extras').on('input', function() {
         calculateTaxes();
     });
 
-    // Al ser un select, usamos el evento change
     $('#periodInput').on('change', function() {
         loadOvertimeData();
     });

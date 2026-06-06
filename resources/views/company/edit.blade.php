@@ -49,6 +49,32 @@
                             <input type="text" class="form-control" value="{{ ucfirst($company->status) }}" disabled>
                         </div>
                     </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="bi bi-calendar2-week me-1"></i>Frecuencia de Nómina</label>
+                            <select class="form-select" name="payroll_frequency">
+                                <option value="" @selected(is_null($company->payroll_frequency))>— Seleccionar —</option>
+                                <option value="monthly"   @selected($company->payroll_frequency === 'monthly')>Mensual (12 períodos / año)</option>
+                                <option value="biweekly"  @selected($company->payroll_frequency === 'biweekly')>Quincenal (24 períodos / año)</option>
+                            </select>
+                            <small class="text-white">Afecta el cálculo de ISR, ARS, AFP y la generación de períodos.</small>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            @if($company->payroll_frequency)
+                                <div class="p-2 px-3 rounded-3" style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);font-size:0.8rem;">
+                                    <i class="bi bi-check-circle-fill me-1" style="color:#818cf8;"></i>
+                                    <span style="color:#a5b4fc;">
+                                        Actualmente: <strong>{{ $company->payroll_frequency === 'monthly' ? 'Mensual' : 'Quincenal' }}</strong>
+                                    </span>
+                                </div>
+                            @else
+                                <div class="p-2 px-3 rounded-3" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);font-size:0.8rem;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1" style="color:#f59e0b;"></i>
+                                    <span style="color:#fbbf24;">Sin configurar — requerido para nómina</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i> Guardar Cambios</button>
                 </form>
             </div>

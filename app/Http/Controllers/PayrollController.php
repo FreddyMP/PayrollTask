@@ -32,23 +32,41 @@ class PayrollController extends Controller
 
     public function create()
     {
-        $employees = Employee::where('company_id', Auth::user()->company_id)
+        $user      = Auth::user();
+        $company   = $user->company;
+        $employees = Employee::where('company_id', $user->company_id)
             ->with('user')->get();
 
-        $currentPeriod = date('Y-m');
+        $isBiweekly = $company->payroll_frequency === 'biweekly';
+        $currentPeriod = $isBiweekly
+            ? date('Y-m') . (date('j') <= 15 ? '-Q1' : '-Q2')
+            : date('Y-m');
 
-        // Generar lista de periodos (últimos 12 meses y próximo)
+        // Generar lista de períodos (últimos 12 meses y próximo)
         $periods = [];
         for ($i = -12; $i <= 1; $i++) {
             $date = Carbon::now()->addMonths($i);
-            $periods[] = [
-                'value' => $date->format('Y-m'),
-                'label' => ucfirst($date->translatedFormat('F Y'))
-            ];
+            if ($isBiweekly) {
+                // Primera quincena
+                $periods[] = [
+                    'value' => $date->format('Y-m') . '-Q1',
+                    'label' => ucfirst($date->translatedFormat('F Y')) . ' — 1ª Quincena (1-15)',
+                ];
+                // Segunda quincena
+                $periods[] = [
+                    'value' => $date->format('Y-m') . '-Q2',
+                    'label' => ucfirst($date->translatedFormat('F Y')) . ' — 2ª Quincena (16-fin)',
+                ];
+            } else {
+                $periods[] = [
+                    'value' => $date->format('Y-m'),
+                    'label' => ucfirst($date->translatedFormat('F Y')),
+                ];
+            }
         }
         $periods = array_reverse($periods);
 
-        return view('payroll.create', compact('employees', 'currentPeriod', 'periods'));
+        return view('payroll.create', compact('employees', 'currentPeriod', 'periods', 'isBiweekly'));
     }
 
     public function bonuses()
@@ -123,7 +141,8 @@ class PayrollController extends Controller
             $totalTSS = $sfs + $afp + $arsExtra;
 
             // Renta neta imponible (anualizada)
-            $baseAnual = ($salary * 12) - (($sfs + $arsExtra) * 12 + $afp * 12);
+            $multiplier = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
+            $baseAnual = ($remuneracionBruta * $multiplier) - ($totalTSS * $multiplier);
 
             // Escala ISR vigente
             $isrAnual = 0;
@@ -142,7 +161,7 @@ class PayrollController extends Controller
                 $tramo = '25%';
             }
 
-            $isrMensual = $isrAnual / 12;
+            $isrMensual = $isrAnual / $multiplier;
 
             return [
                 'cedula'             => $p->employee->id_number ?? '—',
@@ -174,7 +193,7 @@ class PayrollController extends Controller
 
     /**
      * API: Devuelve horas extra aprobadas y monto segun CT dominicano
-     * para un empleado en un periodo (Y-m) dado.
+     * para un empleado en un periodo (Y-m o Y-m-Q1/Q2) dado.
      */
     public function apiOvertimeData(Request $request)
     {
@@ -189,20 +208,43 @@ class PayrollController extends Controller
 
         $company = $user->company;
 
-        [$year, $month] = explode('-', $period);
+        // Detectar si es período quincenal (Y-m-Q1 o Y-m-Q2)
+        $quincena = null;
+        if (preg_match('/^(\d{4}-\d{2})-(Q[12])$/', $period, $m)) {
+            $basePeriod = $m[1];
+            $quincena   = $m[2]; // 'Q1' o 'Q2'
+        } else {
+            $basePeriod = $period;
+        }
 
-        $requests = UserRequest::where('company_id', $user->company_id)
+        [$year, $month] = explode('-', $basePeriod);
+
+        $query = UserRequest::where('company_id', $user->company_id)
             ->where('user_id', $employee->user_id)
             ->where('type', 'overtime')
             ->where('status', 'approved')
             ->whereYear('overtime_date', $year)
-            ->whereMonth('overtime_date', $month)
-            ->get();
+            ->whereMonth('overtime_date', $month);
 
-        $holidays = Holiday::where('company_id', $user->company_id)
+        // Filtrar por quincena si aplica
+        if ($quincena === 'Q1') {
+            $query->whereDay('overtime_date', '<=', 15);
+        } elseif ($quincena === 'Q2') {
+            $query->whereDay('overtime_date', '>', 15);
+        }
+
+        $requests = $query->get();
+
+        // Cargar festivos del mes (filtrando por quincena si aplica)
+        $holidayQuery = Holiday::where('company_id', $user->company_id)
             ->whereYear('date', $year)
-            ->whereMonth('date', $month)
-            ->pluck('date')
+            ->whereMonth('date', $month);
+        if ($quincena === 'Q1') {
+            $holidayQuery->whereDay('date', '<=', 15);
+        } elseif ($quincena === 'Q2') {
+            $holidayQuery->whereDay('date', '>', 15);
+        }
+        $holidays = $holidayQuery->pluck('date')
             ->map(fn($d) => $d->format('Y-m-d'))
             ->toArray();
 
@@ -211,17 +253,17 @@ class PayrollController extends Controller
 
         $totalOvertimePay = 0;
         $totalHours = 0;
-        
+
         $details = [
-            'diurnas' => 0,
-            'nocturnas' => 0,
+            'diurnas'           => 0,
+            'nocturnas'         => 0,
             'feriados_descanso' => 0,
         ];
 
         foreach ($requests as $req) {
             $date = $req->overtime_date->format('Y-m-d');
             $dayOfWeek = $req->overtime_date->dayOfWeek; // 0 (Sun) to 6 (Sat)
-            
+
             $isRestDay = ($dayOfWeek === 0 && $company->sunday_rest) || ($dayOfWeek === 6 && $company->saturday_rest);
             $isHoliday = in_array($date, $holidays);
 
@@ -237,16 +279,12 @@ class PayrollController extends Controller
                 $start = Carbon::parse($req->overtime_start);
                 $end   = Carbon::parse($req->overtime_end);
 
-                // Default night boundaries for the same day
                 $nightStart = Carbon::parse($req->overtime_start)->setTime(21, 0, 0);
                 $dayStart   = Carbon::parse($req->overtime_start)->setTime(7, 0, 0);
 
-                $dayHours = 0;
+                $dayHours   = 0;
                 $nightHours = 0;
 
-                // Simple interval intersection logic for a single day
-                // We assume start < end as validated in RequestController
-                
                 // Night part (before 7 AM)
                 if ($start->lt($dayStart)) {
                     $nightEndRef = $end->lt($dayStart) ? $end : $dayStart;
@@ -258,7 +296,7 @@ class PayrollController extends Controller
 
                 // Day part (7 AM to 9 PM)
                 if ($current->lt($nightStart) && $end->gt($dayStart)) {
-                    $dayEndRef = $end->lt($nightStart) ? $end : $nightStart;
+                    $dayEndRef   = $end->lt($nightStart) ? $end : $nightStart;
                     $dayStartRef = $current->gt($dayStart) ? $current : $dayStart;
                     if ($dayEndRef->gt($dayStartRef)) {
                         $dayHours += $dayStartRef->diffInMinutes($dayEndRef) / 60;
@@ -273,7 +311,7 @@ class PayrollController extends Controller
                 }
 
                 $totalOvertimePay += ($hourlyRate * 1.35 * $dayHours) + ($hourlyRate * 2.0 * $nightHours);
-                $details['diurnas'] += $dayHours;
+                $details['diurnas']   += $dayHours;
                 $details['nocturnas'] += $nightHours;
             }
         }
@@ -301,23 +339,28 @@ class PayrollController extends Controller
             'overtime_pay' => 'nullable|numeric|min:0',
         ]);
 
-        $salary             = $data['gross_salary'];
-        $extras             = $data['extras'] ?? 0;
-        $overtime_pay       = $data['overtime_pay'] ?? 0;   // incluido en extras automaticamente
-        $descuentos_otros   = $data['descuentos'] ?? 0;
+        $salary           = $data['gross_salary'];
+        $extras           = $data['extras'] ?? 0;
+        $overtime_pay     = $data['overtime_pay'] ?? 0;
+        $descuentos_otros = $data['descuentos'] ?? 0;
 
         // Si hay pago de horas extra, se suma a extras
         $total_extras = $extras + $overtime_pay;
-        
+
+        // Determinar multiplicador según frecuencia de nómina de la empresa
+        // Mensual → 12 períodos/año | Quincenal → 24 períodos/año
+        $company     = Auth::user()->company;
+        $multiplier  = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
+
         // Recalculate taxes on server-side for integrity
         $employeeRecord = Employee::find($data['employee_id']);
         $ars_extra = $employeeRecord->total_ars_extra;
         $ars = ($salary * 0.0304) + $ars_extra;
         $afp = $salary * 0.0287;
-        
-        // base_imponible = (salario * 12) - ((ARS * 12) + (AFP * 12))
-        $base_imponible = ($salary * 12) - (($ars * 12) + ($afp * 12));
-        
+
+        // base_imponible anualizada = ((salario + extras) * mult) - ((ARS * mult) + (AFP * mult))
+        $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+
         $isrAnnual = 0;
         if ($base_imponible <= 416220) {
             $isrAnnual = 0;
@@ -328,7 +371,8 @@ class PayrollController extends Controller
         } else {
             $isrAnnual = ($base_imponible - 867123) * 0.25 + (31216.35 + 48558.80);
         }
-        $isr = $isrAnnual / 12;
+        // ISR por período = ISR anual / multiplicador
+        $isr = $isrAnnual / $multiplier;
 
         // Total deductions = ARS + AFP + ISR + Other discounts
         $total_deductions = $ars + $afp + $isr + $descuentos_otros;

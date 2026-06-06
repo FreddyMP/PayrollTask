@@ -300,6 +300,72 @@
     </div>
 </div>
 
+{{-- PAYROLL FREQUENCY MODAL (obligatorio para super sin configurar) --}}
+@if($showPayrollFrequencyModal)
+<div class="pf-overlay" id="payrollFreqModal">
+    <div class="pf-modal">
+        <div class="pf-modal-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="pf-icon-wrap">
+                    <i class="bi bi-calendar2-week-fill" style="color:white;font-size:1.4rem;"></i>
+                </div>
+                <div>
+                    <h5 class="pf-title">Configuración de Nómina</h5>
+                    <p class="pf-subtitle">Este paso es obligatorio antes de continuar</p>
+                </div>
+            </div>
+        </div>
+        <div class="pf-modal-body">
+            <p class="pf-desc">
+                Para calcular correctamente los periodos, impuestos y descuentos, debe especificar
+                con qué frecuencia procesa la nómina en <strong style="color:white;">{{ Auth::user()->company->name }}</strong>.
+            </p>
+            <div class="pf-options">
+                <!-- OPCIÓN MENSUAL -->
+                <label class="pf-option" id="pfOptMonthly" for="pfMonthly">
+                    <input type="radio" name="pf_choice" id="pfMonthly" value="monthly" hidden>
+                    <div class="pf-option-icon pf-icon-monthly">
+                        <i class="bi bi-calendar-month-fill"></i>
+                    </div>
+                    <div class="pf-option-content">
+                        <span class="pf-option-label">Mensual</span>
+                        <span class="pf-option-desc">Un pago por mes &middot; 12 períodos al año<br><small>ISR calculado dividiendo la base anual entre 12</small></span>
+                    </div>
+                    <div class="pf-check"><i class="bi bi-check-circle-fill"></i></div>
+                </label>
+
+                <!-- OPCIÓN QUINCENAL -->
+                <label class="pf-option" id="pfOptBiweekly" for="pfBiweekly">
+                    <input type="radio" name="pf_choice" id="pfBiweekly" value="biweekly" hidden>
+                    <div class="pf-option-icon pf-icon-biweekly">
+                        <i class="bi bi-calendar2-range-fill"></i>
+                    </div>
+                    <div class="pf-option-content">
+                        <span class="pf-option-label">Quincenal</span>
+                        <span class="pf-option-desc">Dos pagos por mes &middot; 24 períodos al año<br><small>El salario se divide en 2 quincenas &middot; ISR &divide; 24</small></span>
+                    </div>
+                    <div class="pf-check"><i class="bi bi-check-circle-fill"></i></div>
+                </label>
+            </div>
+
+            <div class="pf-warning">
+                <i class="bi bi-exclamation-triangle-fill me-2" style="color:#f59e0b;"></i>
+                <span>Esta configuración afecta los cálculos de ISR, ARS, AFP y las horas extra. Puede modificarse después desde <strong>Configuración de Empresa</strong>.</span>
+            </div>
+        </div>
+        <div class="pf-modal-footer">
+            <form method="POST" action="{{ route('company.payrollFrequency') }}" id="pfForm">
+                @csrf
+                <input type="hidden" name="payroll_frequency" id="pfHiddenInput" value="">
+                <button type="submit" class="pf-btn-confirm" id="pfConfirmBtn" disabled>
+                    <i class="bi bi-check-lg me-2"></i>Confirmar y Continuar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- TODAY MODAL (kept from original) --}}
 @if($showTodayModal)
 <div class="today-modal-overlay" id="todayModal">
@@ -365,6 +431,35 @@
     .today-modal-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,0.06);}
     .badge-hired{background:rgba(16,185,129,0.15);color:#34d399;}
     .badge-discarded{background:rgba(239,68,68,0.15);color:#f87171;}
+    /* ── Payroll Frequency Modal ─────────────────────────────── */
+    .pf-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);z-index:4000;display:flex;align-items:center;justify-content:center;animation:pfOverlayIn 0.4s ease;}
+    @keyframes pfOverlayIn{from{opacity:0}to{opacity:1}}
+    .pf-modal{background:var(--dark-2);border:1px solid rgba(255,255,255,0.1);border-radius:24px;width:100%;max-width:520px;box-shadow:0 30px 80px rgba(0,0,0,0.6);animation:pfModalIn 0.45s cubic-bezier(0.16,1,0.3,1);overflow:hidden;transition:transform 0.15s ease;}
+    @keyframes pfModalIn{from{opacity:0;transform:scale(0.88) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .pf-modal-header{background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.12));border-bottom:1px solid rgba(255,255,255,0.07);padding:1.5rem 1.75rem;}
+    .pf-icon-wrap{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(99,102,241,0.4);flex-shrink:0;}
+    .pf-title{margin:0;font-weight:700;font-size:1.1rem;color:white;}
+    .pf-subtitle{margin:0;font-size:0.72rem;color:#94a3b8;margin-top:2px;}
+    .pf-modal-body{padding:1.5rem 1.75rem;}
+    .pf-desc{font-size:0.85rem;color:#94a3b8;line-height:1.6;margin-bottom:1.25rem;}
+    .pf-options{display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem;}
+    .pf-option{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.25rem;background:rgba(255,255,255,0.03);border:2px solid rgba(255,255,255,0.07);border-radius:14px;cursor:pointer;transition:all 0.25s;position:relative;}
+    .pf-option:hover{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.25);}
+    .pf-option.selected{background:rgba(99,102,241,0.10);border-color:#6366f1;box-shadow:0 0 0 1px rgba(99,102,241,0.3);}
+    .pf-option-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .pf-icon-monthly{background:linear-gradient(135deg,rgba(34,211,238,0.15),rgba(59,130,246,0.1));color:#22d3ee;}
+    .pf-icon-biweekly{background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(249,115,22,0.1));color:#fbbf24;}
+    .pf-option-content{flex:1;}
+    .pf-option-label{display:block;font-weight:700;font-size:0.95rem;color:white;margin-bottom:3px;}
+    .pf-option-desc{font-size:0.73rem;color:#64748b;line-height:1.5;}
+    .pf-option-desc small{font-size:0.68rem;opacity:0.8;}
+    .pf-check{color:#6366f1;font-size:1.2rem;opacity:0;transition:opacity 0.2s;flex-shrink:0;}
+    .pf-option.selected .pf-check{opacity:1;}
+    .pf-warning{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:0.75rem 1rem;font-size:0.75rem;color:#94a3b8;line-height:1.5;}
+    .pf-modal-footer{padding:1.25rem 1.75rem;border-top:1px solid rgba(255,255,255,0.06);}
+    .pf-btn-confirm{width:100%;padding:0.8rem 1.5rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:12px;color:white;font-weight:700;font-size:0.9rem;cursor:not-allowed;transition:all 0.2s;opacity:0.4;}
+    .pf-btn-confirm.ready{opacity:1;cursor:pointer;}
+    .pf-btn-confirm.ready:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(99,102,241,0.4);}
 </style>
 @endpush
 
@@ -378,4 +473,43 @@
 @endpush
 @endif
 
+@if($showPayrollFrequencyModal)
+@push('scripts')
+<script>
+(function(){
+    const options = document.querySelectorAll('.pf-option');
+    const hiddenInput = document.getElementById('pfHiddenInput');
+    const confirmBtn  = document.getElementById('pfConfirmBtn');
+
+    options.forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            options.forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            const radio = opt.querySelector('input[type=radio]');
+            radio.checked = true;
+            hiddenInput.value = radio.value;
+            confirmBtn.removeAttribute('disabled');
+            confirmBtn.classList.add('ready');
+        });
+    });
+
+    // Bloquear cierre al hacer clic en el overlay con efecto shake
+    document.getElementById('payrollFreqModal').addEventListener('click', function(e){
+        if (e.target === this) {
+            const modal = this.querySelector('.pf-modal');
+            modal.style.transform = 'scale(1.025)';
+            setTimeout(() => { modal.style.transform = ''; }, 160);
+        }
+    });
+
+    // Bloquear tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') e.preventDefault();
+    });
+})();
+</script>
+@endpush
+@endif
+
 @endsection
+

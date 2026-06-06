@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:super')->group(function () {
             Route::get('/company', [CompanyController::class , 'edit'])->name('company.edit');
             Route::post('/company', [CompanyController::class , 'update'])->name('company.update');
+            Route::post('/company/payroll-frequency', [CompanyController::class, 'updatePayrollFrequency'])->name('company.payrollFrequency');
         });
 
         // Recruitment

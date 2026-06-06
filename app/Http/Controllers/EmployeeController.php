@@ -40,9 +40,19 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        $messages = [
+            'email.unique' => 'Ese correo no está disponible.',
+        ];
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
+                    return $query->where('status', 'active');
+                })
+            ],
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,supervisor,usuario',
             'phone' => 'nullable|string|max:20',
@@ -67,7 +77,7 @@ class EmployeeController extends Controller
             'documents' => 'nullable|array',
             'documents.*.name' => 'required|string|max:255',
             'documents.*.file' => 'nullable|file|max:10240',
-        ]);
+        ], $messages);
 
         $companyId = Auth::user()->company_id;
 
@@ -144,9 +154,19 @@ class EmployeeController extends Controller
             abort(403);
         }
 
+        $messages = [
+            'email.unique' => 'Ese correo no está disponible.',
+        ];
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $employee->user_id,
+            'email' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
+                    return $query->where('status', 'active');
+                })->ignore($employee->user_id)
+            ],
             'role' => 'required|in:admin,supervisor,usuario',
             'phone' => 'nullable|string|max:20',
             'position' => 'nullable|string|max:255',
@@ -171,7 +191,7 @@ class EmployeeController extends Controller
             'documents' => 'nullable|array',
             'documents.*.name' => 'required|string|max:255',
             'documents.*.file' => 'nullable|file|max:10240',
-        ]);
+        ], $messages);
 
         $employee->user->update([
             'name' => $data['name'],

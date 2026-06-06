@@ -34,10 +34,20 @@ class SettingsController extends Controller
 
     public function updateEmail(Request $request)
     {
+        $messages = [
+            'email.unique' => 'Ese correo no está disponible.',
+        ];
+
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
+            'email' => [
+                'required',
+                'email',
+                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
+                    return $query->where('status', 'active');
+                })->ignore(Auth::id())
+            ],
             'password' => 'required',
-        ]);
+        ], $messages);
 
         if (!Hash::check($request->password, Auth::user()->password)) {
             return back()->withErrors(['password' => 'La contraseña es incorrecta.']);
