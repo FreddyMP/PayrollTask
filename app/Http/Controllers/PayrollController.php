@@ -402,12 +402,19 @@ class PayrollController extends Controller
             abort(403);
         }
 
+        $payroll->load('employee.user');
+
         $payroll->update([
             'status' => 'paid',
             'payment_date' => $payroll->payment_date ?? now(),
         ]);
 
-        return redirect()->route('payroll.index')->with('success', 'Nómina marcada como pagada.');
+        // Enviar correo con volante de pago al empleado
+        if ($payroll->employee->user && $payroll->employee->user->email) {
+            \Mail::to($payroll->employee->user->email)->send(new \App\Mail\PayrollReceipt($payroll));
+        }
+
+        return redirect()->route('payroll.index')->with('success', 'Nómina marcada como pagada y volante enviado al empleado.');
     }
 
     public function destroy(Payroll $payroll)

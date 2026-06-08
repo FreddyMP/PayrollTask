@@ -2,7 +2,6 @@
 {{-- Header --}}
 <x-slot:header>
 <x-mail::header :url="config('app.url')" :logoUrl="$companyLogo ?? null" :companyLogo="$companyLogo ?? null">
-{{ $companyName ?? config('app.name') }}
 </x-mail::header>
 </x-slot:header>
 
