@@ -17,5 +17,5 @@ Ver Mis Solicitudes
 </x-mail::button>
 
 Gracias,<br>
-{{ config('app.name') }}
+{{ $companyName }}
 </x-mail::message>

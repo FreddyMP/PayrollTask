@@ -14,6 +14,7 @@ class ResetPasswordMail extends Mailable
 
     public $token;
     public $email;
+    public $companyName;
 
     /**
      * Create a new message instance.
@@ -22,6 +23,8 @@ class ResetPasswordMail extends Mailable
     {
         $this->token = $token;
         $this->email = $email;
+        // For password reset, we don't have company context, use default app name
+        $this->companyName = config('app.name');
     }
 
     /**

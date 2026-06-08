@@ -23,9 +23,24 @@ class CompanyController extends Controller
             'address'           => 'nullable|string',
             'srl_rate'          => 'nullable|numeric|min:1.0|max:1.5',
             'payroll_frequency' => 'nullable|in:monthly,biweekly',
+            'logo'              => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=600,max_height=500',
         ]);
 
-        Auth::user()->company->update($data);
+        $company = Auth::user()->company;
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            // Delete old logo if exists
+            if ($company->logo) {
+                \Storage::disk('s3')->delete($company->logo);
+            }
+
+            // Store new logo on S3
+            $logoPath = $request->file('logo')->store('company-logos', 's3');
+            $data['logo'] = $logoPath;
+        }
+
+        $company->update($data);
 
         return back()->with('success', 'Información de empresa actualizada.');
     }
@@ -43,5 +58,17 @@ class CompanyController extends Controller
         Auth::user()->company->update($data);
 
         return redirect()->route('dashboard')->with('success', 'Frecuencia de nómina configurada correctamente.');
+    }
+
+    public function deleteLogo()
+    {
+        $company = Auth::user()->company;
+
+        if ($company->logo) {
+            \Storage::disk('s3')->delete($company->logo);
+            $company->update(['logo' => null]);
+        }
+
+        return back()->with('success', 'Logo eliminado exitosamente.');
     }
 }

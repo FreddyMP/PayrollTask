@@ -87,6 +87,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/payroll/tss', [PayrollController::class , 'tss'])->name('payroll.tss');
             Route::get('/payroll/ir17', [PayrollController::class , 'ir17'])->name('payroll.ir17');
             Route::post('/payroll', [PayrollController::class , 'store'])->name('payroll.store');
+            Route::post('/payroll/auto-generate', [PayrollController::class , 'autoGenerate'])->name('payroll.autoGenerate');
+            Route::get('/payroll/{payroll}/edit', [PayrollController::class , 'edit'])->name('payroll.edit');
+            Route::patch('/payroll/{payroll}', [PayrollController::class , 'update'])->name('payroll.update');
             Route::patch('/payroll/{payroll}/paid', [PayrollController::class , 'markPaid'])->name('payroll.markPaid');
             Route::delete('/payroll/{payroll}', [PayrollController::class , 'destroy'])->name('payroll.destroy');
             Route::get('/api/payroll/overtime', [PayrollController::class, 'apiOvertimeData'])->name('payroll.apiOvertime');
@@ -114,6 +117,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/company', [CompanyController::class , 'edit'])->name('company.edit');
             Route::post('/company', [CompanyController::class , 'update'])->name('company.update');
             Route::post('/company/payroll-frequency', [CompanyController::class, 'updatePayrollFrequency'])->name('company.payrollFrequency');
+            Route::post('/company/logo/delete', [CompanyController::class, 'deleteLogo'])->name('company.deleteLogo');
         });
 
         // Recruitment

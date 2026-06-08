@@ -41,8 +41,17 @@
         <label class="text-secondary small me-2">Período:</label>
         <select name="period" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
             @foreach($availablePeriods as $p)
+            @php
+                $basePeriod = preg_replace('/-Q[12]$/', '', $p);
+                $periodLabel = \Carbon\Carbon::parse($basePeriod)->translatedFormat('F Y');
+                if (str_ends_with($p, '-Q1')) {
+                    $periodLabel .= ' — 1ª Quincena';
+                } elseif (str_ends_with($p, '-Q2')) {
+                    $periodLabel .= ' — 2ª Quincena';
+                }
+            @endphp
             <option value="{{ $p }}" {{ $period == $p ? 'selected' : '' }}>
-                {{ \Carbon\Carbon::parse($p)->translatedFormat('F Y') }}
+                {{ $periodLabel }}
             </option>
             @endforeach
         </select>

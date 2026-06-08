@@ -46,9 +46,14 @@
             @endforeach
         </select>
     </div>
-    <a href="{{ route('payroll.create') }}" class="btn btn-primary-custom">
-        <i class="bi bi-plus-lg me-1"></i> Nueva Nómina
-    </a>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#autoGenerateModal">
+            <i class="bi bi-magic me-1"></i> Generar Automáticamente
+        </button>
+        <a href="{{ route('payroll.create') }}" class="btn btn-primary-custom">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Nómina
+        </a>
+    </div>
 </div>
 
 <div class="card">
@@ -80,6 +85,9 @@
                         <td>
                             <div class="d-flex gap-1">
                                 @if($payroll->status === 'pending')
+                                <a href="{{ route('payroll.edit', $payroll) }}" class="btn btn-outline-custom btn-sm" style="color: #60a5fa;" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                                 <form method="POST" action="{{ route('payroll.markPaid', $payroll) }}" class="d-inline">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="btn btn-outline-custom btn-sm" style="color: #34d399;" title="Marcar como pagado">
@@ -107,6 +115,70 @@
 
 <div class="mt-3">{{ $payrolls->links() }}</div>
 @endsection
+
+<!-- Modal para Generar Nómina Automáticamente -->
+<div class="modal fade" id="autoGenerateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generar Nómina Automáticamente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ route('payroll.autoGenerate') }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label">Período</label>
+                        <select class="form-select" name="period" required>
+                            @php
+                                $company = auth()->user()->company;
+                                $isBiweekly = $company->payroll_frequency === 'biweekly';
+                                $currentPeriod = $isBiweekly
+                                    ? date('Y-m') . (date('j') <= 15 ? '-Q1' : '-Q2')
+                                    : date('Y-m');
+                                $periods = [];
+                                for ($i = -3; $i <= 1; $i++) {
+                                    $date = \Carbon\Carbon::now()->addMonths($i);
+                                    if ($isBiweekly) {
+                                        $periods[] = [
+                                            'value' => $date->format('Y-m') . '-Q1',
+                                            'label' => ucfirst($date->translatedFormat('F Y')) . ' — 1ª Quincena (1-15)',
+                                        ];
+                                        $periods[] = [
+                                            'value' => $date->format('Y-m') . '-Q2',
+                                            'label' => ucfirst($date->translatedFormat('F Y')) . ' — 2ª Quincena (16-fin)',
+                                        ];
+                                    } else {
+                                        $periods[] = [
+                                            'value' => $date->format('Y-m'),
+                                            'label' => ucfirst($date->translatedFormat('F Y')),
+                                        ];
+                                    }
+                                }
+                                $periods = array_reverse($periods);
+                            @endphp
+                            @foreach($periods as $period)
+                            <option value="{{ $period['value'] }}" {{ $period['value'] == $currentPeriod ? 'selected' : '' }}>
+                                {{ $period['label'] }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Esto generará automáticamente la nómina para todos los empleados activos que no tengan nómina registrada para este período. Se incluirán las horas extra aprobadas automáticamente.
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="bi bi-magic me-1"></i> Generar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <script>

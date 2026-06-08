@@ -8,8 +8,35 @@
         <div class="card">
             <div class="card-header text-secondary"><i class="bi bi-building me-2"></i>Información de la Empresa</div>
             <div class="card-body">
-                <form method="POST" action="{{ route('company.update') }}">
+                <form method="POST" action="{{ route('company.update') }}" enctype="multipart/form-data">
                     @csrf
+                    {{-- Logo Upload --}}
+                    <div class="mb-4">
+                        <label class="form-label">Logo de la Empresa</label>
+                        <div class="d-flex gap-4 align-items-start">
+                            <div class="flex-shrink-0">
+                                @if($company->logo)
+                                    <img src="{{ \Storage::disk('s3')->url($company->logo) }}" alt="Logo" class="rounded-3" style="max-width: 200px; max-height: 167px; object-fit: contain; border: 2px solid rgba(255,255,255,0.1);">
+                                @else
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 200px; height: 167px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2);">
+                                        <i class="bi bi-image fs-1 text-white-50"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control" name="logo" accept="image/jpeg,image/png,image/jpg">
+                                <small class="text-white mt-2 d-block">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Formatos: JPEG, PNG, JPG | Máximo: 2MB | Dimensiones máximas: 600x500px
+                                </small>
+                                @if($company->logo)
+                                    <button type="button" class="btn btn-outline-custom btn-sm mt-2" onclick="deleteLogo()">
+                                        <i class="bi bi-trash me-1"></i> Eliminar Logo
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Nombre de la Empresa</label>
@@ -82,3 +109,25 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function deleteLogo() {
+    if (confirm('¿Está seguro de que desea eliminar el logo de la empresa?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route('company.deleteLogo') }}';
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+@endpush

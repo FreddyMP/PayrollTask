@@ -17,6 +17,8 @@ class TaskAssigned extends Mailable
 
     public $task;
     public $email;
+    public $companyName;
+    public $companyLogo;
 
     /**
      * Create a new message instance.
@@ -25,6 +27,8 @@ class TaskAssigned extends Mailable
     {
         $this->task = $task;
         $this->email = $email;
+        $this->companyName = \Auth::user()->company->name ?? config('app.name');
+        $this->companyLogo = \Auth::user()->company->logo ? \Storage::disk('s3')->url(\Auth::user()->company->logo) : null;
     }
 
     /**

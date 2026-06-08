@@ -14,6 +14,8 @@ class UserRequestReviewed extends Mailable
     use Queueable, SerializesModels;
 
     public $userRequest;
+    public $companyName;
+    public $companyLogo;
 
     /**
      * Create a new message instance.
@@ -21,6 +23,8 @@ class UserRequestReviewed extends Mailable
     public function __construct(UserRequest $userRequest)
     {
         $this->userRequest = $userRequest;
+        $this->companyName = \Auth::user()->company->name ?? config('app.name');
+        $this->companyLogo = \Auth::user()->company->logo ? \Storage::disk('s3')->url(\Auth::user()->company->logo) : null;
     }
 
     /**

@@ -473,4 +473,297 @@ class PayrollController extends Controller
 
         return view('payroll.tss', compact('report', 'period', 'availablePeriods', 'company'));
     }
+
+    public function autoGenerate(Request $request)
+    {
+        $request->validate([
+            'period' => 'required|string|max:20',
+        ]);
+
+        $company = Auth::user()->company;
+        $period = $request->period;
+        $multiplier = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
+        $isBiweekly = $company->payroll_frequency === 'biweekly';
+
+        // Get all active employees for the company
+        $employees = Employee::where('company_id', $company->id)
+            ->with('user')
+            ->get();
+
+        $generatedCount = 0;
+        $skippedCount = 0;
+
+        foreach ($employees as $employee) {
+            // Check if payroll already exists for this employee and period
+            $existing = Payroll::where('employee_id', $employee->id)
+                ->where('period', $period)
+                ->first();
+
+            if ($existing) {
+                $skippedCount++;
+                continue;
+            }
+
+            // Calculate salary based on payroll frequency
+            $salary = $isBiweekly ? $employee->salary / 2 : $employee->salary;
+
+            // Calculate overtime pay for the period
+            $overtime_pay = $this->calculateOvertimePay($employee, $period, $company);
+
+            // Calculate taxes
+            $ars_extra = $employee->total_ars_extra ?? 0;
+            $ars = ($salary * 0.0304) + $ars_extra;
+            $afp = $salary * 0.0287;
+
+            $total_extras = $overtime_pay;
+            $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+
+            $isrAnnual = 0;
+            if ($base_imponible <= 416220) {
+                $isrAnnual = 0;
+            } elseif ($base_imponible < 624329) {
+                $isrAnnual = ($base_imponible - 416220) * 0.15;
+            } elseif ($base_imponible < 867123) {
+                $isrAnnual = ($base_imponible - 624329) * 0.20 + 31216.35;
+            } else {
+                $isrAnnual = ($base_imponible - 867123) * 0.25 + (31216.35 + 48558.80);
+            }
+
+            $isr = $isrAnnual / $multiplier;
+            $total_deductions = $ars + $afp + $isr;
+
+            Payroll::create([
+                'employee_id'  => $employee->id,
+                'company_id'   => $company->id,
+                'period'       => $period,
+                'gross_salary' => $salary,
+                'extras'       => $total_extras,
+                'descuentos'   => 0,
+                'ars'          => $ars,
+                'afp'          => $afp,
+                'isr'          => $isr,
+                'deductions'   => $total_deductions,
+                'net_salary'   => ($salary + $total_extras) - $total_deductions,
+                'payment_date' => null,
+                'status'       => 'pending',
+            ]);
+
+            $generatedCount++;
+        }
+
+        return redirect()->route('payroll.index')->with('success', "Se generaron {$generatedCount} nóminas automáticamente. {$skippedCount} empleados ya tenían nómina para este período.");
+    }
+
+    private function calculateOvertimePay($employee, $period, $company)
+    {
+        // Detectar si es período quincenal (Y-m-Q1 o Y-m-Q2)
+        $quincena = null;
+        if (preg_match('/^(\d{4}-\d{2})-(Q[12])$/', $period, $m)) {
+            $basePeriod = $m[1];
+            $quincena   = $m[2];
+        } else {
+            $basePeriod = $period;
+        }
+
+        [$year, $month] = explode('-', $basePeriod);
+        $year = (int) $year;
+        $month = (int) $month;
+
+        $query = \DB::table('requests')
+            ->where('company_id', $company->id)
+            ->where('user_id', $employee->user_id)
+            ->where('type', 'overtime')
+            ->where('status', 'approved')
+            ->whereYear('overtime_date', $year)
+            ->whereMonth('overtime_date', $month);
+
+        // Filtrar por quincena si aplica
+        if ($quincena === 'Q1') {
+            $query->whereDay('overtime_date', '<=', 15);
+        } elseif ($quincena === 'Q2') {
+            $query->whereDay('overtime_date', '>', 15);
+        }
+
+        $requests = $query->get();
+
+        // Cargar festivos del mes - usar DB::raw para evitar problemas con casts
+        $holidayQuery = \DB::table('holidays')
+            ->where('company_id', $company->id)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month);
+        if ($quincena === 'Q1') {
+            $holidayQuery->whereDay('date', '<=', 15);
+        } elseif ($quincena === 'Q2') {
+            $holidayQuery->whereDay('date', '>', 15);
+        }
+        $holidays = $holidayQuery->pluck('date')->toArray();
+
+        $monthlySalary = (float) $employee->salary;
+        $hourlyRate    = ($monthlySalary / 23.83)/8;
+
+        $totalOvertimePay = 0;
+
+        foreach ($requests as $req) {
+            $overtimeDate = Carbon::parse($req->overtime_date);
+            $date = $overtimeDate->format('Y-m-d');
+            $dayOfWeek = $overtimeDate->dayOfWeek;
+
+            $isRestDay = ($dayOfWeek === 0 && $company->sunday_rest) || ($dayOfWeek === 6 && $company->saturday_rest);
+            $isHoliday = in_array($date, $holidays);
+
+            $hours = (float) $req->overtime_hours;
+
+            if ($isRestDay || $isHoliday) {
+                $totalOvertimePay += ($hourlyRate * 2.0) * $hours;
+            } else {
+                $start = Carbon::parse($req->overtime_start);
+                $end   = Carbon::parse($req->overtime_end);
+
+                $nightStart = Carbon::parse($req->overtime_start)->setTime(21, 0, 0);
+                $dayStart   = Carbon::parse($req->overtime_start)->setTime(7, 0, 0);
+
+                $dayHours   = 0;
+                $nightHours = 0;
+
+                if ($start->lt($dayStart)) {
+                    $nightEndRef = $end->lt($dayStart) ? $end : $dayStart;
+                    $nightHours += $start->diffInMinutes($nightEndRef) / 60;
+                    $current = $nightEndRef;
+                } else {
+                    $current = $start;
+                }
+
+                if ($current->lt($nightStart) && $end->gt($dayStart)) {
+                    $dayEndRef   = $end->lt($nightStart) ? $end : $nightStart;
+                    $dayStartRef = $current->gt($dayStart) ? $current : $dayStart;
+                    if ($dayEndRef->gt($dayStartRef)) {
+                        $dayHours += $dayStartRef->diffInMinutes($dayEndRef) / 60;
+                    }
+                    $current = $dayEndRef;
+                }
+
+                if ($end->gt($nightStart)) {
+                    $nightStartRef = $current->gt($nightStart) ? $current : $nightStart;
+                    $nightHours += $nightStartRef->diffInMinutes($end) / 60;
+                }
+
+                $totalOvertimePay += ($hourlyRate * 1.35 * $dayHours) + ($hourlyRate * 2.0 * $nightHours);
+            }
+        }
+
+        return $totalOvertimePay;
+    }
+
+    public function edit(Payroll $payroll)
+    {
+        if ($payroll->company_id !== Auth::user()->company_id) {
+            abort(403);
+        }
+
+        if ($payroll->status === 'paid') {
+            return redirect()->route('payroll.index')->with('error', 'No se puede editar una nómina marcada como pagada.');
+        }
+
+        $user      = Auth::user();
+        $company   = $user->company;
+        $employees = Employee::where('company_id', $user->company_id)
+            ->with('user')->get();
+
+        $isBiweekly = $company->payroll_frequency === 'biweekly';
+
+        // Generar lista de períodos (últimos 12 meses y próximo)
+        $periods = [];
+        for ($i = -12; $i <= 1; $i++) {
+            $date = Carbon::now()->addMonths($i);
+            if ($isBiweekly) {
+                $periods[] = [
+                    'value' => $date->format('Y-m') . '-Q1',
+                    'label' => ucfirst($date->translatedFormat('F Y')) . ' — 1ª Quincena (1-15)',
+                ];
+                $periods[] = [
+                    'value' => $date->format('Y-m') . '-Q2',
+                    'label' => ucfirst($date->translatedFormat('F Y')) . ' — 2ª Quincena (16-fin)',
+                ];
+            } else {
+                $periods[] = [
+                    'value' => $date->format('Y-m'),
+                    'label' => ucfirst($date->translatedFormat('F Y')),
+                ];
+            }
+        }
+        $periods = array_reverse($periods);
+
+        return view('payroll.edit', compact('payroll', 'employees', 'periods', 'isBiweekly'));
+    }
+
+    public function update(Request $request, Payroll $payroll)
+    {
+        if ($payroll->company_id !== Auth::user()->company_id) {
+            abort(403);
+        }
+
+        if ($payroll->status === 'paid') {
+            return redirect()->route('payroll.index')->with('error', 'No se puede editar una nómina marcada como pagada.');
+        }
+
+        $data = $request->validate([
+            'employee_id'  => 'required|exists:employees,id',
+            'period'       => 'required|string|max:20',
+            'gross_salary' => 'required|numeric|min:0',
+            'extras'       => 'nullable|numeric|min:0',
+            'descuentos'   => 'nullable|numeric|min:0',
+            'ars'          => 'required|numeric|min:0',
+            'afp'          => 'required|numeric|min:0',
+            'isr'          => 'required|numeric|min:0',
+            'payment_date' => 'nullable|date',
+            'overtime_pay' => 'nullable|numeric|min:0',
+        ]);
+
+        $salary           = $data['gross_salary'];
+        $extras           = $data['extras'] ?? 0;
+        $overtime_pay     = $data['overtime_pay'] ?? 0;
+        $descuentos_otros = $data['descuentos'] ?? 0;
+
+        $total_extras = $extras + $overtime_pay;
+
+        $company     = Auth::user()->company;
+        $multiplier  = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
+
+        $employeeRecord = Employee::find($data['employee_id']);
+        $ars_extra = $employeeRecord->total_ars_extra;
+        $ars = ($salary * 0.0304) + $ars_extra;
+        $afp = $salary * 0.0287;
+
+        $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+
+        $isrAnnual = 0;
+        if ($base_imponible <= 416220) {
+            $isrAnnual = 0;
+        } elseif ($base_imponible < 624329) {
+            $isrAnnual = ($base_imponible - 416220) * 0.15;
+        } elseif ($base_imponible < 867123) {
+            $isrAnnual = ($base_imponible - 624329) * 0.20 + 31216.35;
+        } else {
+            $isrAnnual = ($base_imponible - 867123) * 0.25 + (31216.35 + 48558.80);
+        }
+
+        $isr = $isrAnnual / $multiplier;
+        $total_deductions = $ars + $afp + $isr + $descuentos_otros;
+
+        $payroll->update([
+            'employee_id'  => $data['employee_id'],
+            'period'       => $data['period'],
+            'gross_salary' => $salary,
+            'extras'       => $total_extras,
+            'descuentos'   => $descuentos_otros,
+            'ars'          => $ars,
+            'afp'          => $afp,
+            'isr'          => $isr,
+            'deductions'   => $total_deductions,
+            'net_salary'   => ($salary + $total_extras) - $total_deductions,
+            'payment_date' => $data['payment_date'] ?? null,
+        ]);
+
+        return redirect()->route('payroll.index')->with('success', 'Nómina actualizada exitosamente.');
+    }
 }
