@@ -709,7 +709,11 @@
                 <a href="{{ route('employees.index') }}"
                     class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i> Empleados
-                </a>
+                </a><!--
+                <a href="{{ route('contractors.index') }}"
+                    class="nav-link {{ request()->routeIs('contractors.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-badge-fill"></i> Contratistas
+                </a>-->
                 <a href="{{ route('evaluations.index') }}"
                     class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal

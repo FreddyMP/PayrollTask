@@ -310,6 +310,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    console.log('Chart.js cargado correctamente');
+    console.log('Total de respuestas: {{ $totalResponses }}');
+    console.log('Preguntas de escala: {{ $scaleQuestions->count() }}');
+    console.log('Preguntas boolean: {{ $booleanQuestions->count() }}');
+
     const chartTextColor = '#adb5bd';
     const gridColor = 'rgba(255,255,255,0.06)';
 
@@ -326,31 +331,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const labels = @json($scaleQuestions->values()->map(fn($q) => 'P' . $q->order . ': ' . Str::limit($q->question_text, 25)));
-        const avgData = [];
-        const bgColors = [];
-        const borderColors = [];
 
-        @foreach($scaleQuestions as $sq)
-            @php
+        @php
+            $scaleAvgData = [];
+            $scaleBgColors = [];
+            $scaleBorderColors = [];
+            foreach ($scaleQuestions as $sq) {
                 $vals = [];
                 foreach ($evaluation->responses as $r) {
                     $a = $r->answers->where('evaluation_question_id', $sq->id)->first();
                     if ($a && $a->answer_scale !== null) $vals[] = $a->answer_scale;
                 }
                 $avg = count($vals) > 0 ? round(array_sum($vals) / count($vals), 1) : 0;
-            @endphp
-            avgData.push({{ $avg }});
-            @if($avg >= 7)
-                bgColors.push('rgba(46, 204, 113, 0.7)');
-                borderColors.push('rgba(46, 204, 113, 1)');
-            @elseif($avg >= 4)
-                bgColors.push('rgba(241, 196, 15, 0.7)');
-                borderColors.push('rgba(241, 196, 15, 1)');
-            @else
-                bgColors.push('rgba(231, 76, 60, 0.7)');
-                borderColors.push('rgba(231, 76, 60, 1)');
-            @endif
-        @endforeach
+                $scaleAvgData[] = $avg;
+                if ($avg >= 7) {
+                    $scaleBgColors[] = 'rgba(46, 204, 113, 0.7)';
+                    $scaleBorderColors[] = 'rgba(46, 204, 113, 1)';
+                } elseif ($avg >= 4) {
+                    $scaleBgColors[] = 'rgba(241, 196, 15, 0.7)';
+                    $scaleBorderColors[] = 'rgba(241, 196, 15, 1)';
+                } else {
+                    $scaleBgColors[] = 'rgba(231, 76, 60, 0.7)';
+                    $scaleBorderColors[] = 'rgba(231, 76, 60, 1)';
+                }
+            }
+        @endphp
+
+        const avgData = @json($scaleAvgData);
+        const bgColors = @json($scaleBgColors);
+        const borderColors = @json($scaleBorderColors);
 
         new Chart(scaleBarCanvas, {
             type: 'bar',
@@ -387,16 +396,21 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 
     // ─── Boolean Doughnut Charts ───
-    @foreach($booleanQuestions as $bq)
     @php
-        $yes = 0; $no = 0;
-        foreach ($evaluation->responses as $r) {
-            $a = $r->answers->where('evaluation_question_id', $bq->id)->first();
-            if ($a && $a->answer_boolean !== null) {
-                if ($a->answer_boolean) { $yes++; } else { $no++; }
+        $booleanChartData = [];
+        foreach ($booleanQuestions as $bq) {
+            $yes = 0; $no = 0;
+            foreach ($evaluation->responses as $r) {
+                $a = $r->answers->where('evaluation_question_id', $bq->id)->first();
+                if ($a && $a->answer_boolean !== null) {
+                    if ($a->answer_boolean) { $yes++; } else { $no++; }
+                }
             }
+            $booleanChartData[$bq->id] = ['yes' => $yes, 'no' => $no, 'question' => Str::limit($bq->question_text, 40)];
         }
     @endphp
+
+    @foreach($booleanQuestions as $bq)
     (function() {
         const boolCanvas = document.getElementById('boolChart_{{ $bq->id }}');
         if (!boolCanvas) {
@@ -404,12 +418,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const boolData = @json($booleanChartData[$bq->id]);
+
         new Chart(boolCanvas, {
             type: 'doughnut',
             data: {
                 labels: ['Sí', 'No'],
                 datasets: [{
-                    data: [{{ $yes }}, {{ $no }}],
+                    data: [boolData.yes, boolData.no],
                     backgroundColor: ['rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)'],
                     borderColor: ['rgba(46, 204, 113, 1)', 'rgba(231, 76, 60, 1)'],
                     borderWidth: 2,
@@ -447,16 +463,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const distribution = [0,0,0,0,0,0,0,0,0,0]; // index 0 = score 1, index 9 = score 10
-        @foreach($evaluation->responses as $response)
-            @foreach($scaleQuestions as $sq)
-                @php
+        @php
+            $distributionData = [];
+            foreach ($evaluation->responses as $response) {
+                foreach ($scaleQuestions as $sq) {
                     $a = $response->answers->where('evaluation_question_id', $sq->id)->first();
-                @endphp
-                @if($a && $a->answer_scale !== null)
-                    distribution[{{ $a->answer_scale }} - 1]++;
-                @endif
-            @endforeach
-        @endforeach
+                    if ($a && $a->answer_scale !== null) {
+                        $distributionData[] = $a->answer_scale - 1;
+                    }
+                }
+            }
+        @endphp
+        const distributionData = @json($distributionData);
+        distributionData.forEach(function(idx) {
+            distribution[idx]++;
+        });
 
         new Chart(scoreDistCanvas, {
             type: 'line',
@@ -496,15 +517,20 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const empLabels = [];
-        const empStatus = [];
-        const empColors = [];
+        @php
+            $empLabels = [];
+            $empStatus = [];
+            $empColors = [];
+            foreach ($evaluation->assignments as $assignment) {
+                $empLabels[] = $assignment->employee->user->name;
+                $empStatus[] = $assignment->is_completed ? 1 : 0;
+                $empColors[] = $assignment->is_completed ? 'rgba(46, 204, 113, 0.7)' : 'rgba(241, 196, 15, 0.7)';
+            }
+        @endphp
 
-        @foreach($evaluation->assignments as $assignment)
-            empLabels.push('{{ $assignment->employee->user->name }}');
-            empStatus.push({{ $assignment->is_completed ? 1 : 0 }});
-            empColors.push({{ $assignment->is_completed ? "'rgba(46, 204, 113, 0.7)'" : "'rgba(241, 196, 15, 0.7)'" }});
-        @endforeach
+        const empLabels = @json($empLabels);
+        const empStatus = @json($empStatus);
+        const empColors = @json($empColors);
 
         new Chart(participationCanvas, {
             type: 'bar',
@@ -565,29 +591,30 @@ document.addEventListener('DOMContentLoaded', function () {
             'rgba(192, 57, 43, 0.8)',
         ];
 
-        const allDatasets = [];
-        @foreach($evaluation->responses as $idx => $response)
-        (function() {
-            const data = [];
-            @foreach($scaleQuestions as $sq)
-                @php
+        @php
+            $radarDatasets = [];
+            foreach ($evaluation->responses as $idx => $response) {
+                $data = [];
+                foreach ($scaleQuestions as $sq) {
                     $a = $response->answers->where('evaluation_question_id', $sq->id)->first();
-                @endphp
-                data.push({{ $a && $a->answer_scale !== null ? $a->answer_scale : 0 }});
-            @endforeach
+                    $data[] = $a && $a->answer_scale !== null ? $a->answer_scale : 0;
+                }
+                $radarDatasets[] = [
+                    'id' => $response->id,
+                    'label' => $response->employee->user->name,
+                    'data' => $data,
+                    'borderColor' => $radarColors[$idx % count($radarColors)],
+                    'backgroundColor' => str_replace('0.8', '0.1', $radarColors[$idx % count($radarColors)]),
+                ];
+            }
+        @endphp
 
-            allDatasets.push({
-                id: {{ $response->id }},
-                label: '{{ $response->employee->user->name }}',
-                data: data,
-                borderColor: radarColors[{{ $idx }} % radarColors.length],
-                backgroundColor: radarColors[{{ $idx }} % radarColors.length].replace('0.8', '0.1'),
-                borderWidth: 2,
-                pointRadius: 3,
-                pointHoverRadius: 5,
-            });
-        })();
-        @endforeach
+        const allDatasets = @json($radarDatasets);
+        allDatasets.forEach(function(ds) {
+            ds.borderWidth = 2;
+            ds.pointRadius = 3;
+            ds.pointHoverRadius = 5;
+        });
 
         const radarChart = new Chart(radarCanvas, {
             type: 'radar',

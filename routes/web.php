@@ -17,6 +17,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RecruitmentController;
 use App\Http\Controllers\CompanyFieldController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ContractorController;
 
 // Auth routes
 Route::get('/', function () {
@@ -177,4 +178,22 @@ Route::middleware('auth')->group(function () {
         // Evaluations (Employee)
         Route::get('/evaluations/{evaluation}/fill', [\App\Http\Controllers\EvaluationController::class, 'fill'])->name('evaluations.fill');
         Route::post('/evaluations/{evaluation}/submit', [\App\Http\Controllers\EvaluationController::class, 'submit'])->name('evaluations.submit');
+
+        // Contractors (Admin+)
+        Route::middleware('role:admin,super')->prefix('contractors')->name('contractors.')->group(function () {
+            Route::get('/', [ContractorController::class, 'index'])->name('index');
+            Route::get('/create', [ContractorController::class, 'create'])->name('create');
+            Route::post('/', [ContractorController::class, 'store'])->name('store');
+            Route::get('/{contractor}/edit', [ContractorController::class, 'edit'])->name('edit');
+            Route::patch('/{contractor}', [ContractorController::class, 'update'])->name('update');
+            Route::delete('/{contractor}', [ContractorController::class, 'destroy'])->name('destroy');
+
+            // Invoices
+            Route::get('/invoices', [ContractorController::class, 'invoicesIndex'])->name('invoices.index');
+            Route::get('/invoices/create', [ContractorController::class, 'invoicesCreate'])->name('invoices.create');
+            Route::post('/invoices', [ContractorController::class, 'invoicesStore'])->name('invoices.store');
+            Route::get('/invoices/{invoice}/edit', [ContractorController::class, 'invoicesEdit'])->name('invoices.edit');
+            Route::patch('/invoices/{invoice}', [ContractorController::class, 'invoicesUpdate'])->name('invoices.update');
+            Route::delete('/invoices/{invoice}', [ContractorController::class, 'invoicesDestroy'])->name('invoices.destroy');
+        });
     });
