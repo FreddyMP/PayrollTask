@@ -44,12 +44,28 @@ class DocumentProcessorService
     }
 
     /**
+     * Process a docx file replacing placeholders.
+     */
     public function processDocx(string $filePath, DocumentTemplate $template, ?Model $contextModel = null): string
     {
         $replacements = $this->getReplacements($template, $contextModel);
         
-        $tempFile = tempnam(sys_get_temp_dir(), 'docx');
-        file_put_contents($tempFile, Storage::get($filePath));
+        $tempPath = storage_path('app/temp');
+        if (!file_exists($tempPath)) {
+            mkdir($tempPath, 0755, true);
+        }
+        $tempFile = $tempPath . '/' . uniqid('docx_') . '.docx';
+        
+        if (!Storage::exists($filePath)) {
+            throw new \Exception("El archivo de plantilla no existe en el almacenamiento. Si cambiaste de disco (ej. a S3), asegúrate de que el archivo esté disponible.");
+        }
+
+        $content = Storage::get($filePath);
+        if (empty($content)) {
+            throw new \Exception("El archivo de plantilla está vacío o no se pudo descargar del almacenamiento.");
+        }
+        
+        file_put_contents($tempFile, $content);
 
         $zip = new \ZipArchive();
         if ($zip->open($tempFile) === true) {

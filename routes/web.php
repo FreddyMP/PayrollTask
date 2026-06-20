@@ -18,6 +18,8 @@ use App\Http\Controllers\RecruitmentController;
 use App\Http\Controllers\CompanyFieldController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ContractorController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\PositionController;
 
 // Auth routes
 Route::get('/', function () {
@@ -127,6 +129,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [RecruitmentController::class, 'store'])->name('store');
             Route::get('/{vacancy}', [RecruitmentController::class, 'show'])->name('show');
             Route::post('/{vacancy}/steps', [RecruitmentController::class, 'addStep'])->name('steps.store');
+            Route::patch('/steps/{step}', [RecruitmentController::class, 'updateStep'])->name('steps.update');
             Route::post('/{vacancy}/candidates', [RecruitmentController::class, 'addCandidate'])->name('candidates.store');
             Route::post('/candidates/{candidate}/progress', [RecruitmentController::class, 'updateProgress'])->name('candidates.progress');
             Route::get('/{vacancy}/ranking', [RecruitmentController::class, 'ranking'])->name('ranking');
@@ -195,5 +198,25 @@ Route::middleware('auth')->group(function () {
             Route::get('/invoices/{invoice}/edit', [ContractorController::class, 'invoicesEdit'])->name('invoices.edit');
             Route::patch('/invoices/{invoice}', [ContractorController::class, 'invoicesUpdate'])->name('invoices.update');
             Route::delete('/invoices/{invoice}', [ContractorController::class, 'invoicesDestroy'])->name('invoices.destroy');
+        });
+
+        // Departments (Admin+)
+        Route::middleware('role:admin,super')->prefix('departments')->name('departments.')->group(function () {
+            Route::get('/', [DepartmentController::class, 'index'])->name('index');
+            Route::get('/create', [DepartmentController::class, 'create'])->name('create');
+            Route::post('/', [DepartmentController::class, 'store'])->name('store');
+            Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('edit');
+            Route::patch('/{department}', [DepartmentController::class, 'update'])->name('update');
+            Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
+        });
+
+        // Positions (Admin+)
+        Route::middleware('role:admin,super')->prefix('positions')->name('positions.')->group(function () {
+            Route::get('/', [PositionController::class, 'index'])->name('index');
+            Route::get('/create', [PositionController::class, 'create'])->name('create');
+            Route::post('/', [PositionController::class, 'store'])->name('store');
+            Route::get('/{position}/edit', [PositionController::class, 'edit'])->name('edit');
+            Route::patch('/{position}', [PositionController::class, 'update'])->name('update');
+            Route::delete('/{position}', [PositionController::class, 'destroy'])->name('destroy');
         });
     });

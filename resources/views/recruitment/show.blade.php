@@ -55,11 +55,20 @@
                 <div class="list-group list-group-flush bg-transparent">
                     @forelse($vacancy->steps as $step)
                     <div class="list-group-item bg-transparent border-0 ps-0 mb-3 step-card">
-                        <div class="d-flex justify-content-between">
-                            <h6 class="text-white mb-1">{{ $loop->iteration }}. {{ $step->name }}</h6>
-                            <span class="badge badge-status badge-primary">{{ $step->points }} pts</span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white mb-1">{{ $loop->iteration }}. {{ $step->name }}</h6>
+                                <p class="small text-white mb-0">Resp: {{ $step->responsible->name }}</p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge badge-status badge-primary mb-1 d-block">{{ $step->points }} pts</span>
+                                @if($vacancy->status === 'open')
+                                <button class="btn btn-sm btn-link text-warning p-0 text-decoration-none" onclick="editStep({{ $step->id }}, '{{ addslashes($step->name) }}', {{ $step->responsible_id }}, {{ $step->points }})">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </button>
+                                @endif
+                            </div>
                         </div>
-                        <p class="small text-white mb-0">Resp: {{ $step->responsible->name }}</p>
                     </div>
                     @empty
                     <p class="text-white text-center py-3">Define los pasos para esta vacante.</p>
@@ -232,6 +241,45 @@
     </div>
 </div>
 
+<!-- Edit Step Modal -->
+<div class="modal fade" id="editStepModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="editStepForm" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-header">
+                    <h5 class="modal-title text-white">Editar Paso de Reclutamiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del paso</label>
+                        <input type="text" name="name" id="editStepName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Responsable</label>
+                        <select name="responsible_id" id="editStepResponsible" class="form-select" required>
+                            <option value="">Seleccione un usuario...</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->role }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Puntos que vale este paso (Máx 100)</label>
+                        <input type="number" name="points" id="editStepPoints" class="form-control" min="1" max="100" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary-custom">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Add Candidate Modal -->
 <div class="modal fade" id="addCandidateModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -331,6 +379,14 @@
 
 @push('scripts')
 <script>
+function editStep(id, name, responsibleId, points) {
+    $('#editStepForm').attr('action', `/recruitment/steps/${id}`);
+    $('#editStepName').val(name);
+    $('#editStepResponsible').val(responsibleId);
+    $('#editStepPoints').val(points);
+    new bootstrap.Modal(document.getElementById('editStepModal')).show();
+}
+
 function showProgressModal(candidate, currentStep) {
     $('#progressModalTitle').text('Progreso: ' + candidate.name);
     $('#formStepId').val(currentStep ? currentStep.id : '');

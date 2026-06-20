@@ -76,6 +76,27 @@ class RecruitmentController extends Controller
         return redirect()->back()->with('success', 'Paso de reclutamiento agregado.');
     }
 
+    public function updateStep(Request $request, RecruitmentStep $step)
+    {
+        if ($step->vacancy->company_id !== auth()->user()->company_id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'responsible_id' => 'required|exists:users,id',
+            'points' => 'required|integer|min:0|max:100',
+        ]);
+
+        $step->update([
+            'name' => $request->name,
+            'responsible_id' => $request->responsible_id,
+            'points' => $request->points,
+        ]);
+
+        return redirect()->back()->with('success', 'Paso actualizado correctamente.');
+    }
+
     public function addCandidate(Request $request, Vacancy $vacancy)
     {
         $this->authorizeAccess($vacancy);

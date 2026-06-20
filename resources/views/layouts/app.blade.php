@@ -709,14 +709,18 @@
                 <a href="{{ route('employees.index') }}"
                     class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i> Empleados
-                </a><!--
+                </a>
                 <a href="{{ route('contractors.index') }}"
                     class="nav-link {{ request()->routeIs('contractors.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-badge-fill"></i> Contratistas
-                </a>-->
+                    <i class="bi bi-person-badge-fill"></i> Organigrama
+                </a>
                 <a href="{{ route('evaluations.index') }}"
                     class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
+                </a>
+                <a href="{{ route('departments.index') }}"
+                    class="nav-link {{ request()->routeIs('departments.*') ? 'active' : '' }}">
+                    <i class="bi bi-diagram-3"></i> Departamentos
                 </a>
                 <a href="{{ route('payroll.index') }}"
                     class="nav-link {{ request()->routeIs('payroll.*') ? 'active' : '' }}">
