@@ -79,27 +79,32 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label"><i class="bi bi-calendar2-week me-1"></i>Frecuencia de Nómina</label>
-                            <select class="form-select" name="payroll_frequency">
+                            <select class="form-select" name="payroll_frequency" id="payroll_frequency">
                                 <option value="" @selected(is_null($company->payroll_frequency))>— Seleccionar —</option>
                                 <option value="monthly"   @selected($company->payroll_frequency === 'monthly')>Mensual (12 períodos / año)</option>
                                 <option value="biweekly"  @selected($company->payroll_frequency === 'biweekly')>Quincenal (24 períodos / año)</option>
                             </select>
                             <small class="text-white">Afecta el cálculo de ISR, ARS, AFP y la generación de períodos.</small>
                         </div>
-                        <div class="col-md-6 d-flex align-items-center">
-                            @if($company->payroll_frequency)
-                                <div class="p-2 px-3 rounded-3" style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);font-size:0.8rem;">
-                                    <i class="bi bi-check-circle-fill me-1" style="color:#818cf8;"></i>
-                                    <span style="color:#a5b4fc;">
-                                        Actualmente: <strong>{{ $company->payroll_frequency === 'monthly' ? 'Mensual' : 'Quincenal' }}</strong>
-                                    </span>
-                                </div>
-                            @else
-                                <div class="p-2 px-3 rounded-3" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);font-size:0.8rem;">
-                                    <i class="bi bi-exclamation-triangle-fill me-1" style="color:#f59e0b;"></i>
-                                    <span style="color:#fbbf24;">Sin configurar — requerido para nómina</span>
-                                </div>
-                            @endif
+                        <div class="col-md-6">
+                            <label class="form-label">Pago Bonificación de Ley</label>
+                            <select class="form-select" name="bonus_payment_method" id="bonus_payment_method">
+                                <option value="payroll" @selected(old('bonus_payment_method', $company->bonus_payment_method) === 'payroll')>Pagar con la Nómina</option>
+                                <option value="separate" @selected(old('bonus_payment_method', $company->bonus_payment_method) === 'separate')>Pago Separado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-4" id="bonus_split_container" style="display: none;">
+                        <div class="col-md-12">
+                            <label class="form-label">División de Bonificación (Nómina Quincenal)</label>
+                            <select class="form-select" name="bonus_biweekly_split">
+                                <option value="">— Seleccionar —</option>
+                                <option value="both" @selected(old('bonus_biweekly_split', $company->bonus_biweekly_split) === 'both')>Ambas Quincenas (Dividido)</option>
+                                <option value="q1" @selected(old('bonus_biweekly_split', $company->bonus_biweekly_split) === 'q1')>1ra Quincena (Completo)</option>
+                                <option value="q2" @selected(old('bonus_biweekly_split', $company->bonus_biweekly_split) === 'q2')>2da Quincena (Completo)</option>
+                            </select>
+                            <small class="text-white">Define cómo se agregará la bonificación si se paga con la nómina quincenal.</small>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i> Guardar Cambios</button>
@@ -129,5 +134,27 @@ function deleteLogo() {
         form.submit();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const payrollFrequency = document.getElementById('payroll_frequency');
+    const bonusPaymentMethod = document.getElementById('bonus_payment_method');
+    const bonusSplitContainer = document.getElementById('bonus_split_container');
+
+    function toggleBonusSplit() {
+        if (payrollFrequency && bonusPaymentMethod && bonusSplitContainer) {
+            if (payrollFrequency.value === 'biweekly' && bonusPaymentMethod.value === 'payroll') {
+                bonusSplitContainer.style.display = 'flex';
+            } else {
+                bonusSplitContainer.style.display = 'none';
+            }
+        }
+    }
+
+    if (payrollFrequency && bonusPaymentMethod) {
+        payrollFrequency.addEventListener('change', toggleBonusSplit);
+        bonusPaymentMethod.addEventListener('change', toggleBonusSplit);
+        toggleBonusSplit();
+    }
+});
 </script>
 @endpush

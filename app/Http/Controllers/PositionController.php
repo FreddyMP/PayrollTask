@@ -9,13 +9,34 @@ use Illuminate\Support\Facades\Auth;
 
 class PositionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $positions = Position::where('company_id', Auth::user()->company_id)
-            ->with('department')
-            ->orderBy('title')
+        $query = Position::where('company_id', Auth::user()->company_id)
+            ->with('department');
+
+        // Filtro por búsqueda de título
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por departamento
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        // Filtro por estado
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('is_active', $request->status);
+        }
+
+        $positions = $query->orderBy('title')->get();
+
+        // Obtener departamentos para el filtro
+        $departments = Department::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
             ->get();
-        return view('positions.index', compact('positions'));
+
+        return view('positions.index', compact('positions', 'departments'));
     }
 
     public function create()

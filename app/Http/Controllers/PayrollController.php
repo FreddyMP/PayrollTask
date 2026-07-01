@@ -18,14 +18,34 @@ class PayrollController extends Controller
         $companyId = Auth::user()->company_id;
         $query = Payroll::where('company_id', $companyId)->with('employee.user');
 
+        // Filtro por nombre de empleado
+        if ($request->filled('employee_name')) {
+            $query->whereHas('employee.user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->employee_name . '%');
+            });
+        }
+
+        // Filtro por período
         if ($request->filled('period')) {
             $query->where('period', $request->period);
         }
+
+        // Filtro por estado
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $payrolls = $query->latest()->paginate(15);
+        // Filtro por rango de salario (mínimo)
+        if ($request->filled('salary_min')) {
+            $query->where('net_salary', '>=', $request->salary_min);
+        }
+
+        // Filtro por rango de salario (máximo)
+        if ($request->filled('salary_max')) {
+            $query->where('net_salary', '<=', $request->salary_max);
+        }
+
+        $payrolls = $query->latest()->paginate(15)->appends($request->query());
 
         return view('payroll.index', compact('payrolls'));
     }
@@ -104,7 +124,7 @@ class PayrollController extends Controller
 
             $hireDate = \Carbon\Carbon::parse($employee->hire_date);
             $months = $hireDate->diffInMonths($now);
-            
+
             if ($months >= 12) {
                 $employee->christmas_salary = $employee->salary;
                 $employee->months_worked = '12+';
@@ -116,7 +136,64 @@ class PayrollController extends Controller
             }
         });
 
-        return view('payroll.christmas', compact('employees'));
+        $paidEmployeeIds = \App\Models\Payroll::where('company_id', Auth::user()->company_id)
+            ->where('period', $now->year . '-NAVIDAD')
+            ->pluck('employee_id')
+            ->toArray();
+
+        return view('payroll.christmas', compact('employees', 'paidEmployeeIds'));
+    }
+
+    public function payChristmas(Employee $employee)
+    {
+        $companyId = Auth::user()->company_id;
+        if ($employee->company_id !== $companyId) {
+            abort(403);
+        }
+
+        $now = \Carbon\Carbon::now();
+        if (!$employee->hire_date) {
+            return back()->with('error', 'Empleado sin fecha de ingreso.');
+        }
+
+        $hireDate = \Carbon\Carbon::parse($employee->hire_date);
+        $months = $hireDate->diffInMonths($now);
+
+        if ($months >= 12) {
+            $amount = $employee->salary;
+        } else {
+            $floatMonths = $hireDate->floatDiffInMonths($now);
+            $monthsWorked = max(1, (int) ceil($floatMonths));
+            $amount = ($employee->salary * $monthsWorked) / 12;
+        }
+
+        $period = $now->year . '-NAVIDAD';
+
+        $payroll = Payroll::updateOrCreate(
+            [
+                'employee_id' => $employee->id,
+                'company_id' => $companyId,
+                'period' => $period,
+            ],
+            [
+                'gross_salary' => $amount,
+                'extras' => 0,
+                'descuentos' => 0,
+                'ars' => 0,
+                'afp' => 0,
+                'isr' => 0,
+                'deductions' => 0,
+                'net_salary' => $amount,
+                'status' => 'paid',
+                'payment_date' => $now,
+            ]
+        );
+
+        if ($employee->user && $employee->user->email) {
+            \Mail::to($employee->user->email)->send(new \App\Mail\ChristmasReceipt($payroll));
+        }
+
+        return back()->with('success', 'Salario de Navidad marcado como pagado y correo enviado.');
     }
 
     public function ir17(Request $request)
@@ -417,6 +494,49 @@ class PayrollController extends Controller
         return redirect()->route('payroll.index')->with('success', 'Nómina marcada como pagada y volante enviado al empleado.');
     }
 
+    public function markAllPaid(Request $request)
+    {
+        $companyId = Auth::user()->company_id;
+        $company   = Auth::user()->company;
+
+        // Determinar período actual
+        $isBiweekly    = $company->payroll_frequency === 'biweekly';
+        $currentPeriod = $isBiweekly
+            ? date('Y-m') . (date('j') <= 15 ? '-Q1' : '-Q2')
+            : date('Y-m');
+
+        // Obtener todas las nóminas pendientes del período actual
+        $pendingPayrolls = Payroll::where('company_id', $companyId)
+            ->where('period', $currentPeriod)
+            ->where('status', 'pending')
+            ->with('employee.user')
+            ->get();
+
+        if ($pendingPayrolls->isEmpty()) {
+            return redirect()->route('payroll.index')
+                ->with('error', 'No hay nóminas pendientes para el período actual.');
+        }
+
+        $markedCount = 0;
+        foreach ($pendingPayrolls as $payroll) {
+            $payroll->update([
+                'status'       => 'paid',
+                'payment_date' => $payroll->payment_date ?? now(),
+            ]);
+
+            // Enviar correo con volante de pago al empleado
+            if ($payroll->employee && $payroll->employee->user && $payroll->employee->user->email) {
+                \Mail::to($payroll->employee->user->email)->send(new \App\Mail\PayrollReceipt($payroll));
+            }
+
+            $markedCount++;
+        }
+
+        return redirect()->route('payroll.index')
+            ->with('success', "Se marcaron {$markedCount} nóminas como pagadas y se enviaron los volantes de pago correspondientes.");
+    }
+
+
     public function destroy(Payroll $payroll)
     {
         if ($payroll->company_id !== Auth::user()->company_id) {
@@ -446,7 +566,7 @@ class PayrollController extends Controller
 
         $report = $payrollData->map(function ($p) use ($topes, $company) {
             $salary = $p->gross_salary;
-            
+
             // Bases Cotizables
             $baseSFS = min($salary, $topes['sfs']);
             $baseAFP = min($salary, $topes['afp']);
@@ -772,5 +892,206 @@ class PayrollController extends Controller
         ]);
 
         return redirect()->route('payroll.index')->with('success', 'Nómina actualizada exitosamente.');
+    }
+
+    public function addBonusesToPayroll(Request $request)
+    {
+        $company = Auth::user()->company;
+        if ($company->bonus_payment_method !== 'payroll') {
+            return back()->with('error', 'La empresa no está configurada para pagar bonificaciones con la nómina.');
+        }
+
+        $bonuses = $request->input('bonuses', []);
+        if (empty($bonuses)) {
+            return back()->with('error', 'No se recibieron datos de bonificación.');
+        }
+
+        $isBiweekly = $company->payroll_frequency === 'biweekly';
+        $splitMethod = $company->bonus_biweekly_split;
+        $multiplier = $isBiweekly ? 24 : 12;
+
+        $now = \Carbon\Carbon::now();
+        $basePeriod = $now->format('Y-m');
+
+        // Verificar si ya existen nóminas generadas en los períodos
+        $periodsToCheck = [];
+        if ($isBiweekly) {
+            if ($splitMethod === 'both') {
+                $periodsToCheck = [$basePeriod . '-Q1', $basePeriod . '-Q2'];
+            } elseif ($splitMethod === 'q1') {
+                $periodsToCheck = [$basePeriod . '-Q1'];
+            } else {
+                $periodsToCheck = [$basePeriod . '-Q2'];
+            }
+        } else {
+            $periodsToCheck = [$basePeriod];
+        }
+
+        $existingPayrolls = Payroll::where('company_id', $company->id)
+            ->whereIn('period', $periodsToCheck)
+            ->exists();
+
+        if ($existingPayrolls) {
+            return back()->with('payroll_exists_error', true);
+        }
+
+        foreach ($bonuses as $employeeId => $amount) {
+            if ($amount <= 0) continue;
+
+            $employee = Employee::find($employeeId);
+            if (!$employee || $employee->company_id !== $company->id) continue;
+
+            // Determine periods to update/create
+            $periodsToUpdate = [];
+            if ($isBiweekly) {
+                if ($splitMethod === 'both') {
+                    $periodsToUpdate = [
+                        ['period' => $basePeriod . '-Q1', 'amount' => $amount / 2],
+                        ['period' => $basePeriod . '-Q2', 'amount' => $amount / 2],
+                    ];
+                } elseif ($splitMethod === 'q1') {
+                    $periodsToUpdate = [['period' => $basePeriod . '-Q1', 'amount' => $amount]];
+                } else { // q2
+                    $periodsToUpdate = [['period' => $basePeriod . '-Q2', 'amount' => $amount]];
+                }
+            } else {
+                $periodsToUpdate = [['period' => $basePeriod, 'amount' => $amount]];
+            }
+
+            foreach ($periodsToUpdate as $pData) {
+                $period = $pData['period'];
+                $bonusAmount = $pData['amount'];
+
+                $payroll = Payroll::firstOrNew([
+                    'employee_id' => $employee->id,
+                    'company_id'  => $company->id,
+                    'period'      => $period,
+                ]);
+
+                if ($payroll->status === 'paid') {
+                    continue; // Skip already paid payrolls
+                }
+
+                $salary = $isBiweekly ? $employee->salary / 2 : $employee->salary;
+                $payroll->gross_salary = $salary;
+
+                // Add bonus to extras
+                $currentExtras = $payroll->exists ? $payroll->extras : 0;
+                $payroll->extras = $currentExtras + $bonusAmount;
+
+                $payroll->status = $payroll->exists ? $payroll->status : 'pending';
+
+                // Recalculate deductions
+                $ars_extra = $employee->total_ars_extra ?? 0;
+                $ars = ($salary * 0.0304) + $ars_extra;
+                $afp = $salary * 0.0287;
+
+                $total_extras = $payroll->extras;
+                $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+
+                $isrAnnual = 0;
+                if ($base_imponible <= 416220) {
+                    $isrAnnual = 0;
+                } elseif ($base_imponible < 624329) {
+                    $isrAnnual = ($base_imponible - 416220) * 0.15;
+                } elseif ($base_imponible < 867123) {
+                    $isrAnnual = ($base_imponible - 624329) * 0.20 + 31216.35;
+                } else {
+                    $isrAnnual = ($base_imponible - 867123) * 0.25 + (31216.35 + 48558.80);
+                }
+
+                $isr = $isrAnnual / $multiplier;
+                $total_deductions = $ars + $afp + $isr + ($payroll->descuentos ?? 0);
+
+                $payroll->ars = $ars;
+                $payroll->afp = $afp;
+                $payroll->isr = $isr;
+                $payroll->deductions = $total_deductions;
+                $payroll->net_salary = ($salary + $total_extras) - $total_deductions;
+                $payroll->save();
+            }
+        }
+
+        return redirect()->route('payroll.bonuses')->with('success', 'Bonificaciones agregadas a la nómina del período actual exitosamente.');
+    }
+
+    public function paySeparateBonus(Request $request, Employee $employee)
+    {
+        $company = Auth::user()->company;
+        if ($employee->company_id !== $company->id) {
+            abort(403);
+        }
+
+        if ($company->bonus_payment_method !== 'separate') {
+            return back()->with('error', 'La empresa no está configurada para realizar pagos separados de bonificación.');
+        }
+
+        $amount = (float) $request->input('amount', 0);
+        if ($amount <= 0) {
+            return back()->with('error', 'Monto de bonificación inválido.');
+        }
+
+        $now = \Carbon\Carbon::now();
+        $period = $now->year . '-BONIFICACION';
+
+        $multiplier  = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
+        $monthlySalary = $employee->salary;
+        $ars_extra = $employee->total_ars_extra ?? 0;
+        $ars = ($monthlySalary * 0.0304) + $ars_extra;
+        $afp = $monthlySalary * 0.0287;
+
+        $base_imponible = (($monthlySalary + $amount) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+
+        $isrAnnual = 0;
+        if ($base_imponible <= 416220) {
+            $isrAnnual = 0;
+        } elseif ($base_imponible < 624329) {
+            $isrAnnual = ($base_imponible - 416220) * 0.15;
+        } elseif ($base_imponible < 867123) {
+            $isrAnnual = ($base_imponible - 624329) * 0.20 + 31216.35;
+        } else {
+            $isrAnnual = ($base_imponible - 867123) * 0.25 + (31216.35 + 48558.80);
+        }
+
+        $base_imponible_no_bonus = ($monthlySalary * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+        $isrAnnual_no_bonus = 0;
+        if ($base_imponible_no_bonus <= 416220) {
+            $isrAnnual_no_bonus = 0;
+        } elseif ($base_imponible_no_bonus < 624329) {
+            $isrAnnual_no_bonus = ($base_imponible_no_bonus - 416220) * 0.15;
+        } elseif ($base_imponible_no_bonus < 867123) {
+            $isrAnnual_no_bonus = ($base_imponible_no_bonus - 624329) * 0.20 + 31216.35;
+        } else {
+            $isrAnnual_no_bonus = ($base_imponible_no_bonus - 867123) * 0.25 + (31216.35 + 48558.80);
+        }
+
+        $isrDeduction = ($isrAnnual - $isrAnnual_no_bonus) / $multiplier;
+        if ($isrDeduction < 0) $isrDeduction = 0;
+
+        $payroll = Payroll::updateOrCreate(
+            [
+                'employee_id' => $employee->id,
+                'company_id' => $company->id,
+                'period' => $period,
+            ],
+            [
+                'gross_salary' => $amount,
+                'extras' => 0,
+                'descuentos' => 0,
+                'ars' => 0,
+                'afp' => 0,
+                'isr' => $isrDeduction,
+                'deductions' => $isrDeduction,
+                'net_salary' => $amount - $isrDeduction,
+                'status' => 'paid',
+                'payment_date' => $now,
+            ]
+        );
+
+        if ($employee->user && $employee->user->email) {
+            \Mail::to($employee->user->email)->send(new \App\Mail\BonusReceipt($payroll));
+        }
+
+        return back()->with('success', 'Bonificación de Ley marcada como pagada y correo enviado.');
     }
 }

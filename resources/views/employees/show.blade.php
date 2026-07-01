@@ -11,7 +11,7 @@
                     {{ strtoupper(substr($employee->user->name ?? '', 0, 2)) }}
                 </div>
                 <h5 class="mb-1" style="color: white;">{{ $employee->user->name }}</h5>
-                <p style="font-size: 0.85rem; color: #64748b;">{{ $employee->user->position ?? '—' }}</p>
+                <p style="font-size: 0.85rem; color: #64748b;">{{ $employee->position?->title ?? $employee->user->position ?? '—' }}</p>
                 <span class="badge-status badge-{{ $employee->user->role }}">{{ ucfirst($employee->user->role) }}</span>
                 <span class="badge-status badge-{{ $employee->user->status }}">{{ ucfirst($employee->user->status) }}</span>
             </div>
@@ -41,10 +41,6 @@
             <div class="card-header text-secondary">Información Laboral</div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <small class="text-white">Departamento</small>
-                        <div class="fw-semibold" style="color: var(--success);">{{ $employee->department ?? '—' }}</div>
-                    </div>
                     <div class="col-md-4">
                         <small class="text-white">Salario</small>
                         <div class="fw-semibold" style="color: var(--success);">RD$ {{ number_format($employee->salary, 2) }}</div>

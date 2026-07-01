@@ -15,9 +15,33 @@ use Illuminate\Support\Facades\Mail;
 
 class EvaluationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $evaluations = Evaluation::where('company_id', Auth::user()->company_id)->withCount('questions', 'assignments')->get();
+        $query = Evaluation::where('company_id', Auth::user()->company_id);
+
+        // Filter by search (title)
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $evaluations = $query->withCount('questions', 'assignments')
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+
         return view('evaluations.index', compact('evaluations'));
     }
 
@@ -50,7 +74,7 @@ class EvaluationController extends Controller
         $this->authorizeAccess($evaluation);
         $evaluation->load(['questions', 'assignments.employee.user']);
         $employees = Employee::where('company_id', Auth::user()->company_id)->with('user')->get();
-        
+
         return view('evaluations.show', compact('evaluation', 'employees'));
     }
 
@@ -126,7 +150,7 @@ class EvaluationController extends Controller
                     $evaluation->assignments()->create([
                         'employee_id' => $employeeId,
                     ]);
-                    
+
                     if ($employee->user) {
                         Mail::to($employee->user->email)->queue(new EvaluationAssignedMail($evaluation, $employee->user));
                     }
@@ -227,7 +251,7 @@ class EvaluationController extends Controller
     {
         $this->authorizeAccess($evaluation);
         $evaluation->load(['questions', 'responses.employee.user', 'responses.answers']);
-        
+
         return view('evaluations.results', compact('evaluation'));
     }
 

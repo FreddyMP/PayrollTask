@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\User;
+use App\Models\Position;
+use App\Models\Department;
 use App\Models\EmployeeDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,11 +17,9 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         $companyId = Auth::user()->company_id;
-        $query = Employee::where('company_id', $companyId)->with('user');
+        $query = Employee::where('company_id', $companyId)->with(['user', 'position']);
 
-        if ($request->filled('department')) {
-            $query->where('department', $request->department);
-        }
+        // Filtro de búsqueda por nombre/email
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function ($q) use ($search) {
@@ -28,14 +28,46 @@ class EmployeeController extends Controller
             });
         }
 
-        $employees = $query->latest()->paginate(15);
+        // Filtro por departamento
+        if ($request->filled('department')) {
+            $query->where('department_id', $request->department);
+        }
 
-        return view('employees.index', compact('employees'));
+        // Filtro por rol
+        if ($request->filled('role')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('role', $request->role);
+            });
+        }
+
+        // Filtro por tipo de contrato
+        if ($request->filled('contract_type')) {
+            $query->where('contract_type', $request->contract_type);
+        }
+
+        // Filtro por estado
+        if ($request->filled('status')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        $employees = $query->latest()->paginate(15)->withQueryString();
+
+        // Obtener departamentos para el dropdown
+        $departments = Department::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('employees.index', compact('employees', 'departments'));
     }
 
     public function create()
     {
-        return view('employees.create');
+        $companyId = Auth::user()->company_id;
+        $positions = Position::where('company_id', $companyId)->where('is_active', true)->with('department')->orderBy('title')->get();
+        return view('employees.create', compact('positions'));
     }
 
     public function store(Request $request)
@@ -56,8 +88,7 @@ class EmployeeController extends Controller
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,supervisor,usuario',
             'phone' => 'nullable|string|max:20',
-            'position' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
+            'position_id' => 'nullable|exists:positions,id',
             'salary' => 'nullable|numeric|min:0',
             'hire_date' => 'nullable|date',
             'contract_type' => 'nullable|in:full_time,part_time,contractor',
@@ -81,6 +112,17 @@ class EmployeeController extends Controller
 
         $companyId = Auth::user()->company_id;
 
+        if (!empty($data['position_id'])) {
+            $position = Position::with('department')->find($data['position_id']);
+            if (!$position || $position->company_id !== $companyId) {
+                abort(403);
+            }
+        }
+
+        $positionTitle = isset($position) ? $position->title : null;
+        $departmentId = isset($position) ? $position->department_id : null;
+        $departmentName = isset($position) && $position->department ? $position->department->name : null;
+
         $user = User::create([
             'company_id' => $companyId,
             'name' => $data['name'],
@@ -88,14 +130,16 @@ class EmployeeController extends Controller
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
             'phone' => $data['phone'] ?? null,
-            'position' => $data['position'] ?? null,
+            'position' => $positionTitle,
             'status' => 'active',
         ]);
 
         $employee = Employee::create([
             'user_id' => $user->id,
             'company_id' => $companyId,
-            'department' => $data['department'] ?? null,
+            'position_id' => $data['position_id'] ?? null,
+            'department_id' => $departmentId,
+            'department' => $departmentName,
             'salary' => $data['salary'] ?? 0,
             'hire_date' => $data['hire_date'] ?? now(),
             'contract_type' => $data['contract_type'] ?? 'full_time',
@@ -134,7 +178,7 @@ class EmployeeController extends Controller
             abort(403);
         }
 
-        $employee->load(['user', 'payrolls']);
+        $employee->load(['user', 'payrolls', 'position']);
         return view('employees.show', compact('employee'));
     }
 
@@ -144,8 +188,10 @@ class EmployeeController extends Controller
             abort(403);
         }
 
-        $employee->load('user');
-        return view('employees.edit', compact('employee'));
+        $employee->load(['user', 'position']);
+        $companyId = Auth::user()->company_id;
+        $positions = Position::where('company_id', $companyId)->where('is_active', true)->with('department')->orderBy('title')->get();
+        return view('employees.edit', compact('employee', 'positions'));
     }
 
     public function update(Request $request, Employee $employee)
@@ -169,8 +215,7 @@ class EmployeeController extends Controller
             ],
             'role' => 'required|in:admin,supervisor,usuario',
             'phone' => 'nullable|string|max:20',
-            'position' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
+            'position_id' => 'nullable|exists:positions,id',
             'salary' => 'nullable|numeric|min:0',
             'hire_date' => 'nullable|date',
             'contract_type' => 'nullable|in:full_time,part_time,contractor',
@@ -193,17 +238,30 @@ class EmployeeController extends Controller
             'documents.*.file' => 'nullable|file|max:10240',
         ], $messages);
 
+        if (!empty($data['position_id'])) {
+            $position = Position::with('department')->find($data['position_id']);
+            if (!$position || $position->company_id !== $employee->company_id) {
+                abort(403);
+            }
+        }
+
+        $positionTitle = isset($position) ? $position->title : null;
+        $departmentId = isset($position) ? $position->department_id : null;
+        $departmentName = isset($position) && $position->department ? $position->department->name : null;
+
         $employee->user->update([
             'name' => $data['name'],
             'email' => strtolower($data['email']),
             'role' => $data['role'],
             'phone' => $data['phone'] ?? null,
-            'position' => $data['position'] ?? null,
+            'position' => $positionTitle,
             'status' => $data['status'] ?? 'active',
         ]);
 
         $employee->update([
-            'department' => $data['department'] ?? null,
+            'position_id' => $data['position_id'] ?? null,
+            'department_id' => $departmentId,
+            'department' => $departmentName,
             'salary' => $data['salary'] ?? 0,
             'hire_date' => $data['hire_date'] ?? null,
             'contract_type' => $data['contract_type'] ?? 'full_time',

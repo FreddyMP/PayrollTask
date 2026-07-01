@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | PayrollTask</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
@@ -45,14 +52,14 @@
         .login-card {
             background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             padding: 2.5rem;
             width: 100%;
             max-width: 420px;
             position: relative;
             z-index: 1;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
         }
 
         .login-brand {
@@ -97,7 +104,7 @@
 
         .form-control {
             background: #334155;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: white;
             border-radius: 12px;
             padding: 0.75rem 1rem;
@@ -111,7 +118,9 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
         }
 
-        .form-control::placeholder { color: #64748b; }
+        .form-control::placeholder {
+            color: #64748b;
+        }
 
         .btn-login {
             width: 100%;
@@ -134,12 +143,14 @@
 
         .form-check-input {
             background-color: #334155;
-            border-color: rgba(255,255,255,0.1);
+            border-color: rgba(255, 255, 255, 0.1);
         }
+
         .form-check-input:checked {
             background-color: #6366f1;
             border-color: #6366f1;
         }
+
         .form-check-label {
             color: #94a3b8;
             font-size: 0.85rem;
@@ -155,7 +166,7 @@
 
         .input-group-text {
             background: #334155;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: #64748b;
             border-radius: 12px 0 0 12px;
         }
@@ -188,11 +199,13 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-card">
         <div class="login-brand">
-            
-            <img src="https://payrolltask-s3-cloud-852128327213-us-east-2-an.s3.us-east-2.amazonaws.com/logo-payrooltask.png" alt="Logo" width="200">
+
+            <img src="https://payrolltask-s3-cloud-852128327213-us-east-2-an.s3.us-east-2.amazonaws.com/logo.png"
+                alt="Logo" width="200">
             <p>Plataforma de Gestión Empresarial</p>
         </div>
 
@@ -210,7 +223,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                     <input type="email" class="form-control" name="email" value="{{ old('email') }}"
-                           placeholder="correo@empresa.com" required autofocus style="border-radius: 0 12px 12px 0">
+                        placeholder="correo@empresa.com" required autofocus style="border-radius: 0 12px 12px 0">
                 </div>
             </div>
 
@@ -218,8 +231,8 @@
                 <label class="form-label">Contraseña</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" class="form-control" name="password"
-                           placeholder="••••••••" required style="border-radius: 0 12px 12px 0">
+                    <input type="password" class="form-control" name="password" placeholder="••••••••" required
+                        style="border-radius: 0 12px 12px 0">
                 </div>
             </div>
 
@@ -232,14 +245,17 @@
                 <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
             </button>
         </form>
-            <div class="mb-3 mt-2 d-flex justify-content-end">
-                <a href="{{ route('password.request') }}" style="color: #6366f1; font-size: 0.8rem; text-decoration: none; font-weight: 500;">
-                    ¿Olvidaste tu contraseña?
-                </a>
-            </div>
+        <div class="mb-3 mt-2 d-flex justify-content-end">
+            <a href="{{ route('password.request') }}"
+                style="color: #6366f1; font-size: 0.8rem; text-decoration: none; font-weight: 500;">
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
         <div class="text-center mt-3 mb-1">
             <span style="color: #94a3b8; font-size: 0.875rem;">¿No tienes cuenta?</span>
-            <a href="{{ route('register') }}" style="color: #6366f1; font-size: 0.875rem; text-decoration: none; font-weight: 600;">Regístrate aquí</a>
+            <a href="{{ route('register') }}"
+                style="color: #6366f1; font-size: 0.875rem; text-decoration: none; font-weight: 600;">Regístrate
+                aquí</a>
         </div>
 
         <div class="demo-info">
@@ -252,4 +268,5 @@
         </div>
     </div>
 </body>
+
 </html>

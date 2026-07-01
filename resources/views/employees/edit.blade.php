@@ -66,7 +66,21 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Cargo</label>
-                                    <input type="text" class="form-control" name="position" value="{{ old('position', $employee->user->position) }}">
+                                    @php
+                                        $selectedPositionId = old('position_id', $employee->position_id);
+                                        if (!$selectedPositionId && $employee->user->position) {
+                                            $matchedPosition = $positions->firstWhere('title', $employee->user->position);
+                                            $selectedPositionId = $matchedPosition?->id;
+                                        }
+                                    @endphp
+                                    <select class="form-select" name="position_id">
+                                        <option value="">Seleccionar...</option>
+                                        @foreach($positions as $position)
+                                            <option value="{{ $position->id }}" {{ $selectedPositionId == $position->id ? 'selected' : '' }}>
+                                                {{ $position->title }}@if($position->department) ({{ $position->department->name }})@endif
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Cédula</label>
@@ -76,19 +90,15 @@
 
                             <h6 class="mb-3" style="color: var(--primary-light);">Información Laboral</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-md-3">
-                                    <label class="form-label">Departamento</label>
-                                    <input type="text" class="form-control" name="department" value="{{ old('department', $employee->department) }}">
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label">Salario</label>
                                     <input type="number" step="0.01" class="form-control" name="salary" value="{{ old('salary', $employee->salary) }}">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label">Fecha de Ingreso</label>
                                     <input type="date" class="form-control" name="hire_date" value="{{ old('hire_date', $employee->hire_date?->format('Y-m-d')) }}">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label">Tipo de Contrato</label>
                                     <select class="form-select" name="contract_type">
                                         <option value="full_time" {{ $employee->contract_type == 'full_time' ? 'selected' : '' }}>Tiempo Completo</option>

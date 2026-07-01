@@ -15,19 +15,45 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class RecruitmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $vacancies = Vacancy::where('company_id', auth()->user()->company_id)
-            ->withCount('candidates')
-            ->latest()
-            ->paginate(10);
-        
+        $query = Vacancy::where('company_id', auth()->user()->company_id)
+            ->withCount('candidates');
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply department filter
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        // Apply date range filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_until')) {
+            $query->whereDate('created_at', '<=', $request->date_until);
+        }
+
+        $vacancies = $query->latest()->paginate(10)->withQueryString();
+
         $applicationForm = ApplicationForm::firstOrCreate([
             'company_id' => auth()->user()->company_id
         ]);
         $applicationForm->load('fields');
 
-        return view('recruitment.index', compact('vacancies', 'applicationForm'));
+        $departments = \App\Models\Department::where('company_id', auth()->user()->company_id)->where('is_active', true)->orderBy('name')->get();
+
+        return view('recruitment.index', compact('vacancies', 'applicationForm', 'departments'));
     }
 
     public function store(Request $request)
@@ -105,6 +131,7 @@ class RecruitmentController extends Controller
             'email' => 'nullable|email',
             'phone' => 'nullable|string',
             'cv' => 'required|file|mimes:pdf,doc,docx|max:10240',
+            'first_step_date' => 'nullable|date',
         ]);
 
         $cvPath = null;
@@ -127,6 +154,7 @@ class RecruitmentController extends Controller
                 'recruitment_step_id' => $firstStep->id,
                 'status' => 'pending',
                 'score' => 0,
+                'scheduled_at' => $request->first_step_date,
             ]);
         }
 
@@ -143,6 +171,7 @@ class RecruitmentController extends Controller
             'status' => 'required|in:completed,discarded',
             'score' => 'nullable|integer|min:0',
             'notes' => 'nullable|string',
+            'next_step_date' => 'nullable|date',
         ]);
 
         $progress = CandidateProgress::updateOrCreate(
@@ -172,7 +201,15 @@ class RecruitmentController extends Controller
                 ], [
                     'status' => 'pending',
                     'score' => 0,
+                    'scheduled_at' => $request->next_step_date,
                 ]);
+
+                // If it already existed but they passed a date, we update it
+                if ($request->filled('next_step_date')) {
+                    CandidateProgress::where('candidate_id', $candidate->id)
+                        ->where('recruitment_step_id', $nextStep->id)
+                        ->update(['scheduled_at' => $request->next_step_date]);
+                }
             } else {
                 // Last step completed!
                 // Maybe set status to "completed" or similar if we had that status

@@ -16,6 +16,76 @@
     </div>
 </div>
 
+<!-- Filtros Colapsables -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <button class="btn btn-link text-decoration-none text-white w-100 text-start p-0"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#filterCollapse"
+                        aria-expanded="false"
+                        aria-controls="filterCollapse">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-funnel me-2"></i>Filtros</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+            </div>
+            <div class="collapse" id="filterCollapse">
+                <div class="card-body">
+                    <form action="{{ route('documents.index') }}" method="GET">
+                        <div class="row g-3">
+                            <!-- Búsqueda por título -->
+                            <div class="col-md-4">
+                                <label class="form-label small">Buscar por Título</label>
+                                <input type="text"
+                                       name="search"
+                                       class="form-control"
+                                       placeholder="Título del documento..."
+                                       value="{{ request('search') }}">
+                            </div>
+
+                            <!-- Filtro por categoría -->
+                            <div class="col-md-4">
+                                <label class="form-label small">Categoría</label>
+                                <select name="category" class="form-select">
+                                    <option value="">Todas las categorías</option>
+                                    <option value="general" {{ request('category') === 'general' ? 'selected' : '' }}>General</option>
+                                    <option value="contrato" {{ request('category') === 'contrato' ? 'selected' : '' }}>Contrato</option>
+                                    <option value="certificacion" {{ request('category') === 'certificacion' ? 'selected' : '' }}>Certificación</option>
+                                    <option value="amonestacion" {{ request('category') === 'amonestacion' ? 'selected' : '' }}>Amonestación</option>
+                                </select>
+                            </div>
+
+                            <!-- Filtro por fecha -->
+                            <div class="col-md-4">
+                                <label class="form-label small">Fecha de Creación</label>
+                                <input type="date"
+                                       name="date"
+                                       class="form-control"
+                                       value="{{ request('date') }}">
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 d-flex gap-2 justify-content-end">
+                                <a href="{{ route('documents.index') }}" class="btn btn-outline-custom btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                                </a>
+                                <button type="submit" class="btn btn-primary-custom btn-sm">
+                                    <i class="bi bi-search me-1"></i>Aplicar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     @forelse($templates as $template)
     <div class="col-md-4 mb-4">

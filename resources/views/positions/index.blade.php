@@ -3,18 +3,7 @@
 @section('page-title', 'Posiciones')
 
 @section('content')
-<ul class="nav nav-tabs mb-4 px-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('departments.index') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
-            Departamentos
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" href="{{ route('positions.index') }}" style="color: white; border-bottom: 2px solid var(--primary); background: transparent; border-top: 0; border-left: 0; border-right: 0; padding: 0.75rem 1.25rem;">
-            Posiciones
-        </a>
-    </li>
-</ul>
+@include('departments.partials.tabs', ['activeTab' => 'positions'])
 
 <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
@@ -25,6 +14,81 @@
         <a href="{{ route('positions.create') }}" class="btn btn-primary-custom">
             <i class="bi bi-plus-lg me-2"></i>Nueva Posición
         </a>
+    </div>
+</div>
+
+<!-- Card de Filtros Colapsable -->
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark-2 py-2 border-0">
+                <button class="btn btn-link text-white text-decoration-none w-100 text-start d-flex justify-content-between align-items-center p-0"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#filtersCard"
+                        aria-expanded="false"
+                        aria-controls="filtersCard">
+                    <span>
+                        <i class="bi bi-funnel me-2"></i>
+                        <span class="fw-bold">Filtros</span>
+                    </span>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="collapse" id="filtersCard">
+                <div class="card-body">
+                    <form action="{{ route('positions.index') }}" method="GET" id="filterForm">
+                        <div class="row g-3">
+                            <!-- Búsqueda por título -->
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">Búsqueda por Título</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="search"
+                                       name="search"
+                                       placeholder="Buscar por título..."
+                                       value="{{ request('search') }}">
+                            </div>
+
+                            <!-- Filtro por Departamento -->
+                            <div class="col-md-4">
+                                <label for="department_id" class="form-label">Departamento</label>
+                                <select class="form-select" id="department_id" name="department_id">
+                                    <option value="">Todos los departamentos</option>
+                                    @foreach($departments as $department)
+                                        <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
+                                            {{ $department->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Filtro por Estado -->
+                            <div class="col-md-4">
+                                <label for="status" class="form-label">Estado</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="">Todos los estados</option>
+                                    <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Activo</option>
+                                    <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="row mt-3">
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-search me-2"></i>Buscar
+                                </button>
+                                <a href="{{ route('positions.index') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-2"></i>Limpiar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -23,14 +23,40 @@ class RequestController extends Controller
             $query->where('user_id', $user->id);
         }
 
+        // Filtro por nombre de empleado
+        if ($request->filled('employee')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->employee . '%');
+            });
+        }
+
+        // Filtro por tipo
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
+
+        // Filtro por estado
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $requests = $query->latest()->paginate(15);
+        // Filtro por rango de fechas
+        if ($request->filled('start_date')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('start_date', '>=', $request->start_date)
+                  ->orWhere('overtime_date', '>=', $request->start_date);
+            });
+        }
+
+        if ($request->filled('end_date')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('end_date', '<=', $request->end_date)
+                  ->orWhere('start_date', '<=', $request->end_date)
+                  ->orWhere('overtime_date', '<=', $request->end_date);
+            });
+        }
+
+        $requests = $query->latest()->paginate(15)->withQueryString();
 
         return view('requests.index', compact('requests'));
     }

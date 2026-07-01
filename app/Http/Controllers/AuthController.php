@@ -70,7 +70,7 @@ class AuthController extends Controller
             DB::commit();
 
             Auth::login($user);
-            
+
             AccessLog::create([
                 'user_id' => $user->id,
                 'login_at' => now(),

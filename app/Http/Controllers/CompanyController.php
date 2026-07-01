@@ -23,6 +23,8 @@ class CompanyController extends Controller
             'address'           => 'nullable|string',
             'srl_rate'          => 'nullable|numeric|min:1.0|max:1.5',
             'payroll_frequency' => 'nullable|in:monthly,biweekly',
+            'bonus_payment_method' => 'nullable|in:payroll,separate',
+            'bonus_biweekly_split' => 'nullable|in:both,q1,q2',
             'logo'              => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=600,max_height=500',
         ]);
 
@@ -46,18 +48,20 @@ class CompanyController extends Controller
     }
 
     /**
-     * Actualiza exclusivamente la frecuencia de nómina desde el modal del dashboard.
+     * Actualiza la configuración de nómina y bonificaciones desde el modal del dashboard.
      * Solo accesible para usuarios con rol "super".
      */
     public function updatePayrollFrequency(Request $request)
     {
         $data = $request->validate([
             'payroll_frequency' => 'required|in:monthly,biweekly',
+            'bonus_payment_method' => 'required|in:payroll,separate',
+            'bonus_biweekly_split' => 'nullable|in:both,q1,q2',
         ]);
 
         Auth::user()->company->update($data);
 
-        return redirect()->route('dashboard')->with('success', 'Frecuencia de nómina configurada correctamente.');
+        return redirect()->route('dashboard')->with('success', 'Configuración de nómina guardada correctamente.');
     }
 
     public function deleteLogo()

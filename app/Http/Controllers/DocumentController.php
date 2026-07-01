@@ -19,9 +19,27 @@ class DocumentController extends Controller
         $this->processor = $processor;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $templates = DocumentTemplate::where('company_id', Auth::user()->company_id)->get();
+        $query = DocumentTemplate::where('company_id', Auth::user()->company_id);
+
+        // Filtro por búsqueda de título
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por categoría
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Filtro por fecha de creación
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $templates = $query->orderBy('created_at', 'desc')->get();
+
         return view('documents.index', compact('templates'));
     }
 
@@ -62,7 +80,7 @@ class DocumentController extends Controller
     public function generate(Request $request, DocumentTemplate $template)
     {
         $this->authorizeAccess($template);
-        
+
         $employee = null;
         if ($request->employee_id) {
             $employee = Employee::where('id', $request->employee_id)

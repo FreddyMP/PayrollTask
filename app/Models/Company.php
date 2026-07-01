@@ -9,6 +9,7 @@ class Company extends Model
     protected $fillable = [
         'name', 'rnc', 'email', 'phone', 'address', 'logo', 'plan', 'status',
         'saturday_rest', 'sunday_rest', 'srl_rate', 'payroll_frequency',
+        'bonus_payment_method', 'bonus_biweekly_split',
     ];
 
     public function holidays()
@@ -44,5 +45,10 @@ class Company extends Model
     public function payrolls()
     {
         return $this->hasMany(Payroll::class);
+    }
+
+    public function regulations()
+    {
+        return $this->hasMany(Regulation::class);
     }
 }

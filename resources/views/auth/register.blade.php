@@ -366,9 +366,9 @@
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
-            
+
             <div class="section-title">Datos de la Empresa</div>
-            
+
             <div class="mb-3">
                 <label class="form-label">Nombre de la Compañía</label>
                 <div class="input-group">

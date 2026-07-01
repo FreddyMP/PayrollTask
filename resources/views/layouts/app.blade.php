@@ -663,20 +663,52 @@
         .btn-close {
             filter: invert(1);
         }
+
+        /* Global Loader */
+        .global-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .global-loader .spinner-border {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-width: 0.25em;
+            color: var(--primary) !important;
+        }
     </style>
     @stack('styles')
 </head>
 
 <body>
+    <!-- Global Loader Overlay -->
+    <div id="global-loader" class="global-loader d-none">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <div class="mt-3 fw-semibold text-white tracking-wide" style="letter-spacing: 1px; font-size: 0.9rem;">
+            PROCESANDO...</div>
+    </div>
+
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
             <div>
                 @if(auth()->user()->company && auth()->user()->company->logo)
-                    <img src="{{ \Storage::disk('s3')->url(auth()->user()->company->logo) }}"
-                        alt="Logo" width="200">
+                    <img src="{{ \Storage::disk('s3')->url(auth()->user()->company->logo) }}" alt="Logo" width="200">
                 @else
-                    <img src="https://payrolltask-s3-cloud-852128327213-us-east-2-an.s3.us-east-2.amazonaws.com/logo-payrooltask.png"
+                    <img src="https://payrolltask-s3-cloud-852128327213-us-east-2-an.s3.us-east-2.amazonaws.com/logo.png"
                         alt="Logo" width="200">
                 @endif
                 <small>Panel Empresarial</small>
@@ -698,6 +730,10 @@
 
             @if(auth()->user()->isAdmin())
                 <div class="nav-section">Administración</div>
+                <a href="{{ route('vacations.index') }}"
+                    class="nav-link {{ request()->routeIs('vacations.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-check-fill"></i> Gestión de Vacaciones
+                </a>
                 <a href="{{ route('access-logs.index') }}"
                     class="nav-link {{ request()->routeIs('access-logs.*') ? 'active' : '' }}">
                     <i class="bi bi-clock-history"></i> Registro de Accesos
@@ -710,16 +746,18 @@
                     class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i> Empleados
                 </a>
-                <a href="{{ route('contractors.index') }}"
-                    class="nav-link {{ request()->routeIs('contractors.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-badge-fill"></i> Organigrama
-                </a>
+
                 <a href="{{ route('evaluations.index') }}"
                     class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
                 </a>
+                <li class="nav-item">
+                    <a class="nav-link " href="{{ route('org-chart.index') }}">
+                        <i class="bi bi-diagram-3"></i> Organigrama
+                    </a>
+                </li>
                 <a href="{{ route('departments.index') }}"
-                    class="nav-link {{ request()->routeIs('departments.*') ? 'active' : '' }}">
+                    class="nav-link {{ request()->routeIs('departments.*', 'positions.*', 'org-chart.*') ? 'active' : '' }}">
                     <i class="bi bi-diagram-3"></i> Departamentos
                 </a>
                 <a href="{{ route('payroll.index') }}"
@@ -733,6 +771,10 @@
             @endif
 
             <div class="nav-section">Gestión</div>
+            <a href="{{ route('regulations.index') }}"
+                class="nav-link {{ request()->routeIs('regulations.*') ? 'active' : '' }}">
+                <i class="bi bi-file-earmark-text-fill"></i> Reglamentos
+            </a>
             <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
                 <i class="bi bi-kanban-fill"></i> Tablero de Tareas
             </a>
@@ -830,6 +872,63 @@
     <script>
         $.ajaxSetup({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+        });
+
+        // Prevent double submissions and show global loader
+        document.addEventListener('DOMContentLoaded', function () {
+            const forms = document.querySelectorAll('form');
+            const loader = document.getElementById('global-loader');
+
+            forms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    // Check if form has target="_blank"
+                    if (form.getAttribute('target') === '_blank') {
+                        return;
+                    }
+
+                    // Allow HTML5 validation to kick in
+                    if (!form.checkValidity()) {
+                        return;
+                    }
+
+                    // Check if a confirmation dialog prevented the submission (e.g. onsubmit="return confirm(...)")
+                    // This is trickier because inline onsubmit runs before event listeners if added as HTML attribute.
+                    // If the form is actually submitting, we can show the loader.
+
+                    if (loader) {
+                        loader.classList.remove('d-none');
+                    }
+
+                    // Disable submit buttons to prevent double clicking
+                    const submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+                    submitButtons.forEach(btn => {
+                        // Use a small timeout so the button's name/value can be submitted if needed
+                        setTimeout(() => {
+                            btn.disabled = true;
+                            // Optionally change text
+                            if (btn.tagName === 'BUTTON' && !btn.innerHTML.includes('spinner')) {
+                                const originalContent = btn.innerHTML;
+                                btn.dataset.originalText = originalContent;
+                                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Procesando...';
+                            }
+                        }, 50);
+                    });
+                });
+            });
+
+            // Ocultar loader si el usuario navega hacia atrás usando la caché del navegador (BFCache)
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted && loader) {
+                    loader.classList.add('d-none');
+                    const buttons = document.querySelectorAll('button[type="submit"], input[type="submit"]');
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        if (btn.tagName === 'BUTTON' && btn.dataset.originalText) {
+                            btn.innerHTML = btn.dataset.originalText;
+                        }
+                    });
+                }
+            });
         });
     </script>
     @stack('scripts')

@@ -12,6 +12,76 @@
     @endif
 </div>
 
+{{-- Card de Filtros Colapsable --}}
+<div class="card mb-4" style="border: 1px solid rgba(255,255,255,0.06); background: var(--dark-2);">
+    <div class="card-header" style="background: transparent; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <button class="btn btn-link text-white text-decoration-none w-100 text-start d-flex justify-content-between align-items-center p-0" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="{{ request()->hasAny(['search', 'status', 'start_date', 'end_date', 'team_member']) ? 'true' : 'false' }}" aria-controls="filtersCollapse">
+            <span><i class="bi bi-funnel me-2"></i>Filtros @if(request()->hasAny(['search', 'status', 'start_date', 'end_date', 'team_member']))<span class="badge bg-primary ms-2">Activos</span>@endif</span>
+            <i class="bi bi-chevron-down"></i>
+        </button>
+    </div>
+    <div class="collapse {{ request()->hasAny(['search', 'status', 'start_date', 'end_date', 'team_member']) ? 'show' : '' }}" id="filtersCollapse">
+        <div class="card-body">
+            <form method="GET" action="{{ route('projects.index') }}">
+                <div class="row g-3">
+                    {{-- Búsqueda por nombre --}}
+                    <div class="col-md-3">
+                        <label for="search" class="form-label text-white small">Buscar por nombre</label>
+                        <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="Nombre del proyecto...">
+                    </div>
+
+                    {{-- Filtro por Estado --}}
+                    <div class="col-md-3">
+                        <label for="status" class="form-label text-white small">Estado</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Todos los estados</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Activo</option>
+                            <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>En espera</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completado</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelado</option>
+                        </select>
+                    </div>
+
+                    {{-- Filtro por Fecha de Inicio --}}
+                    <div class="col-md-3">
+                        <label for="start_date" class="form-label text-white small">Fecha de inicio desde</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                    </div>
+
+                    {{-- Filtro por Fecha de Fin --}}
+                    <div class="col-md-3">
+                        <label for="end_date" class="form-label text-white small">Fecha de fin hasta</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                    </div>
+
+                    {{-- Filtro por Miembro del Equipo --}}
+                    <div class="col-md-6">
+                        <label for="team_member" class="form-label text-white small">Miembro del equipo</label>
+                        <select class="form-select" id="team_member" name="team_member">
+                            <option value="">Todos los miembros</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" {{ request('team_member') == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }} ({{ ucfirst($user->role) }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Botones --}}
+                    <div class="col-md-6 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="bi bi-search me-1"></i> Aplicar Filtros
+                        </button>
+                        <a href="{{ route('projects.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i> Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4">
     @forelse($projects as $project)
     <div class="col-xl-4 col-md-6">

@@ -18,7 +18,7 @@ class TaskController extends Controller
     {
         $user = Auth::user();
         $companyId = $user->company_id;
-        
+
         $query = Task::where('company_id', $companyId)
             ->with(['assignedUser', 'creator', 'project', 'attachments.user']);
 
@@ -35,17 +35,42 @@ class TaskController extends Controller
             }
         }
 
+        // Filtro por búsqueda (título o descripción)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filtro por estado
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+
+        // Filtro por prioridad
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
+
+        // Filtro por usuario asignado
         if ($request->filled('assigned_to')) {
             $query->where('assigned_to', $request->assigned_to);
         }
+
+        // Filtro por proyecto
         if ($request->filled('project_id')) {
             $query->where('project_id', $request->project_id);
+        }
+
+        // Filtro por rango de fechas (fecha de vencimiento)
+        if ($request->filled('date_from')) {
+            $query->whereDate('due_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('due_date', '<=', $request->date_to);
         }
 
         $tasks = $query->latest()->paginate(10);
@@ -86,7 +111,7 @@ class TaskController extends Controller
                 $path = $file->store('tasks/attachments', config('filesystems.default'));
                 $user = Auth::user();
                 $group = $user->isSupervisor() ? 'supervisor' : 'assigned';
-                
+
                 TaskAttachment::create([
                     'task_id' => $task->id,
                     'user_id' => $user->id,
@@ -192,7 +217,7 @@ class TaskController extends Controller
         if ($task->assigned_to) {
             $task->load('assignedUser');
             $email = User::find($task->assigned_to)->email;
-            
+
             if ($task->assignedUser && $task->assignedUser->email) {
                 Mail::to($email)->send(new TaskStatusUpdated($task, $email));
             }

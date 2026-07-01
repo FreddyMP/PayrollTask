@@ -20,6 +20,9 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\OrgChartController;
+use App\Http\Controllers\RegulationController;
+use App\Http\Controllers\VacationController;
 
 // Auth routes
 Route::get('/', function () {
@@ -84,16 +87,20 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:admin')->group(function () {
             Route::get('/payroll', [PayrollController::class , 'index'])->name('payroll.index');
             Route::get('/payroll/bonuses', [PayrollController::class , 'bonuses'])->name('payroll.bonuses');
+            Route::post('/payroll/bonuses/add-to-payroll', [PayrollController::class , 'addBonusesToPayroll'])->name('payroll.bonuses.addToPayroll');
+            Route::post('/payroll/bonuses/{employee}/pay-separate', [PayrollController::class , 'paySeparateBonus'])->name('payroll.bonuses.paySeparate');
             Route::get('/payroll/benefits', [PayrollController::class , 'benefits'])->name('payroll.benefits');
             Route::get('/payroll/christmas', [PayrollController::class , 'christmas'])->name('payroll.christmas');
             Route::get('/payroll/create', [PayrollController::class , 'create'])->name('payroll.create');
             Route::get('/payroll/tss', [PayrollController::class , 'tss'])->name('payroll.tss');
             Route::get('/payroll/ir17', [PayrollController::class , 'ir17'])->name('payroll.ir17');
+            Route::post('/payroll/christmas/{employee}/pay', [PayrollController::class , 'payChristmas'])->name('payroll.christmas.pay');
             Route::post('/payroll', [PayrollController::class , 'store'])->name('payroll.store');
             Route::post('/payroll/auto-generate', [PayrollController::class , 'autoGenerate'])->name('payroll.autoGenerate');
             Route::get('/payroll/{payroll}/edit', [PayrollController::class , 'edit'])->name('payroll.edit');
             Route::patch('/payroll/{payroll}', [PayrollController::class , 'update'])->name('payroll.update');
             Route::patch('/payroll/{payroll}/paid', [PayrollController::class , 'markPaid'])->name('payroll.markPaid');
+            Route::post('/payroll/mark-all-paid', [PayrollController::class , 'markAllPaid'])->name('payroll.markAllPaid');
             Route::delete('/payroll/{payroll}', [PayrollController::class , 'destroy'])->name('payroll.destroy');
             Route::get('/api/payroll/overtime', [PayrollController::class, 'apiOvertimeData'])->name('payroll.apiOvertime');
         }
@@ -133,7 +140,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/{vacancy}/candidates', [RecruitmentController::class, 'addCandidate'])->name('candidates.store');
             Route::post('/candidates/{candidate}/progress', [RecruitmentController::class, 'updateProgress'])->name('candidates.progress');
             Route::get('/{vacancy}/ranking', [RecruitmentController::class, 'ranking'])->name('ranking');
-            
+
             // Application Form
             Route::post('/application-form/{applicationForm}/fields', [RecruitmentController::class, 'storeField'])->name('application-form.fields.store');
             Route::delete('/application-form/fields/{field}', [RecruitmentController::class, 'deleteField'])->name('application-form.fields.destroy');
@@ -168,13 +175,13 @@ Route::middleware('auth')->group(function () {
             Route::get('/{evaluation}/show', [\App\Http\Controllers\EvaluationController::class, 'show'])->name('show');
             Route::patch('/{evaluation}', [\App\Http\Controllers\EvaluationController::class, 'update'])->name('update');
             Route::delete('/{evaluation}', [\App\Http\Controllers\EvaluationController::class, 'destroy'])->name('destroy');
-            
+
             Route::post('/{evaluation}/questions', [\App\Http\Controllers\EvaluationController::class, 'storeQuestion'])->name('questions.store');
             Route::delete('/{evaluation}/questions/{question}', [\App\Http\Controllers\EvaluationController::class, 'destroyQuestion'])->name('questions.destroy');
-            
+
             Route::post('/{evaluation}/assignments', [\App\Http\Controllers\EvaluationController::class, 'storeAssignments'])->name('assignments.store');
             Route::delete('/{evaluation}/assignments/{assignment}', [\App\Http\Controllers\EvaluationController::class, 'destroyAssignment'])->name('assignments.destroy');
-            
+
             Route::get('/{evaluation}/results', [\App\Http\Controllers\EvaluationController::class, 'results'])->name('results');
         });
 
@@ -218,5 +225,35 @@ Route::middleware('auth')->group(function () {
             Route::get('/{position}/edit', [PositionController::class, 'edit'])->name('edit');
             Route::patch('/{position}', [PositionController::class, 'update'])->name('update');
             Route::delete('/{position}', [PositionController::class, 'destroy'])->name('destroy');
+        });
+
+        // Org Chart (Admin+)
+        Route::middleware('role:admin,super')->prefix('organigrama')->name('org-chart.')->group(function () {
+            Route::get('/', [OrgChartController::class, 'index'])->name('index');
+        });
+
+        // Regulations (All users can view, Admin+ can manage)
+        Route::prefix('regulations')->name('regulations.')->group(function () {
+            Route::get('/', [RegulationController::class, 'index'])->name('index');
+            Route::get('/{regulation}', [RegulationController::class, 'show'])->name('show');
+
+            // Admin/Super only
+            Route::middleware('role:admin,super')->group(function () {
+                Route::post('/', [RegulationController::class, 'store'])->name('store');
+                Route::patch('/{regulation}', [RegulationController::class, 'update'])->name('update');
+                Route::delete('/{regulation}', [RegulationController::class, 'destroy'])->name('destroy');
+                Route::post('/{regulation}/toggle', [RegulationController::class, 'toggleStatus'])->name('toggle');
+            });
+        });
+
+        // Vacations (Admin+)
+        Route::middleware('role:admin,super')->prefix('vacations')->name('vacations.')->group(function () {
+            Route::get('/', [VacationController::class, 'index'])->name('index');
+            Route::get('/create', [VacationController::class, 'create'])->name('create');
+            Route::post('/', [VacationController::class, 'store'])->name('store');
+            Route::get('/employee/{employee}', [VacationController::class, 'show'])->name('show');
+            Route::get('/{vacation}/edit', [VacationController::class, 'edit'])->name('edit');
+            Route::patch('/{vacation}', [VacationController::class, 'update'])->name('update');
+            Route::delete('/{vacation}', [VacationController::class, 'destroy'])->name('destroy');
         });
     });

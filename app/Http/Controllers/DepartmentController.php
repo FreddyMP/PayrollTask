@@ -8,13 +8,38 @@ use Illuminate\Support\Facades\Auth;
 
 class DepartmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $departments = Department::where('company_id', Auth::user()->company_id)
-            ->with('parentDepartment', 'childDepartments')
+        $query = Department::where('company_id', Auth::user()->company_id)
+            ->with('parentDepartment', 'childDepartments');
+
+        // Filtro por búsqueda de nombre
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por estado
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status);
+        }
+
+        // Filtro por departamento padre
+        if ($request->filled('parent_id')) {
+            if ($request->parent_id === 'null') {
+                $query->whereNull('parent_department_id');
+            } else {
+                $query->where('parent_department_id', $request->parent_id);
+            }
+        }
+
+        $departments = $query->orderBy('name')->get();
+
+        // Obtener todos los departamentos para el filtro de padre
+        $allDepartments = Department::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
-        return view('departments.index', compact('departments'));
+
+        return view('departments.index', compact('departments', 'allDepartments'));
     }
 
     public function create()

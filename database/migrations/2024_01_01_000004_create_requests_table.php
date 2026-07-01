@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration 
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('requests', function (Blueprint $table) {
@@ -20,6 +19,11 @@ return new class extends Migration
             $table->text('admin_notes')->nullable();
             $table->unsignedBigInteger('reviewed_by')->nullable();
             $table->timestamp('reviewed_at')->nullable();
+            $table->date('overtime_date')->nullable();
+            $table->time('overtime_start')->nullable();
+            $table->time('overtime_end')->nullable();
+            $table->decimal('overtime_hours', 5, 2)->nullable();
+            $table->unsignedBigInteger('approved_by_user_id')->nullable();
             $table->timestamps();
         });
     }

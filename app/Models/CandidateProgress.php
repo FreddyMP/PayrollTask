@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class CandidateProgress extends Model
 {
-    protected $fillable = ['candidate_id', 'recruitment_step_id', 'score', 'status', 'notes', 'completed_at'];
+    protected $fillable = ['candidate_id', 'recruitment_step_id', 'score', 'status', 'notes', 'completed_at', 'scheduled_at'];
 
     protected $casts = [
         'completed_at' => 'datetime',
+        'scheduled_at' => 'date',
     ];
 
     public function candidate()

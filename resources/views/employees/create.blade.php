@@ -63,7 +63,14 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Cargo</label>
-                                    <input type="text" class="form-control" name="position" value="{{ old('position') }}">
+                                    <select class="form-select" name="position_id">
+                                        <option value="">Seleccionar...</option>
+                                        @foreach($positions as $position)
+                                            <option value="{{ $position->id }}" {{ old('position_id') == $position->id ? 'selected' : '' }}>
+                                                {{ $position->title }}@if($position->department) ({{ $position->department->name }})@endif
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Cédula</label>
@@ -73,19 +80,15 @@
 
                             <h6 class="mb-3 text-secondary">Información Laboral</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-md-3">
-                                    <label class="form-label">Departamento</label>
-                                    <input type="text" class="form-control" name="department" value="{{ old('department') }}">
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label">Salario</label>
                                     <input type="number" step="0.01" class="form-control" name="salary" value="{{ old('salary') }}">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label">Fecha de Ingreso</label>
                                     <input type="date" class="form-control" name="hire_date" value="{{ old('hire_date', date('Y-m-d')) }}">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label">Tipo de Contrato</label>
                                     <select class="form-select" name="contract_type">
                                         <option value="full_time">Tiempo Completo</option>

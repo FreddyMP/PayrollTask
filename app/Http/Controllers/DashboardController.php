@@ -157,11 +157,12 @@ class DashboardController extends Controller
             session()->put('today_modal_shown', true);
         }
 
-        // ─── Payroll Frequency Modal ──────────────────────────
-        // Si el usuario es 'super' y la empresa aún no tiene frecuencia definida,
+        // ─── Payroll Configuration Modal ──────────────────────────
+        // Si el usuario es 'super' y la empresa aún no tiene configuración de nómina completa,
         // mostramos el modal obligatorio de selección (no se puede cerrar sin elegir).
         $showPayrollFrequencyModal = $user->isSuper()
-            && is_null($user->company->payroll_frequency ?? null);
+            && (is_null($user->company->payroll_frequency ?? null)
+                || is_null($user->company->bonus_payment_method ?? null));
 
         // ─── Task stats (keep for compatibility) ─────────────
         $taskStats = [

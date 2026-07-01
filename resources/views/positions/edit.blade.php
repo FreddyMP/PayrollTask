@@ -3,18 +3,7 @@
 @section('page-title', 'Editar Posición')
 
 @section('content')
-<ul class="nav nav-tabs mb-4 px-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('departments.index') }}" style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
-            Departamentos
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" href="{{ route('positions.index') }}" style="color: white; border-bottom: 2px solid var(--primary); background: transparent; border-top: 0; border-left: 0; border-right: 0; padding: 0.75rem 1.25rem;">
-            Posiciones
-        </a>
-    </li>
-</ul>
+@include('departments.partials.tabs', ['activeTab' => 'positions'])
 
 <div class="row justify-content-center">
     <div class="col-lg-8">

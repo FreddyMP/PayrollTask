@@ -16,6 +16,65 @@
     </div>
 </div>
 
+<!-- Filters Card -->
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header" style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <button class="btn btn-link text-white text-decoration-none w-100 text-start d-flex justify-content-between align-items-center p-0" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+            <span><i class="bi bi-funnel me-2"></i>Filtros</span>
+            <i class="bi bi-chevron-down"></i>
+        </button>
+    </div>
+    <div class="collapse" id="filtersCollapse">
+        <div class="card-body">
+            <form method="GET" action="{{ route('evaluations.index') }}" id="filterForm">
+                <div class="row g-3">
+                    <!-- Search by title -->
+                    <div class="col-md-4">
+                        <label class="form-label small text-white">Buscar por título</label>
+                        <input type="text" name="search" class="form-control" placeholder="Título de evaluación" value="{{ request('search') }}">
+                    </div>
+
+                    <!-- Filter by status -->
+                    <div class="col-md-4">
+                        <label class="form-label small text-white">Estado</label>
+                        <select name="status" class="form-select">
+                            <option value="">Todos los estados</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Activa</option>
+                            <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Borrador</option>
+                            <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Cerrada</option>
+                        </select>
+                    </div>
+
+                    <!-- Date range filter -->
+                    <div class="col-md-4">
+                        <label class="form-label small text-white">Fecha de creación</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="date" name="date_from" class="form-control" placeholder="Desde" value="{{ request('date_from') }}">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" name="date_to" class="form-control" placeholder="Hasta" value="{{ request('date_to') }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter buttons -->
+                <div class="row mt-3">
+                    <div class="col-12 d-flex gap-2 justify-content-end">
+                        <a href="{{ route('evaluations.index') }}" class="btn btn-outline-custom btn-sm">
+                            <i class="bi bi-x-circle me-1"></i>Limpiar
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom btn-sm">
+                            <i class="bi bi-search me-1"></i>Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     @forelse($evaluations as $evaluation)
     <div class="col-md-4 mb-4">

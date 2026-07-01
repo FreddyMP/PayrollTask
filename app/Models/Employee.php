@@ -30,6 +30,16 @@ class Employee extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function department_rel()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
+    }
+
     public function payrolls()
     {
         return $this->hasMany(Payroll::class);
@@ -45,8 +55,65 @@ class Employee extends Model
         return $this->hasMany(EmployeeDocument::class);
     }
 
+    public function vacations()
+    {
+        return $this->hasMany(Vacation::class);
+    }
+
     public function getTotalArsExtraAttribute()
     {
         return $this->arsExtras()->sum('ars_amount');
+    }
+
+    /**
+     * Calcula los años de antigüedad del empleado
+     */
+    public function getYearsOfServiceAttribute(): float
+    {
+        if (!$this->hire_date) {
+            return 0;
+        }
+        return $this->hire_date->diffInYears(now());
+    }
+
+    /**
+     * Obtiene los días de vacaciones que le corresponden según antigüedad
+     */
+    public function getVacationDaysEntitledAttribute(): int
+    {
+        $yearsOfService = $this->years_of_service;
+
+        // Empleados con menos de 1 año no tienen vacaciones
+        if ($yearsOfService < 1) {
+            return 0;
+        }
+
+        // Menos de 5 años: 14 días
+        // 5 años o más: 18 días
+        return $yearsOfService >= 5 ? 18 : 14;
+    }
+
+    /**
+     * Obtiene los días de vacaciones tomados en un año específico
+     */
+    public function getVacationDaysTaken(int $year = null): int
+    {
+        $year = $year ?? now()->year;
+
+        return $this->vacations()
+            ->where('year', $year)
+            ->whereIn('status', ['approved', 'completed'])
+            ->sum('days_taken');
+    }
+
+    /**
+     * Obtiene los días de vacaciones restantes en un año específico
+     */
+    public function getVacationDaysRemaining(int $year = null): int
+    {
+        $entitled = $this->vacation_days_entitled;
+        $taken = $this->getVacationDaysTaken($year);
+
+        return max(0, $entitled - $taken);
     }
 }
