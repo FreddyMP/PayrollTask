@@ -1,8 +1,7 @@
-@extends('layouts.app')
-@section('title', 'Organigrama')
-@section('page-title', 'Organigrama')
+<?php $__env->startSection('title', 'Organigrama'); ?>
+<?php $__env->startSection('page-title', 'Organigrama'); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         .org-stats {
             display: grid;
@@ -250,10 +249,10 @@
             display: block;
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
-    <!--@include('departments.partials.tabs', ['activeTab' => 'org-chart'])-->
+<?php $__env->startSection('content'); ?>
+    <!--<?php echo $__env->make('departments.partials.tabs', ['activeTab' => 'org-chart'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>-->
 
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -267,19 +266,19 @@
     <div class="org-stats">
         <div class="org-stat-card">
             <small>Departamentos</small>
-            <div class="value">{{ $stats['departments'] }}</div>
+            <div class="value"><?php echo e($stats['departments']); ?></div>
         </div>
         <div class="org-stat-card">
             <small>Empleados</small>
-            <div class="value">{{ $stats['employees'] }}</div>
+            <div class="value"><?php echo e($stats['employees']); ?></div>
         </div>
         <div class="org-stat-card">
             <small>Posiciones</small>
-            <div class="value">{{ $stats['positions'] }}</div>
+            <div class="value"><?php echo e($stats['positions']); ?></div>
         </div>
         <div class="org-stat-card">
             <small>Niveles</small>
-            <div class="value">{{ $stats['levels'] }}</div>
+            <div class="value"><?php echo e($stats['levels']); ?></div>
         </div>
     </div>
 
@@ -289,22 +288,24 @@
             <small class="text-secondary">Solo departamentos activos</small>
         </div>
         <div class="card-body">
-            @if($rootDepartments->isNotEmpty())
+            <?php if($rootDepartments->isNotEmpty()): ?>
                 <div class="org-chart-wrapper">
                     <ul class="org-tree">
-                        @include('org-chart._node', ['nodes' => $rootDepartments, 'allDepartments' => $departments])
+                        <?php echo $__env->make('org-chart._node', ['nodes' => $rootDepartments, 'allDepartments' => $departments], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </ul>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="org-empty">
                     <i class="bi bi-diagram-3"></i>
                     <h6 class="text-white mb-2">No hay departamentos para mostrar</h6>
                     <p class="mb-3">Crea departamentos y define su jerarquía asignando un departamento padre.</p>
-                    <a href="{{ route('departments.create') }}" class="btn btn-primary-custom">
+                    <a href="<?php echo e(route('departments.create')); ?>" class="btn btn-primary-custom">
                         <i class="bi bi-plus-lg me-1"></i> Crear primer departamento
                     </a>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/org-chart/index.blade.php ENDPATH**/ ?>
