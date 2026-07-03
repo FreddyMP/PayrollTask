@@ -96,6 +96,8 @@ class EmployeeController extends Controller
             'id_number' => 'nullable|string|max:20',
             'work_start' => 'nullable|date_format:H:i',
             'work_end' => 'nullable|date_format:H:i',
+            'break_start' => 'nullable|date_format:H:i',
+            'break_end' => 'nullable|date_format:H:i',
             'ars_extras' => 'nullable|array',
             'ars_extras.*.name' => 'required|string|max:255',
             'ars_extras.*.id_number' => 'nullable|string|max:20',
@@ -147,6 +149,8 @@ class EmployeeController extends Controller
             'id_number' => $data['id_number'] ?? null,
             'work_start' => $data['work_start'] ?? '08:00',
             'work_end' => $data['work_end'] ?? '17:00',
+            'break_start' => $data['break_start'] ?? null,
+            'break_end' => $data['break_end'] ?? null,
         ]);
 
         if (!empty($data['ars_extras'])) {
@@ -223,6 +227,8 @@ class EmployeeController extends Controller
             'id_number' => 'nullable|string|max:20',
             'work_start' => 'nullable|date_format:H:i',
             'work_end' => 'nullable|date_format:H:i',
+            'break_start' => 'nullable|date_format:H:i',
+            'break_end' => 'nullable|date_format:H:i',
             'status' => 'nullable|in:active,inactive',
             'ars_extras' => 'nullable|array',
             'ars_extras.*.name' => 'required|string|max:255',
@@ -269,6 +275,8 @@ class EmployeeController extends Controller
             'id_number' => $data['id_number'] ?? null,
             'work_start' => $data['work_start'] ?? '08:00',
             'work_end' => $data['work_end'] ?? '17:00',
+            'break_start' => $data['break_start'] ?? null,
+            'break_end' => $data['break_end'] ?? null,
         ]);
 
         $employee->arsExtras()->delete();

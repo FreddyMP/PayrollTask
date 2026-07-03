@@ -746,6 +746,10 @@
                     class="nav-link <?php echo e(request()->routeIs('employees.*') ? 'active' : ''); ?>">
                     <i class="bi bi-people-fill"></i> Empleados
                 </a>
+                <a href="<?php echo e(route('fichajes.index')); ?>"
+                    class="nav-link <?php echo e(request()->routeIs('fichajes.*') ? 'active' : ''); ?>">
+                    <i class="bi bi-clock-history"></i> Fichajes
+                </a>
 
                 <a href="<?php echo e(route('evaluations.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('evaluations.*') ? 'active' : ''); ?>">

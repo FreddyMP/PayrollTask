@@ -10,6 +10,7 @@ class Employee extends Model
     protected $fillable = [
         'user_id', 'company_id', 'department', 'department_id', 'position_id', 'salary',
         'hire_date', 'contract_type', 'work_start', 'work_end', 'bank_account', 'id_number',
+        'break_start', 'break_end',
     ];
 
     protected function casts(): array
@@ -43,6 +44,11 @@ class Employee extends Model
     public function payrolls()
     {
         return $this->hasMany(Payroll::class);
+    }
+
+    public function fichajes()
+    {
+        return $this->hasMany(Fichaje::class);
     }
 
     public function arsExtras()

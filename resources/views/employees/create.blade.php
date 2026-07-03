@@ -112,6 +112,18 @@
                                     <input type="time" class="form-control" name="work_end" value="{{ old('work_end', '17:00') }}" required>
                                 </div>
                             </div>
+
+                            <h6 class="mb-3 text-secondary">Horas de Descanso en la Jornada</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label text-info"><i class="bi bi-cup-hot me-1"></i>Inicio de Descanso (Opcional)</label>
+                                    <input type="time" class="form-control" name="break_start" value="{{ old('break_start') }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-info"><i class="bi bi-cup-hot-fill me-1"></i>Fin de Descanso (Opcional)</label>
+                                    <input type="time" class="form-control" name="break_end" value="{{ old('break_end') }}">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Pestaña ARS Extras -->

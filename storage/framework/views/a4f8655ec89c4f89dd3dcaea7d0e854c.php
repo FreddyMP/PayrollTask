@@ -1,15 +1,14 @@
-@extends('layouts.app')
-@section('title', 'Editar Empleado')
-@section('page-title', 'Editar Empleado')
+<?php $__env->startSection('title', 'Editar Empleado'); ?>
+<?php $__env->startSection('page-title', 'Editar Empleado'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="row justify-content-center">
     <div class="col-lg-10">
         <div class="card">
-            <div class="card-header text-secondary"><i class="bi bi-pencil me-2"></i>Editar Empleado: {{ $employee->user->name }}</div>
+            <div class="card-header text-secondary"><i class="bi bi-pencil me-2"></i>Editar Empleado: <?php echo e($employee->user->name); ?></div>
             <div class="card-body">
-                <form method="POST" action="{{ route('employees.update', $employee) }}" enctype="multipart/form-data">
-                    @csrf @method('PUT')
+                <form method="POST" action="<?php echo e(route('employees.update', $employee)); ?>" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
 
                     <ul class="nav nav-tabs mb-4" id="employeeTabs" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -36,17 +35,17 @@
                             <div class="row g-3 mb-4">
                                 <div class="col-md-4">
                                     <label class="form-label">Nombre Completo</label>
-                                    <input type="text" class="form-control" name="name" value="{{ old('name', $employee->user->name) }}" required>
+                                    <input type="text" class="form-control" name="name" value="<?php echo e(old('name', $employee->user->name)); ?>" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Correo Electrónico</label>
-                                    <input type="email" class="form-control" name="email" value="{{ old('email', $employee->user->email) }}" required>
+                                    <input type="email" class="form-control" name="email" value="<?php echo e(old('email', $employee->user->email)); ?>" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Estado</label>
                                     <select class="form-select" name="status">
-                                        <option value="active" {{ $employee->user->status == 'active' ? 'selected' : '' }}>Activo</option>
-                                        <option value="inactive" {{ $employee->user->status == 'inactive' ? 'selected' : '' }}>Inactivo</option>
+                                        <option value="active" <?php echo e($employee->user->status == 'active' ? 'selected' : ''); ?>>Activo</option>
+                                        <option value="inactive" <?php echo e($employee->user->status == 'inactive' ? 'selected' : ''); ?>>Inactivo</option>
                                     </select>
                                 </div>
                             </div>
@@ -55,36 +54,36 @@
                                 <div class="col-md-3">
                                     <label class="form-label">Rol</label>
                                     <select class="form-select" name="role">
-                                        <option value="usuario" {{ $employee->user->role == 'usuario' ? 'selected' : '' }}>Usuario</option>
-                                        <option value="supervisor" {{ $employee->user->role == 'supervisor' ? 'selected' : '' }}>Supervisor</option>
-                                        <option value="admin" {{ $employee->user->role == 'admin' ? 'selected' : '' }}>Administrador</option>
+                                        <option value="usuario" <?php echo e($employee->user->role == 'usuario' ? 'selected' : ''); ?>>Usuario</option>
+                                        <option value="supervisor" <?php echo e($employee->user->role == 'supervisor' ? 'selected' : ''); ?>>Supervisor</option>
+                                        <option value="admin" <?php echo e($employee->user->role == 'admin' ? 'selected' : ''); ?>>Administrador</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Teléfono</label>
-                                    <input type="text" class="form-control" name="phone" value="{{ old('phone', $employee->user->phone) }}">
+                                    <input type="text" class="form-control" name="phone" value="<?php echo e(old('phone', $employee->user->phone)); ?>">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Cargo</label>
-                                    @php
+                                    <?php
                                         $selectedPositionId = old('position_id', $employee->position_id);
                                         if (!$selectedPositionId && $employee->user->position) {
                                             $matchedPosition = $positions->firstWhere('title', $employee->user->position);
                                             $selectedPositionId = $matchedPosition?->id;
                                         }
-                                    @endphp
+                                    ?>
                                     <select class="form-select" name="position_id">
                                         <option value="">Seleccionar...</option>
-                                        @foreach($positions as $position)
-                                            <option value="{{ $position->id }}" {{ $selectedPositionId == $position->id ? 'selected' : '' }}>
-                                                {{ $position->title }}@if($position->department) ({{ $position->department->name }})@endif
+                                        <?php $__currentLoopData = $positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($position->id); ?>" <?php echo e($selectedPositionId == $position->id ? 'selected' : ''); ?>>
+                                                <?php echo e($position->title); ?><?php if($position->department): ?> (<?php echo e($position->department->name); ?>)<?php endif; ?>
                                             </option>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Cédula</label>
-                                    <input type="text" class="form-control" name="id_number" value="{{ old('id_number', $employee->id_number) }}">
+                                    <input type="text" class="form-control" name="id_number" value="<?php echo e(old('id_number', $employee->id_number)); ?>">
                                 </div>
                             </div>
 
@@ -92,18 +91,18 @@
                             <div class="row g-3 mb-4">
                                 <div class="col-md-4">
                                     <label class="form-label">Salario</label>
-                                    <input type="number" step="0.01" class="form-control" name="salary" value="{{ old('salary', $employee->salary) }}">
+                                    <input type="number" step="0.01" class="form-control" name="salary" value="<?php echo e(old('salary', $employee->salary)); ?>">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Fecha de Ingreso</label>
-                                    <input type="date" class="form-control" name="hire_date" value="{{ old('hire_date', $employee->hire_date?->format('Y-m-d')) }}">
+                                    <input type="date" class="form-control" name="hire_date" value="<?php echo e(old('hire_date', $employee->hire_date?->format('Y-m-d'))); ?>">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Tipo de Contrato</label>
                                     <select class="form-select" name="contract_type">
-                                        <option value="full_time" {{ $employee->contract_type == 'full_time' ? 'selected' : '' }}>Tiempo Completo</option>
-                                        <option value="part_time" {{ $employee->contract_type == 'part_time' ? 'selected' : '' }}>Medio Tiempo</option>
-                                        <option value="contractor" {{ $employee->contract_type == 'contractor' ? 'selected' : '' }}>Contratista</option>
+                                        <option value="full_time" <?php echo e($employee->contract_type == 'full_time' ? 'selected' : ''); ?>>Tiempo Completo</option>
+                                        <option value="part_time" <?php echo e($employee->contract_type == 'part_time' ? 'selected' : ''); ?>>Medio Tiempo</option>
+                                        <option value="contractor" <?php echo e($employee->contract_type == 'contractor' ? 'selected' : ''); ?>>Contratista</option>
                                     </select>
                                 </div>
                             </div>
@@ -111,15 +110,15 @@
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label">Cuenta Bancaria</label>
-                                    <input type="text" class="form-control" name="bank_account" value="{{ old('bank_account', $employee->bank_account) }}">
+                                    <input type="text" class="form-control" name="bank_account" value="<?php echo e(old('bank_account', $employee->bank_account)); ?>">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-warning"><i class="bi bi-clock me-1"></i>Hora de Entrada</label>
-                                    <input type="time" class="form-control" name="work_start" value="{{ old('work_start', \Carbon\Carbon::parse($employee->work_start)->format('H:i')) }}" required>
+                                    <input type="time" class="form-control" name="work_start" value="<?php echo e(old('work_start', \Carbon\Carbon::parse($employee->work_start)->format('H:i'))); ?>" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-warning"><i class="bi bi-clock-fill me-1"></i>Hora de Salida</label>
-                                    <input type="time" class="form-control" name="work_end" value="{{ old('work_end', \Carbon\Carbon::parse($employee->work_end)->format('H:i')) }}" required>
+                                    <input type="time" class="form-control" name="work_end" value="<?php echo e(old('work_end', \Carbon\Carbon::parse($employee->work_end)->format('H:i'))); ?>" required>
                                 </div>
                             </div>
 
@@ -127,11 +126,11 @@
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label text-info"><i class="bi bi-cup-hot me-1"></i>Inicio de Descanso (Opcional)</label>
-                                    <input type="time" class="form-control" name="break_start" value="{{ old('break_start', $employee->break_start ? \Carbon\Carbon::parse($employee->break_start)->format('H:i') : '') }}">
+                                    <input type="time" class="form-control" name="break_start" value="<?php echo e(old('break_start', $employee->break_start ? \Carbon\Carbon::parse($employee->break_start)->format('H:i') : '')); ?>">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label text-info"><i class="bi bi-cup-hot-fill me-1"></i>Fin de Descanso (Opcional)</label>
-                                    <input type="time" class="form-control" name="break_end" value="{{ old('break_end', $employee->break_end ? \Carbon\Carbon::parse($employee->break_end)->format('H:i') : '') }}">
+                                    <input type="time" class="form-control" name="break_end" value="<?php echo e(old('break_end', $employee->break_end ? \Carbon\Carbon::parse($employee->break_end)->format('H:i') : '')); ?>">
                                 </div>
                             </div>
                         </div>
@@ -146,49 +145,49 @@
                             </div>
                             
                             <div id="extrasContainer">
-                                @foreach($employee->arsExtras as $index => $extra)
+                                <?php $__currentLoopData = $employee->arsExtras; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $extra): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="extra-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
                                     <div class="card-body p-3">
                                         <div class="row g-3">
                                             <div class="col-md-3">
                                                 <label class="form-label small">Nombres y Apellidos</label>
-                                                <input type="text" class="form-control form-control-sm" name="ars_extras[{{ $index }}][name]" value="{{ $extra->name }}" required>
+                                                <input type="text" class="form-control form-control-sm" name="ars_extras[<?php echo e($index); ?>][name]" value="<?php echo e($extra->name); ?>" required>
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Cédula</label>
-                                                <input type="text" class="form-control form-control-sm" name="ars_extras[{{ $index }}][id_number]" value="{{ $extra->id_number }}">
+                                                <input type="text" class="form-control form-control-sm" name="ars_extras[<?php echo e($index); ?>][id_number]" value="<?php echo e($extra->id_number); ?>">
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Parentesco</label>
-                                                <select class="form-select form-select-sm" name="ars_extras[{{ $index }}][relationship]">
-                                                    <option value="Padre / Madre" {{ $extra->relationship == 'Padre / Madre' ? 'selected' : '' }}>Padre / Madre</option>
-                                                    <option value="Suegro / Suegra" {{ $extra->relationship == 'Suegro / Suegra' ? 'selected' : '' }}>Suegro / Suegra</option>
-                                                    <option value="Hijo / Hijastro mayor de edad" {{ $extra->relationship == 'Hijo / Hijastro mayor de edad' ? 'selected' : '' }}>Hijo / Hijastro mayor de edad</option>
-                                                    <option value="Otro" {{ $extra->relationship == 'Otro' ? 'selected' : '' }}>Otro</option>
+                                                <select class="form-select form-select-sm" name="ars_extras[<?php echo e($index); ?>][relationship]">
+                                                    <option value="Padre / Madre" <?php echo e($extra->relationship == 'Padre / Madre' ? 'selected' : ''); ?>>Padre / Madre</option>
+                                                    <option value="Suegro / Suegra" <?php echo e($extra->relationship == 'Suegro / Suegra' ? 'selected' : ''); ?>>Suegro / Suegra</option>
+                                                    <option value="Hijo / Hijastro mayor de edad" <?php echo e($extra->relationship == 'Hijo / Hijastro mayor de edad' ? 'selected' : ''); ?>>Hijo / Hijastro mayor de edad</option>
+                                                    <option value="Otro" <?php echo e($extra->relationship == 'Otro' ? 'selected' : ''); ?>>Otro</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Fecha Nacimiento</label>
-                                                <input type="date" class="form-control form-control-sm" name="ars_extras[{{ $index }}][birth_date]" value="{{ $extra->birth_date?->format('Y-m-d') }}">
+                                                <input type="date" class="form-control form-control-sm" name="ars_extras[<?php echo e($index); ?>][birth_date]" value="<?php echo e($extra->birth_date?->format('Y-m-d')); ?>">
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Sexo</label>
-                                                <select class="form-select form-select-sm" name="ars_extras[{{ $index }}][sex]">
-                                                    <option value="M" {{ $extra->sex == 'M' ? 'selected' : '' }}>Masculino</option>
-                                                    <option value="F" {{ $extra->sex == 'F' ? 'selected' : '' }}>Femenino</option>
+                                                <select class="form-select form-select-sm" name="ars_extras[<?php echo e($index); ?>][sex]">
+                                                    <option value="M" <?php echo e($extra->sex == 'M' ? 'selected' : ''); ?>>Masculino</option>
+                                                    <option value="F" <?php echo e($extra->sex == 'F' ? 'selected' : ''); ?>>Femenino</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Teléfono</label>
-                                                <input type="text" class="form-control form-control-sm" name="ars_extras[{{ $index }}][phone]" value="{{ $extra->phone }}">
+                                                <input type="text" class="form-control form-control-sm" name="ars_extras[<?php echo e($index); ?>][phone]" value="<?php echo e($extra->phone); ?>">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label small">Dirección</label>
-                                                <input type="text" class="form-control form-control-sm" name="ars_extras[{{ $index }}][address]" value="{{ $extra->address }}">
+                                                <input type="text" class="form-control form-control-sm" name="ars_extras[<?php echo e($index); ?>][address]" value="<?php echo e($extra->address); ?>">
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small text-primary">Monto ARS</label>
-                                                <input type="number" step="0.01" class="form-control form-control-sm border-primary" name="ars_extras[{{ $index }}][ars_amount]" value="{{ $extra->ars_amount }}" required>
+                                                <input type="number" step="0.01" class="form-control form-control-sm border-primary" name="ars_extras[<?php echo e($index); ?>][ars_amount]" value="<?php echo e($extra->ars_amount); ?>" required>
                                             </div>
                                             <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-outline-danger w-100 btnRemoveExtra">
@@ -198,10 +197,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
 
-                            <div id="noExtrasMsg" class="text-center py-4 text-white border rounded-3 bg-light bg-opacity-10 mb-4" style="{{ $employee->arsExtras->count() > 0 ? 'display: none;' : '' }}">
+                            <div id="noExtrasMsg" class="text-center py-4 text-white border rounded-3 bg-light bg-opacity-10 mb-4" style="<?php echo e($employee->arsExtras->count() > 0 ? 'display: none;' : ''); ?>">
                                 <i class="bi bi-info-circle me-1"></i> No se han agregado dependientes extras.
                             </div>
                         </div>
@@ -216,7 +215,7 @@
                             </div>
 
                             <div id="existingDocuments" class="mb-4">
-                                @if($employee->documents->count() > 0)
+                                <?php if($employee->documents->count() > 0): ?>
                                     <div class="table-responsive">
                                         <table class="table table-sm table-hover align-middle">
                                             <thead class="table-light">
@@ -227,43 +226,43 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($employee->documents as $doc)
+                                                <?php $__currentLoopData = $employee->documents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <tr>
-                                                    <td>{{ $doc->name }}</td>
-                                                    <td>{{ $doc->created_at->format('d/m/Y') }}</td>
+                                                    <td><?php echo e($doc->name); ?></td>
+                                                    <td><?php echo e($doc->created_at->format('d/m/Y')); ?></td>
                                                     <td class="text-end">
-                                                        <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info me-1">
+                                                        <a href="<?php echo e(Storage::url($doc->file_path)); ?>" target="_blank" class="btn btn-sm btn-outline-info me-1">
                                                             <i class="bi bi-eye"></i>
                                                         </a>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger btnDeleteExistingDoc" data-id="{{ $doc->id }}">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger btnDeleteExistingDoc" data-id="<?php echo e($doc->id); ?>">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </td>
                                                 </tr>
-                                                @endforeach
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </tbody>
                                         </table>
                                     </div>
-                                @else
+                                <?php else: ?>
                                     <div class="text-center py-3 text-white border rounded-3 bg-light bg-opacity-10 mb-3">
                                         <i class="bi bi-info-circle me-1"></i> No hay documentos guardados.
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
 
                             <div id="documentsContainer">
-                                {{-- Las nuevas filas se agregarán aquí --}}
+                                
                             </div>
                         </div>
                     </div>
 
                     <div class="d-flex gap-2 mt-4 pt-3 border-top">
                         <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i> Guardar Cambios</button>
-                        <a href="{{ route('employees.index') }}" class="btn btn-outline-custom">Cancelar</a>
+                        <a href="<?php echo e(route('employees.index')); ?>" class="btn btn-outline-custom">Cancelar</a>
                     </div>
                 </form>
 
-                {{-- Template para nuevas filas --}}
+                
                 <template id="extraRowTemplate">
                     <div class="extra-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
                         <div class="card-body p-3">
@@ -318,7 +317,7 @@
                     </div>
                 </template>
 
-                {{-- Template para filas de documentos --}}
+                
                 <template id="documentRowTemplate">
                     <div class="document-row card mb-3 border-0 shadow-sm" style="background: rgba(255,255,255,0.03);">
                         <div class="card-body p-3">
@@ -341,21 +340,21 @@
                     </div>
                 </template>
 
-                {{-- Formulario oculto para eliminar documentos --}}
+                
                 <form id="deleteDocForm" method="POST" style="display: none;">
-                    @csrf @method('DELETE')
+                    <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                 </form>
             </div>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).ready(function() {
     // Calcular el siguiente índice basado en las filas existentes
-    let extraIndex = {{ $employee->arsExtras->count() }};
+    let extraIndex = <?php echo e($employee->arsExtras->count()); ?>;
     const container = $('#extrasContainer');
     const template = $('#extraRowTemplate').html();
     const noExtrasMsg = $('#noExtrasMsg');
@@ -405,4 +404,6 @@ $(document).ready(function() {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/employees/edit.blade.php ENDPATH**/ ?>

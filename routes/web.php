@@ -76,6 +76,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:supervisor');
     Route::delete('/requests/{userRequest}', [RequestController::class , 'destroy'])->name('requests.destroy');
 
+    // Fichajes
+    Route::get('/fichajes', [App\Http\Controllers\FichajeController::class, 'index'])->name('fichajes.index');
+
     // Employees (Admin+)
     Route::middleware('role:admin')->group(function () {
             Route::resource('employees', EmployeeController::class);

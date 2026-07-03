@@ -746,6 +746,10 @@
                     class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i> Empleados
                 </a>
+                <a href="{{ route('fichajes.index') }}"
+                    class="nav-link {{ request()->routeIs('fichajes.*') ? 'active' : '' }}">
+                    <i class="bi bi-clock-history"></i> Fichajes
+                </a>
 
                 <a href="{{ route('evaluations.index') }}"
                     class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">

@@ -19,3 +19,5 @@ Route::middleware(['api.auth'])->group(function () {
     });
 });
 
+// Fichajes API Endpoint (recibe datos desde terceros)
+Route::post('/fichaje', [App\Http\Controllers\FichajeController::class, 'storeApi']);

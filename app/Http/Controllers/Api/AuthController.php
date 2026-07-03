@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => [__('Las credenciales proporcionadas son incorrectas.')],
             ]);
@@ -42,7 +43,7 @@ class AuthController extends Controller
 
         $deviceName = $request->device_name ?? $request->header('User-Agent') ?? 'Unknown Device';
         $token = $user->createToken($deviceName)->plainTextToken;
-
+        $employee = Employee::where('user_id', $user->id)->first();
         return response()->json([
             'token' => $token,
             'user' => [
@@ -55,6 +56,7 @@ class AuthController extends Controller
                 'position' => $user->position,
                 'avatar' => $user->avatar,
                 'company' => $user->company,
+                'employee_data' => $employee,
             ],
             'message' => 'Inicio de sesión exitoso.'
         ]);
@@ -69,7 +71,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        
+
         $lastLog = \App\Models\AccessLog::where('user_id', $user->id)
             ->whereNull('logout_at')
             ->latest('login_at')
