@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\FichajeController;
 
 
 Route::middleware(['api.auth'])->group(function () {
@@ -16,8 +17,9 @@ Route::middleware(['api.auth'])->group(function () {
         });
 
         Route::get('/tasks', [TaskController::class, 'index']);
+        Route::post('/fichaje', [FichajeController::class, 'storeApi']);
     });
 });
 
 // Fichajes API Endpoint (recibe datos desde terceros)
-Route::post('/fichaje', [App\Http\Controllers\FichajeController::class, 'storeApi']);
+
