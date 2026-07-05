@@ -54,9 +54,9 @@
                                 <div class="col-md-3">
                                     <label class="form-label">Rol</label>
                                     <select class="form-select" name="role">
-                                        <option value="usuario" <?php echo e($employee->user->role == 'usuario' ? 'selected' : ''); ?>>Usuario</option>
-                                        <option value="supervisor" <?php echo e($employee->user->role == 'supervisor' ? 'selected' : ''); ?>>Supervisor</option>
-                                        <option value="admin" <?php echo e($employee->user->role == 'admin' ? 'selected' : ''); ?>>Administrador</option>
+                                        <option value="usuario" <?php echo e(($employee->role ?? $employee->user->role) == 'usuario' ? 'selected' : ''); ?>>Usuario</option>
+                                        <option value="supervisor" <?php echo e(($employee->role ?? $employee->user->role) == 'supervisor' ? 'selected' : ''); ?>>Supervisor</option>
+                                        <option value="admin" <?php echo e(($employee->role ?? $employee->user->role) == 'admin' ? 'selected' : ''); ?>>Administrador</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">

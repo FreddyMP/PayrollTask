@@ -1,9 +1,8 @@
-@extends('layouts.app')
-@section('title', 'Nómina')
-@section('page-title', 'Nómina')
+<?php $__env->startSection('title', 'Nómina'); ?>
+<?php $__env->startSection('page-title', 'Nómina'); ?>
 
-@section('content')
-    @php
+<?php $__env->startSection('content'); ?>
+    <?php
         $company = auth()->user()->company;
         $isBiweekly = $company->payroll_frequency === 'biweekly';
         $currentPeriod = $isBiweekly
@@ -20,40 +19,40 @@
         // 1) Todos los empleados tienen nómina generada para el período actual
         // 2) Al menos una nómina está pendiente de pago
         $showMarkAllBtn = $totalEmployees > 0 && $generatedCount >= $totalEmployees && $pendingCount > 0;
-    @endphp
+    ?>
     <ul class="nav nav-tabs mb-4 px-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
         <li class="nav-item">
-            <a class="nav-link active" href="{{ route('payroll.index') }}"
+            <a class="nav-link active" href="<?php echo e(route('payroll.index')); ?>"
                 style="color: white; border-bottom: 2px solid var(--primary); background: transparent; border-top: 0; border-left: 0; border-right: 0; padding: 0.75rem 1.25rem;">
                 Registros de Nómina
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.bonuses') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.bonuses')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Bonificaciones de Ley
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.benefits') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.benefits')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Prestaciones Laborales
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.christmas') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.christmas')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Salario Navidad
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.tss') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.tss')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Exportar TSS
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.ir17') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.ir17')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Generar IR-3
             </a>
@@ -66,19 +65,19 @@
                 aria-expanded="false" aria-controls="filterCard">
                 <i class="bi bi-funnel me-1"></i> Filtros
             </button>
-            @if(!$showMarkAllBtn)
+            <?php if(!$showMarkAllBtn): ?>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#autoGenerateModal">
                     <i class="bi bi-magic me-1"></i> Generar Automáticamente
                 </button>
-            @endif
-            @if($showMarkAllBtn)
+            <?php endif; ?>
+            <?php if($showMarkAllBtn): ?>
                 <button type="button" class="btn btn-mark-all" data-bs-toggle="modal" data-bs-target="#markAllPaidModal"
-                    title="Marcar toda la nómina del período {{ $currentPeriod }} como pagada">
+                    title="Marcar toda la nómina del período <?php echo e($currentPeriod); ?> como pagada">
                     <i class="bi bi-check2-all me-1"></i> Marcar Todos como Pagados
-                    <span class="badge-pending-count">{{ $pendingCount }}</span>
+                    <span class="badge-pending-count"><?php echo e($pendingCount); ?></span>
                 </button>
-            @endif
-            <a href="{{ route('payroll.create') }}" class="btn btn-primary-custom">
+            <?php endif; ?>
+            <a href="<?php echo e(route('payroll.create')); ?>" class="btn btn-primary-custom">
                 <i class="bi bi-plus-lg me-1"></i> Nueva Nómina
             </a>
         </div>
@@ -88,13 +87,13 @@
     <div class="collapse mb-4" id="filterCard">
         <div class="card">
             <div class="card-body">
-                <form method="GET" action="{{ route('payroll.index') }}" id="filterForm">
+                <form method="GET" action="<?php echo e(route('payroll.index')); ?>" id="filterForm">
                     <div class="row g-3">
                         <!-- Búsqueda por empleado -->
                         <div class="col-md-3">
                             <label for="employee_name" class="form-label">Empleado</label>
                             <input type="text" class="form-control" id="employee_name" name="employee_name"
-                                placeholder="Buscar por nombre" value="{{ request('employee_name') }}">
+                                placeholder="Buscar por nombre" value="<?php echo e(request('employee_name')); ?>">
                         </div>
 
                         <!-- Filtro por período -->
@@ -102,15 +101,15 @@
                             <label for="period" class="form-label">Período</label>
                             <select class="form-select" id="period" name="period">
                                 <option value="">Todos los períodos</option>
-                                @php
+                                <?php
                                     $periods = \App\Models\Payroll::where('company_id', auth()->user()->company_id)
                                         ->distinct()
                                         ->orderBy('period', 'desc')
                                         ->pluck('period');
-                                @endphp
-                                @foreach($periods as $p)
-                                    <option value="{{ $p }}" {{ request('period') == $p ? 'selected' : '' }}>{{ $p }}</option>
-                                @endforeach
+                                ?>
+                                <?php $__currentLoopData = $periods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($p); ?>" <?php echo e(request('period') == $p ? 'selected' : ''); ?>><?php echo e($p); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
 
@@ -119,9 +118,9 @@
                             <label for="status" class="form-label">Estado</label>
                             <select class="form-select" id="status" name="status">
                                 <option value="">Todos</option>
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pendiente
+                                <option value="pending" <?php echo e(request('status') == 'pending' ? 'selected' : ''); ?>>Pendiente
                                 </option>
-                                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Pagado</option>
+                                <option value="paid" <?php echo e(request('status') == 'paid' ? 'selected' : ''); ?>>Pagado</option>
                             </select>
                         </div>
 
@@ -129,20 +128,20 @@
                         <div class="col-md-2">
                             <label for="salary_min" class="form-label">Salario Mínimo</label>
                             <input type="number" class="form-control" id="salary_min" name="salary_min" placeholder="Min"
-                                step="0.01" value="{{ request('salary_min') }}">
+                                step="0.01" value="<?php echo e(request('salary_min')); ?>">
                         </div>
 
                         <!-- Filtro por rango de salario (máximo) -->
                         <div class="col-md-2">
                             <label for="salary_max" class="form-label">Salario Máximo</label>
                             <input type="number" class="form-control" id="salary_max" name="salary_max" placeholder="Max"
-                                step="0.01" value="{{ request('salary_max') }}">
+                                step="0.01" value="<?php echo e(request('salary_max')); ?>">
                         </div>
                     </div>
 
                     <!-- Botones de acción -->
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <a href="{{ route('payroll.index') }}" class="btn btn-outline-custom">
+                        <a href="<?php echo e(route('payroll.index')); ?>" class="btn btn-outline-custom">
                             <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
                         </a>
                         <button type="submit" class="btn btn-primary-custom">
@@ -171,38 +170,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($payrolls as $payroll)
+                        <?php $__empty_1 = true; $__currentLoopData = $payrolls; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payroll): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
-                                <td class="fw-semibold">{{ $payroll->employee->user->name ?? '—' }}</td>
-                                <td>{{ $payroll->period }}</td>
-                                <td>RD$ {{ number_format($payroll->gross_salary, 2) }}</td>
-                                <td style="color: #f87171;">-RD$ {{ number_format($payroll->deductions, 2) }}</td>
+                                <td class="fw-semibold"><?php echo e($payroll->employee->user->name ?? '—'); ?></td>
+                                <td><?php echo e($payroll->period); ?></td>
+                                <td>RD$ <?php echo e(number_format($payroll->gross_salary, 2)); ?></td>
+                                <td style="color: #f87171;">-RD$ <?php echo e(number_format($payroll->deductions, 2)); ?></td>
                                 <td class="fw-semibold" style="color: var(--success);">RD$
-                                    {{ number_format($payroll->net_salary, 2) }}
+                                    <?php echo e(number_format($payroll->net_salary, 2)); ?>
+
                                 </td>
-                                <td>{{ $payroll->payment_date?->format('d/m/Y') ?? '—' }}</td>
+                                <td><?php echo e($payroll->payment_date?->format('d/m/Y') ?? '—'); ?></td>
                                 <td><span
-                                        class="badge-status badge-{{ $payroll->status }}">{{ ucfirst($payroll->status) }}</span>
+                                        class="badge-status badge-<?php echo e($payroll->status); ?>"><?php echo e(ucfirst($payroll->status)); ?></span>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        @if($payroll->status === 'pending')
-                                            <a href="{{ route('payroll.edit', $payroll) }}" class="btn btn-outline-custom btn-sm"
+                                        <?php if($payroll->status === 'pending'): ?>
+                                            <a href="<?php echo e(route('payroll.edit', $payroll)); ?>" class="btn btn-outline-custom btn-sm"
                                                 style="color: #60a5fa;" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <form method="POST" action="{{ route('payroll.markPaid', $payroll) }}" class="d-inline"
+                                            <form method="POST" action="<?php echo e(route('payroll.markPaid', $payroll)); ?>" class="d-inline"
                                                 onsubmit="return submitMarkPaid(this)">
-                                                @csrf @method('PATCH')
+                                                <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
                                                 <button type="submit" class="btn btn-outline-custom btn-sm" style="color: #34d399;"
                                                     title="Marcar como pagado">
                                                     <i class="bi bi-check-circle btn-icon"></i>
                                                 </button>
                                             </form>
-                                        @endif
-                                        <form method="POST" action="{{ route('payroll.destroy', $payroll) }}" class="d-inline"
+                                        <?php endif; ?>
+                                        <form method="POST" action="<?php echo e(route('payroll.destroy', $payroll)); ?>" class="d-inline"
                                             onsubmit="return confirm('¿Eliminar este registro?')">
-                                            @csrf @method('DELETE')
+                                            <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                             <button type="submit" class="btn btn-outline-custom btn-sm" style="color: #f87171;"
                                                 title="Eliminar">
                                                 <i class="bi bi-trash"></i>
@@ -211,19 +211,19 @@
                                     </div>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="8" class="text-center text-dark py-4">No hay registros de nómina</td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div class="mt-3">{{ $payrolls->links() }}</div>
-@endsection
+    <div class="mt-3"><?php echo e($payrolls->links()); ?></div>
+<?php $__env->stopSection(); ?>
 
 <!-- Modal para Generar Nómina Automáticamente -->
 <div class="modal fade" id="autoGenerateModal" tabindex="-1" aria-hidden="true">
@@ -234,12 +234,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ route('payroll.autoGenerate') }}">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('payroll.autoGenerate')); ?>">
+                    <?php echo csrf_field(); ?>
                     <div class="mb-3">
                         <label class="form-label">Período</label>
                         <select class="form-select" name="period" required>
-                            @php
+                            <?php
                                 $company = auth()->user()->company;
                                 $isBiweekly = $company->payroll_frequency === 'biweekly';
                                 $currentPeriod = $isBiweekly
@@ -265,12 +265,13 @@
                                     }
                                 }
                                 $periods = array_reverse($periods);
-                            @endphp
-                            @foreach($periods as $period)
-                                <option value="{{ $period['value'] }}" {{ $period['value'] == $currentPeriod ? 'selected' : '' }}>
-                                    {{ $period['label'] }}
+                            ?>
+                            <?php $__currentLoopData = $periods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $period): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($period['value']); ?>" <?php echo e($period['value'] == $currentPeriod ? 'selected' : ''); ?>>
+                                    <?php echo e($period['label']); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                     <div class="alert alert-info">
@@ -305,11 +306,11 @@
             <div class="modal-body">
                 <div class="mark-all-info-box">
                     <i class="bi bi-calendar2-check me-2"></i>
-                    <strong>Período actual:</strong>&nbsp;<span class="period-badge">{{ $currentPeriod }}</span>
+                    <strong>Período actual:</strong>&nbsp;<span class="period-badge"><?php echo e($currentPeriod); ?></span>
                 </div>
                 <p class="mt-3 mb-1" style="color: #cbd5e1;">
                     Esta acción marcará como <strong style="color:#34d399;">pagadas</strong>
-                    las <strong>{{ $pendingCount }}</strong> nómina(s) pendientes del período actual
+                    las <strong><?php echo e($pendingCount); ?></strong> nómina(s) pendientes del período actual
                     y enviará automáticamente el <strong>volante de pago</strong> por correo a cada empleado.
                 </p>
                 <div class="alert-warning-custom mt-3">
@@ -319,9 +320,9 @@
             </div>
             <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
                 <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
-                <form method="POST" action="{{ route('payroll.markAllPaid') }}" id="markAllPaidForm"
+                <form method="POST" action="<?php echo e(route('payroll.markAllPaid')); ?>" id="markAllPaidForm"
                     onsubmit="return submitMarkAllPaid(this)">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn btn-mark-all-confirm" id="markAllPaidBtn">
                         <i class="bi bi-check2-all me-1"></i> Confirmar y Pagar Todos
                     </button>
@@ -331,11 +332,11 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         // Mostrar el card de filtros si hay filtros activos
         document.addEventListener('DOMContentLoaded', function () {
-            const hasFilters = {{ (request()->has('employee_name') || request()->has('period') || request()->has('status') || request()->has('salary_min') || request()->has('salary_max')) ? 'true' : 'false' }};
+            const hasFilters = <?php echo e((request()->has('employee_name') || request()->has('period') || request()->has('status') || request()->has('salary_min') || request()->has('salary_max')) ? 'true' : 'false'); ?>;
             if (hasFilters) {
                 const filterCard = document.getElementById('filterCard');
                 if (filterCard) {
@@ -474,4 +475,5 @@
             cursor: not-allowed;
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/payroll/index.blade.php ENDPATH**/ ?>

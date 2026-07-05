@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'api.auth' => \App\Http\Middleware\ApiAuthorizationMiddleware::class,
+            'active.company' => \App\Http\Middleware\SetActiveCompany::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\SetActiveCompany::class,
         ]);
 
         $middleware->group('api', [

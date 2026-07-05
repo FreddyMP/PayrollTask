@@ -78,13 +78,7 @@ class EmployeeController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
-                    return $query->where('status', 'active');
-                })
-            ],
+            'email' => 'required|email',
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,supervisor,usuario',
             'phone' => 'nullable|string|max:20',
@@ -113,6 +107,15 @@ class EmployeeController extends Controller
         ], $messages);
 
         $companyId = Auth::user()->company_id;
+        
+        $email = strtolower($data['email']);
+        $existingEmployee = Employee::whereHas('user', function ($q) use ($email) {
+            $q->where('email', $email);
+        })->where('company_id', $companyId)->first();
+
+        if ($existingEmployee) {
+            return back()->withErrors(['email' => 'Este correo ya está registrado como empleado en esta empresa.'])->withInput();
+        }
 
         if (!empty($data['position_id'])) {
             $position = Position::with('department')->find($data['position_id']);
@@ -125,16 +128,20 @@ class EmployeeController extends Controller
         $departmentId = isset($position) ? $position->department_id : null;
         $departmentName = isset($position) && $position->department ? $position->department->name : null;
 
-        $user = User::create([
-            'company_id' => $companyId,
-            'name' => $data['name'],
-            'email' => strtolower($data['email']),
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'],
-            'phone' => $data['phone'] ?? null,
-            'position' => $positionTitle,
-            'status' => 'active',
-        ]);
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            $user = User::create([
+                'company_id' => $companyId,
+                'name' => $data['name'],
+                'email' => $email,
+                'password' => Hash::make($data['password']),
+                'role' => $data['role'],
+                'phone' => $data['phone'] ?? null,
+                'position' => $positionTitle,
+                'status' => 'active',
+            ]);
+        }
 
         $employee = Employee::create([
             'user_id' => $user->id,
@@ -151,6 +158,7 @@ class EmployeeController extends Controller
             'work_end' => $data['work_end'] ?? '17:00',
             'break_start' => $data['break_start'] ?? null,
             'break_end' => $data['break_end'] ?? null,
+            'role' => $data['role'],
         ]);
 
         if (!empty($data['ars_extras'])) {
@@ -210,13 +218,7 @@ class EmployeeController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                \Illuminate\Validation\Rule::unique('users', 'email')->where(function ($query) {
-                    return $query->where('status', 'active');
-                })->ignore($employee->user_id)
-            ],
+            'email' => 'required|email',
             'role' => 'required|in:admin,supervisor,usuario',
             'phone' => 'nullable|string|max:20',
             'position_id' => 'nullable|exists:positions,id',
@@ -244,6 +246,17 @@ class EmployeeController extends Controller
             'documents.*.file' => 'nullable|file|max:10240',
         ], $messages);
 
+        $companyId = Auth::user()->company_id;
+        $email = strtolower($data['email']);
+
+        $existingEmployee = Employee::whereHas('user', function ($q) use ($email) {
+            $q->where('email', $email);
+        })->where('company_id', $companyId)->where('id', '!=', $employee->id)->first();
+
+        if ($existingEmployee) {
+            return back()->withErrors(['email' => 'Este correo ya está registrado como empleado en esta empresa.'])->withInput();
+        }
+
         if (!empty($data['position_id'])) {
             $position = Position::with('department')->find($data['position_id']);
             if (!$position || $position->company_id !== $employee->company_id) {
@@ -258,7 +271,6 @@ class EmployeeController extends Controller
         $employee->user->update([
             'name' => $data['name'],
             'email' => strtolower($data['email']),
-            'role' => $data['role'],
             'phone' => $data['phone'] ?? null,
             'position' => $positionTitle,
             'status' => $data['status'] ?? 'active',
@@ -277,6 +289,7 @@ class EmployeeController extends Controller
             'work_end' => $data['work_end'] ?? '17:00',
             'break_start' => $data['break_start'] ?? null,
             'break_end' => $data['break_end'] ?? null,
+            'role' => $data['role'],
         ]);
 
         $employee->arsExtras()->delete();

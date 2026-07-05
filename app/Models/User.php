@@ -28,7 +28,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
+            'company_id'        => 'integer',
         ];
     }
 
@@ -84,8 +85,11 @@ class User extends Authenticatable
 
     public function hasMinRole(string $role): bool
     {
+        // Always read the current runtime value of $this->role,
+        // which the SetActiveCompany middleware injects per-company.
+        $currentRole = $this->getAttribute('role') ?? 'usuario';
         $levels = ['super' => 1, 'admin' => 2, 'supervisor' => 3, 'usuario' => 4];
-        return ($levels[$this->role] ?? 99) <= ($levels[$role] ?? 99);
+        return ($levels[$currentRole] ?? 99) <= ($levels[$role] ?? 99);
     }
 
     public function hasRole(string $role): bool

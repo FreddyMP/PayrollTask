@@ -1,41 +1,40 @@
-@extends('layouts.app')
-@section('title', 'ISR IR-3- Retenciones de Asalariados')
-@section('page-title', 'Reporte IR-3(DGII)')
+<?php $__env->startSection('title', 'ISR IR-3- Retenciones de Asalariados'); ?>
+<?php $__env->startSection('page-title', 'Reporte IR-3(DGII)'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <ul class="nav nav-tabs mb-4 px-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.index') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.index')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Registros de Nómina
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.bonuses') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.bonuses')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Bonificaciones de Ley
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.benefits') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.benefits')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Prestaciones Laborales
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.christmas') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.christmas')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Salario Navidad
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.tss') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.tss')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 TSS
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="{{ route('payroll.ir17') }}"
+            <a class="nav-link active" href="<?php echo e(route('payroll.ir17')); ?>"
                 style="color: white; border-bottom: 2px solid var(--primary); background: transparent; border-top: 0; border-left: 0; border-right: 0; padding: 0.75rem 1.25rem;">
                 IR-3
             </a>
@@ -43,11 +42,11 @@
     </ul>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <form action="{{ route('payroll.ir17') }}" method="GET" class="d-flex gap-2 align-items-center">
+        <form action="<?php echo e(route('payroll.ir17')); ?>" method="GET" class="d-flex gap-2 align-items-center">
             <label class="text-secondary small me-2">Período:</label>
             <select name="period" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
-                @foreach($availablePeriods as $p)
-                    @php
+                <?php $__currentLoopData = $availablePeriods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $basePeriod = preg_replace('/-Q[12]$/', '', $p);
                         $periodLabel = \Carbon\Carbon::parse($basePeriod)->translatedFormat('F Y');
                         if (str_ends_with($p, '-Q1')) {
@@ -55,11 +54,12 @@
                         } elseif (str_ends_with($p, '-Q2')) {
                             $periodLabel .= ' — 2ª Quincena';
                         }
-                    @endphp
-                    <option value="{{ $p }}" {{ $period == $p ? 'selected' : '' }}>
-                        {{ $periodLabel }}
+                    ?>
+                    <option value="<?php echo e($p); ?>" <?php echo e($period == $p ? 'selected' : ''); ?>>
+                        <?php echo e($periodLabel); ?>
+
                     </option>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
         </form>
         <div class="d-flex gap-2">
@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    {{-- Encabezado del formulario IR-3--}}
+    
     <div class="card mb-4 border-0 shadow-sm"
         style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.05));">
         <div class="card-body">
@@ -83,9 +83,9 @@
                         Retenciones de Asalariados (DGII)</p>
                 </div>
                 <div class="col-md-4 text-end">
-                    <div class="small text-white"><strong>RNC:</strong> {{ $company->rnc ?? '—' }}</div>
-                    <div class="small text-white"><strong>Empresa:</strong> {{ $company->name }}</div>
-                    @php
+                    <div class="small text-white"><strong>RNC:</strong> <?php echo e($company->rnc ?? '—'); ?></div>
+                    <div class="small text-white"><strong>Empresa:</strong> <?php echo e($company->name); ?></div>
+                    <?php
                         $basePeriodDisplay = preg_replace('/-Q[12]$/', '', $period);
                         $periodLabelDisplay = \Carbon\Carbon::parse($basePeriodDisplay)->translatedFormat('F Y');
                         if (str_ends_with($period, '-Q1')) {
@@ -93,14 +93,14 @@
                         } elseif (str_ends_with($period, '-Q2')) {
                             $periodLabelDisplay .= ' — 2ª Quincena';
                         }
-                    @endphp
-                    <div class="small" style="color: #94a3b8;"><strong>Período:</strong> {{ $periodLabelDisplay }}</div>
+                    ?>
+                    <div class="small" style="color: #94a3b8;"><strong>Período:</strong> <?php echo e($periodLabelDisplay); ?></div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Info de escala ISR --}}
+    
     <div class="alert border-0 shadow-sm mb-4" style="background: rgba(251, 191, 36, 0.08); color: #fbbf24;">
         <div class="d-flex">
             <i class="bi bi-calculator-fill me-3 fs-4"></i>
@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    {{-- Tabla principal IR-3--}}
+    
     <div class="card shadow-sm">
         <div class="card-body p-0 overflow-hidden">
             <div class="table-responsive">
@@ -137,31 +137,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($report as $row)
+                        <?php $__empty_1 = true; $__currentLoopData = $report; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <td class="ps-4">
                                     <span class="badge bg-dark bg-opacity-50 fw-normal"
-                                        style="font-size: 0.8rem;">{{ $row['cedula'] }}</span>
+                                        style="font-size: 0.8rem;"><?php echo e($row['cedula']); ?></span>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold">{{ $row['nombre'] }}</div>
+                                    <div class="fw-semibold"><?php echo e($row['nombre']); ?></div>
                                 </td>
-                                <td class="text-end">RD$ {{ number_format($row['remuneracion_bruta'], 2) }}</td>
+                                <td class="text-end">RD$ <?php echo e(number_format($row['remuneracion_bruta'], 2)); ?></td>
                                 <td class="text-end">
-                                    @if($row['otros_ingresos'] > 0)
-                                        <span style="color: #34d399;">RD$ {{ number_format($row['otros_ingresos'], 2) }}</span>
-                                    @else
+                                    <?php if($row['otros_ingresos'] > 0): ?>
+                                        <span style="color: #34d399;">RD$ <?php echo e(number_format($row['otros_ingresos'], 2)); ?></span>
+                                    <?php else: ?>
                                         <span class="text-white">—</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end" style="background: rgba(52, 211, 153, 0.02);">
-                                    {{ number_format($row['sfs'], 2) }}</td>
+                                    <?php echo e(number_format($row['sfs'], 2)); ?></td>
                                 <td class="text-end" style="background: rgba(96, 165, 250, 0.02);">
-                                    {{ number_format($row['afp'], 2) }}</td>
-                                <td class="text-end">{{ number_format($row['total_tss'], 2) }}</td>
-                                <td class="text-end fw-semibold">RD$ {{ number_format($row['ingreso_gravable'], 2) }}</td>
+                                    <?php echo e(number_format($row['afp'], 2)); ?></td>
+                                <td class="text-end"><?php echo e(number_format($row['total_tss'], 2)); ?></td>
+                                <td class="text-end fw-semibold">RD$ <?php echo e(number_format($row['ingreso_gravable'], 2)); ?></td>
                                 <td class="text-center">
-                                    @php
+                                    <?php
                                         $tramoBadge = match ($row['tramo']) {
                                             'Exento' => 'bg-success bg-opacity-10 text-success',
                                             '15%' => 'bg-info bg-opacity-10 text-info',
@@ -169,58 +169,60 @@
                                             '25%' => 'bg-danger bg-opacity-10 text-danger',
                                             default => 'bg-secondary bg-opacity-10 text-secondary',
                                         };
-                                    @endphp
-                                    <span class="badge {{ $tramoBadge }}" style="font-size: 0.8rem;">{{ $row['tramo'] }}</span>
+                                    ?>
+                                    <span class="badge <?php echo e($tramoBadge); ?>" style="font-size: 0.8rem;"><?php echo e($row['tramo']); ?></span>
                                 </td>
                                 <td class="text-end pe-4" style="background: rgba(251, 191, 36, 0.02);">
-                                    @if($row['isr_retenido'] > 0)
+                                    <?php if($row['isr_retenido'] > 0): ?>
                                         <span class="fw-bold" style="color: #fbbf24;">RD$
-                                            {{ number_format($row['isr_retenido'], 2) }}</span>
-                                    @else
+                                            <?php echo e(number_format($row['isr_retenido'], 2)); ?></span>
+                                    <?php else: ?>
                                         <span class="text-success fw-semibold">Exento</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="10" class="text-center py-5 text-dark">
                                     <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
-                                    No hay registros de nómina para el período {{ $periodLabelDisplay }}.
+                                    No hay registros de nómina para el período <?php echo e($periodLabelDisplay); ?>.
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
-                    @if($report->count() > 0)
+                    <?php if($report->count() > 0): ?>
                         <tfoot style="background: rgba(255,255,255,0.03); border-top: 2px solid rgba(255,255,255,0.1);">
                             <tr class="fw-bold border-0">
-                                <td class="ps-4" colspan="2">TOTALES ({{ $report->count() }}
-                                    empleado{{ $report->count() > 1 ? 's' : '' }})</td>
-                                <td class="text-end">RD$ {{ number_format($report->sum('remuneracion_bruta'), 2) }}</td>
-                                <td class="text-end">RD$ {{ number_format($report->sum('otros_ingresos'), 2) }}</td>
-                                <td class="text-end">{{ number_format($report->sum('sfs'), 2) }}</td>
-                                <td class="text-end">{{ number_format($report->sum('afp'), 2) }}</td>
-                                <td class="text-end">{{ number_format($report->sum('total_tss'), 2) }}</td>
-                                <td class="text-end">RD$ {{ number_format($report->sum('ingreso_gravable'), 2) }}</td>
+                                <td class="ps-4" colspan="2">TOTALES (<?php echo e($report->count()); ?>
+
+                                    empleado<?php echo e($report->count() > 1 ? 's' : ''); ?>)</td>
+                                <td class="text-end">RD$ <?php echo e(number_format($report->sum('remuneracion_bruta'), 2)); ?></td>
+                                <td class="text-end">RD$ <?php echo e(number_format($report->sum('otros_ingresos'), 2)); ?></td>
+                                <td class="text-end"><?php echo e(number_format($report->sum('sfs'), 2)); ?></td>
+                                <td class="text-end"><?php echo e(number_format($report->sum('afp'), 2)); ?></td>
+                                <td class="text-end"><?php echo e(number_format($report->sum('total_tss'), 2)); ?></td>
+                                <td class="text-end">RD$ <?php echo e(number_format($report->sum('ingreso_gravable'), 2)); ?></td>
                                 <td></td>
                                 <td class="text-end pe-4 text-warning" style="font-size: 1.1rem;">
-                                    RD$ {{ number_format($report->sum('isr_retenido'), 2) }}
+                                    RD$ <?php echo e(number_format($report->sum('isr_retenido'), 2)); ?>
+
                                 </td>
                             </tr>
                         </tfoot>
-                    @endif
+                    <?php endif; ?>
                 </table>
             </div>
         </div>
     </div>
 
-    {{-- Resumen de retenciones --}}
-    @if($report->count() > 0)
+    
+    <?php if($report->count() > 0): ?>
         <div class="row g-3 mt-3">
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm" style="background: rgba(52, 211, 153, 0.05);">
                     <div class="card-body text-center py-3">
                         <div class="small text-white mb-1">Empleados Exentos</div>
-                        <div class="fs-4 fw-bold text-success">{{ $report->where('tramo', 'Exento')->count() }}</div>
+                        <div class="fs-4 fw-bold text-success"><?php echo e($report->where('tramo', 'Exento')->count()); ?></div>
                     </div>
                 </div>
             </div>
@@ -228,7 +230,7 @@
                 <div class="card border-0 shadow-sm" style="background: rgba(96, 165, 250, 0.05);">
                     <div class="card-body text-center py-3">
                         <div class="small text-white mb-1">Tramo 15%</div>
-                        <div class="fs-4 fw-bold text-info">{{ $report->where('tramo', '15%')->count() }}</div>
+                        <div class="fs-4 fw-bold text-info"><?php echo e($report->where('tramo', '15%')->count()); ?></div>
                     </div>
                 </div>
             </div>
@@ -236,7 +238,7 @@
                 <div class="card border-0 shadow-sm" style="background: rgba(251, 191, 36, 0.05);">
                     <div class="card-body text-center py-3">
                         <div class="small text-white mb-1">Tramo 20%</div>
-                        <div class="fs-4 fw-bold text-warning">{{ $report->where('tramo', '20%')->count() }}</div>
+                        <div class="fs-4 fw-bold text-warning"><?php echo e($report->where('tramo', '20%')->count()); ?></div>
                     </div>
                 </div>
             </div>
@@ -244,7 +246,7 @@
                 <div class="card border-0 shadow-sm" style="background: rgba(248, 113, 113, 0.05);">
                     <div class="card-body text-center py-3">
                         <div class="small text-white mb-1">Tramo 25%</div>
-                        <div class="fs-4 fw-bold" style="color: #f87171;">{{ $report->where('tramo', '25%')->count() }}</div>
+                        <div class="fs-4 fw-bold" style="color: #f87171;"><?php echo e($report->where('tramo', '25%')->count()); ?></div>
                     </div>
                 </div>
             </div>
@@ -257,7 +259,8 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="small text-white">Total ISR a Retener (Período)</div>
-                                <div class="fs-3 fw-bold text-warning">RD$ {{ number_format($report->sum('isr_retenido'), 2) }}
+                                <div class="fs-3 fw-bold text-warning">RD$ <?php echo e(number_format($report->sum('isr_retenido'), 2)); ?>
+
                                 </div>
                             </div>
                             <i class="bi bi-cash-coin fs-1 text-warning opacity-25"></i>
@@ -272,7 +275,7 @@
                             <div>
                                 <div class="small text-white">Total Nómina Gravable</div>
                                 <div class="fs-3 fw-bold text-primary">RD$
-                                    {{ number_format($report->sum('ingreso_gravable'), 2) }}</div>
+                                    <?php echo e(number_format($report->sum('ingreso_gravable'), 2)); ?></div>
                             </div>
                             <i class="bi bi-graph-up-arrow fs-1 text-primary opacity-25"></i>
                         </div>
@@ -280,15 +283,15 @@
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
     <div class="mt-4 text-secondary small">
         <i class="bi bi-shield-check me-1"></i> Reporte generado conforme al formulario IR-3de la Dirección General de
         Impuestos Internos (DGII) de República Dominicana.
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         function exportCSV() {
             const table = document.getElementById('ir17Table');
@@ -327,9 +330,10 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'IR17_{{ $period }}.csv';
+            a.download = 'IR17_<?php echo e($period); ?>.csv';
             a.click();
             URL.revokeObjectURL(url);
         }
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/payroll/ir17.blade.php ENDPATH**/ ?>

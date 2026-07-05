@@ -32,12 +32,12 @@ class RegulationController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB max
+            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:51200', // 50MB max
         ]);
 
         // Subir archivo
         $file = $request->file('file');
-        $filePath = $file->store('regulations', 'public');
+        $filePath = $file->store('regulations', 's3');
         $fileType = $file->getClientOriginalExtension();
 
         // Intentar extraer contenido según tipo
@@ -64,7 +64,9 @@ class RegulationController extends Controller
             abort(403);
         }
 
-        return view('regulations.show', compact('regulation'));
+        $fileUrl = Storage::disk('s3')->url($regulation->file_path);
+
+        return view('regulations.show', compact('regulation', 'fileUrl'));
     }
 
     public function update(Request $request, Regulation $regulation)
@@ -82,7 +84,7 @@ class RegulationController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,txt|max:10240',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,txt|max:51200', // 50MB max
         ]);
 
         $data = [
@@ -94,11 +96,11 @@ class RegulationController extends Controller
         if ($request->hasFile('file')) {
             // Eliminar archivo anterior
             if ($regulation->file_path) {
-                Storage::disk('public')->delete($regulation->file_path);
+                Storage::disk('s3')->delete($regulation->file_path);
             }
 
             $file = $request->file('file');
-            $filePath = $file->store('regulations', 'public');
+            $filePath = $file->store('regulations', 's3');
             $fileType = $file->getClientOriginalExtension();
             $content = $this->extractContent($file, $fileType);
 
@@ -126,7 +128,7 @@ class RegulationController extends Controller
 
         // Eliminar archivo
         if ($regulation->file_path) {
-            Storage::disk('public')->delete($regulation->file_path);
+            Storage::disk('s3')->delete($regulation->file_path);
         }
 
         $regulation->delete();

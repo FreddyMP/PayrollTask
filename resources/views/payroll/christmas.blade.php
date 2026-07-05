@@ -37,7 +37,7 @@
         <li class="nav-item">
             <a class="nav-link" href="{{ route('payroll.ir17') }}"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
-                IR-17
+                IR-3
             </a>
         </li>
     </ul>

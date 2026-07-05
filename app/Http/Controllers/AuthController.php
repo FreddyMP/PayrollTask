@@ -100,8 +100,36 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
+            // Check how many active companies this user belongs to (via employees table)
+            $employeeCompanies = \App\Models\Employee::where('user_id', $user->id)
+                ->whereHas('company', fn($q) => $q->where('status', 'active'))
+                ->with('company')
+                ->get();
+
+            if ($employeeCompanies->count() > 1) {
+                // Multiple companies — redirect to company selector
+                // Don't set active_company_id yet, let the user choose
+                AccessLog::create([
+                    'user_id' => $user->id,
+                    'login_at' => now(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+                $request->session()->put('just_logged_in', true);
+                return redirect()->route('select-company');
+            }
+
+            // Single or no employee record — auto-select primary company
+            if ($employeeCompanies->count() === 1) {
+                $request->session()->put('active_company_id', $employeeCompanies->first()->company_id);
+            } else {
+                $request->session()->put('active_company_id', $user->company_id);
+            }
+
             AccessLog::create([
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
                 'login_at' => now(),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -149,5 +177,63 @@ class AuthController extends Controller
         }
 
         return redirect()->route('login');
+    }
+
+    public function showSelectCompany()
+    {
+        $user = Auth::user();
+
+        $companies = \App\Models\Employee::where('user_id', $user->id)
+            ->whereHas('company', fn($q) => $q->where('status', 'active'))
+            ->with(['company', 'user'])
+            ->get();
+
+        // If only one company or none, skip this screen
+        if ($companies->count() <= 1) {
+            $companyId = $companies->count() === 1
+                ? $companies->first()->company_id
+                : $user->company_id;
+            session(['active_company_id' => $companyId]);
+            return redirect()->route('dashboard');
+        }
+
+        return view('auth.select-company', compact('companies'));
+    }
+
+    public function selectCompany(Request $request)
+    {
+        $request->validate(['company_id' => 'required|integer|exists:companies,id']);
+
+        $user = Auth::user();
+
+        // Verify the user actually belongs to this company
+        $belongs = \App\Models\Employee::where('user_id', $user->id)
+            ->where('company_id', $request->company_id)
+            ->exists();
+
+        if (!$belongs && $user->company_id != $request->company_id) {
+            return back()->withErrors(['company_id' => 'No tienes acceso a esta empresa.']);
+        }
+
+        session(['active_company_id' => $request->company_id]);
+        return redirect()->route('dashboard');
+    }
+
+    public function switchCompany(Request $request)
+    {
+        $request->validate(['company_id' => 'required|integer|exists:companies,id']);
+
+        $user = Auth::user();
+
+        $belongs = \App\Models\Employee::where('user_id', $user->id)
+            ->where('company_id', $request->company_id)
+            ->exists();
+
+        if (!$belongs && $user->company_id != $request->company_id) {
+            return back()->withErrors(['company_id' => 'No tienes acceso a esta empresa.']);
+        }
+
+        session(['active_company_id' => $request->company_id]);
+        return redirect()->route('dashboard');
     }
 }

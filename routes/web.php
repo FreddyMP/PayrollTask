@@ -47,6 +47,11 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Company Selection (multi-company users)
+    Route::get('/select-company', [AuthController::class, 'showSelectCompany'])->name('select-company');
+    Route::post('/select-company', [AuthController::class, 'selectCompany'])->name('select-company.post');
+    Route::post('/switch-company', [AuthController::class, 'switchCompany'])->name('switch-company');
+
     // Tasks
     Route::resource('tasks', TaskController::class)->except('show');
     Route::resource('devices', \App\Http\Controllers\DeviceController::class)->middleware('role:supervisor');
