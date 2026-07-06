@@ -32,7 +32,9 @@
                 <i class="bi bi-file-earmark-text me-2"></i>Hoja de Solicitud
             </button>
         </li>
-        <div class="tab-content" id="recruitmentTabsContent">
+    </ul>
+
+    <div class="tab-content" id="recruitmentTabsContent">
             <!-- Vacancies Tab -->
             <div class="tab-pane fade show active" id="vacancies-pane">
                 <!-- Filters Card -->
