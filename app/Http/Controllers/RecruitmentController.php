@@ -136,7 +136,7 @@ class RecruitmentController extends Controller
 
         $cvPath = null;
         if ($request->hasFile('cv')) {
-            $cvPath = $request->file('cv')->store('cvs', config('filesystems.default'));
+            $cvPath = $request->file('cv')->store('cvs', 's3');
         }
 
         $candidate = $vacancy->candidates()->create([

@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Gestionar Vacante'); ?>
+<?php $__env->startSection('page-title', $vacancy->title); ?>
 
-@section('title', 'Gestionar Vacante')
-@section('page-title', $vacancy->title)
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         .step-card {
             border-left: 4px solid var(--primary);
@@ -44,15 +42,15 @@
             background: var(--danger);
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
-    @if($vacancy->status === 'closed')
+<?php $__env->startSection('content'); ?>
+    <?php if($vacancy->status === 'closed'): ?>
         <div class="alert alert-warning mb-4">
             <i class="bi bi-lock-fill me-2"></i>Esta vacante se encuentra <strong>Cerrada</strong>. No se pueden realizar más
             cambios en el proceso.
         </div>
-    @endif
+    <?php endif; ?>
 
     <div class="row">
         <!-- Left Column: Steps and Config -->
@@ -60,49 +58,50 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span class="text-white">Pasos del Proceso</span>
-                    @if($vacancy->status === 'open')
+                    <?php if($vacancy->status === 'open'): ?>
                         <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#addStepModal">
                             <i class="bi bi-plus-lg"></i>
                         </button>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush bg-transparent">
-                        @forelse($vacancy->steps as $step)
+                        <?php $__empty_1 = true; $__currentLoopData = $vacancy->steps; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $step): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="list-group-item bg-transparent border-0 ps-0 mb-3 step-card">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="text-white mb-1">{{ $loop->iteration }}. {{ $step->name }}</h6>
-                                        <p class="small text-white mb-0">Resp: {{ $step->responsible->name }}</p>
+                                        <h6 class="text-white mb-1"><?php echo e($loop->iteration); ?>. <?php echo e($step->name); ?></h6>
+                                        <p class="small text-white mb-0">Resp: <?php echo e($step->responsible->name); ?></p>
                                     </div>
                                     <div class="text-end">
-                                        <span class="badge badge-status badge-primary mb-1 d-block">{{ $step->points }}
+                                        <span class="badge badge-status badge-primary mb-1 d-block"><?php echo e($step->points); ?>
+
                                             pts</span>
-                                        @if($vacancy->status === 'open')
+                                        <?php if($vacancy->status === 'open'): ?>
                                             <button class="btn btn-sm btn-link text-warning p-0 text-decoration-none"
-                                                onclick="editStep({{ $step->id }}, '{{ addslashes($step->name) }}', {{ $step->responsible_id }}, {{ $step->points }})">
+                                                onclick="editStep(<?php echo e($step->id); ?>, '<?php echo e(addslashes($step->name)); ?>', <?php echo e($step->responsible_id); ?>, <?php echo e($step->points); ?>)">
                                                 <i class="bi bi-pencil-square"></i> Editar
                                             </button>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <p class="text-white text-center py-3">Define los pasos para esta vacante.</p>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
 
-                    @if($vacancy->steps->count() > 0)
+                    <?php if($vacancy->steps->count() > 0): ?>
                         <div class="mt-3">
                             <div class="d-flex justify-content-between small text-white mb-2">
                                 <span>Puntuación Total</span>
-                                <span>{{ $vacancy->steps->sum('points') }} / 100</span>
+                                <span><?php echo e($vacancy->steps->sum('points')); ?> / 100</span>
                             </div>
                             <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-primary" style="width: {{ $vacancy->steps->sum('points') }}%"></div>
+                                <div class="progress-bar bg-primary" style="width: <?php echo e($vacancy->steps->sum('points')); ?>%"></div>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -111,16 +110,16 @@
                     <span class="text-white">Información General</span>
                 </div>
                 <div class="card-body">
-                    <p class="text-white small mb-3">{{ $vacancy->description }}</p>
+                    <p class="text-white small mb-3"><?php echo e($vacancy->description); ?></p>
                     <div class="d-grid">
-                        <a href="{{ route('recruitment.ranking', $vacancy) }}" class="btn btn-outline-custom">
+                        <a href="<?php echo e(route('recruitment.ranking', $vacancy)); ?>" class="btn btn-outline-custom">
                             <i class="bi bi-trophy-fill me-2 text-warning"></i>Ver Ranking
                         </a>
                     </div>
                 </div>
             </div>
 
-            @if($vacancy->selected_candidate_id)
+            <?php if($vacancy->selected_candidate_id): ?>
                 <div class="card" style="border: 2px solid #4510d6  ;">
                     <div class="card-header  py-3" style="background-color: #4510d6;">
                         <span class="text-white fw-bold">Seleccionado para Contrato</span>
@@ -131,13 +130,13 @@
                                 <i class="bi bi-person-check-fill text-success fs-4"></i>
                             </div>
                             <div>
-                                <h6 class="text-white mb-0">{{ $vacancy->selectedCandidate->name }}</h6>
-                                <small class="text-white">{{ $vacancy->selectedCandidate->email }}</small>
+                                <h6 class="text-white mb-0"><?php echo e($vacancy->selectedCandidate->name); ?></h6>
+                                <small class="text-white"><?php echo e($vacancy->selectedCandidate->email); ?></small>
                             </div>
                         </div>
                         <div class="d-grid">
-                            <form action="{{ route('recruitment.vacancies.close', $vacancy) }}" method="POST">
-                                @csrf
+                            <form action="<?php echo e(route('recruitment.vacancies.close', $vacancy)); ?>" method="POST">
+                                <?php echo csrf_field(); ?>
                                 <button type="submit" class="btn btn-success w-100"
                                     onclick="return confirm('¿Seguro que desea cerrar esta vacante? No podrá gestionarla más.')">
                                     <i class="bi bi-door-closed-fill me-2"></i>Cerrar Vacante
@@ -146,7 +145,7 @@
                         </div>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
 
         <!-- Right Column: Candidates -->
@@ -154,12 +153,12 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="text-white mb-0">Candidatos Postulados</h5>
-                    @if($vacancy->status === 'open')
+                    <?php if($vacancy->status === 'open'): ?>
                         <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal"
                             data-bs-target="#addCandidateModal">
                             <i class="bi bi-person-plus-fill me-2"></i>Agregar Candidato
                         </button>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -174,59 +173,62 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($vacancy->candidates as $candidate)
-                                    <tr class="{{ $candidate->status === 'discarded' ? 'opacity-50' : '' }}">
+                                <?php $__empty_1 = true; $__currentLoopData = $vacancy->candidates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $candidate): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <tr class="<?php echo e($candidate->status === 'discarded' ? 'opacity-50' : ''); ?>">
                                         <td>
-                                            <div class="fw-bold text-dark">{{ $candidate->name }}</div>
-                                            <small class="text-dark">{{ $candidate->email }}</small>
+                                            <div class="fw-bold text-dark"><?php echo e($candidate->name); ?></div>
+                                            <small class="text-dark"><?php echo e($candidate->email); ?></small>
                                         </td>
                                         <td>
-                                            @if($candidate->cv_path)
-                                                <a href="{{ Storage::disk('s3')->url($candidate->cv_path) }}" target="_blank"
+                                            <?php if($candidate->cv_path): ?>
+                                                <a href="<?php echo e(Storage::url($candidate->cv_path)); ?>" target="_blank"
                                                     class="text-primary-light">
                                                     <i class="bi bi-file-earmark-pdf"></i> PDF
                                                 </a>
-                                            @endif
+                                            <?php endif; ?>
                                         </td>
                                         <td>
-                                            @if($candidate->status === 'discarded')
+                                            <?php if($candidate->status === 'discarded'): ?>
                                                 <span class="badge badge-status badge-rejected">Descartado</span>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="text-primary-light small fw-bold d-block">
-                                                    {{ $candidate->current_step->name ?? 'Completado' }}
+                                                    <?php echo e($candidate->current_step->name ?? 'Completado'); ?>
+
                                                 </span>
-                                                @if($candidate->current_step)
-                                                    @php 
+                                                <?php if($candidate->current_step): ?>
+                                                    <?php 
                                                         $currentProg = $candidate->progress->firstWhere('recruitment_step_id', $candidate->current_step->id);
-                                                    @endphp
-                                                    @if($currentProg && $currentProg->scheduled_at)
+                                                    ?>
+                                                    <?php if($currentProg && $currentProg->scheduled_at): ?>
                                                         <div class="text-warning mt-1" style="font-size: 0.75rem;">
-                                                            <i class="bi bi-calendar-event"></i> {{ \Carbon\Carbon::parse($currentProg->scheduled_at)->format('d/m/Y') }}
+                                                            <i class="bi bi-calendar-event"></i> <?php echo e(\Carbon\Carbon::parse($currentProg->scheduled_at)->format('d/m/Y')); ?>
+
                                                         </div>
-                                                    @endif
-                                                @endif
-                                            @endif
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
-                                            <span class="badge badge-status badge-review">{{ $candidate->total_points }}
+                                            <span class="badge badge-status badge-review"><?php echo e($candidate->total_points); ?>
+
                                                 pts</span>
                                         </td>
                                         <td class="text-end">
-                                            @if($vacancy->status === 'open')
+                                            <?php if($vacancy->status === 'open'): ?>
                                                 <button class="btn btn-outline-custom btn-sm"
-                                                    onclick="showProgressModal({{ $candidate->toJson() }}, {{ $candidate->current_step ? $candidate->current_step->toJson() : 'null' }})">
+                                                    onclick="showProgressModal(<?php echo e($candidate->toJson()); ?>, <?php echo e($candidate->current_step ? $candidate->current_step->toJson() : 'null'); ?>)">
                                                     <i class="bi bi-gear"></i> Procesar
                                                 </button>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="text-white small">Finalizado</span>
-                                            @endif
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="5" class="text-center py-4 text-dark">No hay candidatos registrados.</td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -239,8 +241,8 @@
     <div class="modal fade" id="addStepModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="{{ route('recruitment.steps.store', $vacancy) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('recruitment.steps.store', $vacancy)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header">
                         <h5 class="modal-title text-white">Agregar Paso de Reclutamiento</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -254,9 +256,9 @@
                             <label class="form-label">Responsable</label>
                             <select name="responsible_id" class="form-select" required>
                                 <option value="">Seleccione un usuario...</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->role }})</option>
-                                @endforeach
+                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($user->id); ?>"><?php echo e($user->name); ?> (<?php echo e($user->role); ?>)</option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -278,8 +280,8 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form id="editStepForm" method="POST">
-                    @csrf
-                    @method('PATCH')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PATCH'); ?>
                     <div class="modal-header">
                         <h5 class="modal-title text-white">Editar Paso de Reclutamiento</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -293,9 +295,9 @@
                             <label class="form-label">Responsable</label>
                             <select name="responsible_id" id="editStepResponsible" class="form-select" required>
                                 <option value="">Seleccione un usuario...</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->role }})</option>
-                                @endforeach
+                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($user->id); ?>"><?php echo e($user->name); ?> (<?php echo e($user->role); ?>)</option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -317,9 +319,9 @@
     <div class="modal fade" id="addCandidateModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="{{ route('recruitment.candidates.store', $vacancy) }}" method="POST"
+                <form action="<?php echo e(route('recruitment.candidates.store', $vacancy)); ?>" method="POST"
                     enctype="multipart/form-data">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header">
                         <h5 class="modal-title text-white">Nuevo Candidato</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -380,7 +382,7 @@
                             <div id="currentActionContainer">
                                 <h6 class="text-white mb-3">Acción del Paso Actual</h6>
                                 <form id="progressForm" method="POST">
-                                    @csrf
+                                    <?php echo csrf_field(); ?>
                                     <input type="hidden" name="recruitment_step_id" id="formStepId">
                                     <div class="mb-3">
                                         <label class="form-label">Puntuación Obtenida (Máx <span
@@ -423,9 +425,9 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         function editStep(id, name, responsibleId, points) {
             $('#editStepForm').attr('action', `/recruitment/steps/${id}`);
@@ -447,7 +449,7 @@
 
             // Populate timeline via progress data
             const progress = candidate.progress || [];
-            const steps = @json($vacancy->steps);
+            const steps = <?php echo json_encode($vacancy->steps, 15, 512) ?>;
 
             steps.forEach(step => {
                 const stepProgress = progress.find(p => p.recruitment_step_id === step.id);
@@ -544,4 +546,5 @@
             modal.show();
         }
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/recruitment/show.blade.php ENDPATH**/ ?>

@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Gestionar Plantilla'); ?>
+<?php $__env->startSection('page-title', 'Plantilla: ' . $template->title); ?>
 
-@section('title', 'Gestionar Plantilla')
-@section('page-title', 'Plantilla: ' . $template->title)
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="row">
         <div class="col-lg-8">
             <ul class="nav nav-tabs border-0 mb-3" id="templateTabs" role="tablist">
@@ -45,18 +43,18 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php
+                                        <?php
                                             $configuredFieldNames = $fields->pluck('name')->map(fn($n) => strtolower($n))->toArray();
                                             $systemVars = ['empresa_nombre', 'empresa_rnc', 'empresa_direccion', 'nombre_empleado', 'email_empleado'];
 
                                             $unconfiguredVariables = collect($extractedVariables ?? [])->filter(function ($var) use ($configuredFieldNames, $systemVars) {
                                                 return !in_array(strtolower($var), $configuredFieldNames) && !in_array(strtolower($var), $systemVars);
                                             })->unique();
-                                        @endphp
+                                        ?>
 
-                                        @foreach($unconfiguredVariables as $index => $unconfiguredVar)
+                                        <?php $__currentLoopData = $unconfiguredVariables; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $unconfiguredVar): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <tr class="table-warning opacity-75">
-                                                <td><code class="text-primary-light">&lt;# {{ $unconfiguredVar }} #&gt;</code>
+                                                <td><code class="text-primary-light">&lt;# <?php echo e($unconfiguredVar); ?> #&gt;</code>
                                                     <span class="badge bg-warning text-dark ms-2 extra-small">No
                                                         configurada</span>
                                                 </td>
@@ -64,32 +62,32 @@
                                                 <td class="text-end">
                                                     <button class="btn btn-primary-custom btn-sm border-0"
                                                         data-bs-toggle="modal" data-bs-target="#addVariableModal"
-                                                        onclick="document.getElementById('newVarName').value='{{ $unconfiguredVar }}'">
+                                                        onclick="document.getElementById('newVarName').value='<?php echo e($unconfiguredVar); ?>'">
                                                         <i class="bi bi-plus-circle"></i> Configurar
                                                     </button>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                                        @forelse($fields as $field)
+                                        <?php $__empty_1 = true; $__currentLoopData = $fields; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                             <tr>
-                                                <td><code class="text-primary-light">&lt;# {{ $field->name }} #&gt;</code></td>
-                                                <td>{{ Str::limit($field->value, 40) }}</td>
+                                                <td><code class="text-primary-light">&lt;# <?php echo e($field->name); ?> #&gt;</code></td>
+                                                <td><?php echo e(Str::limit($field->value, 40)); ?></td>
                                                 <td class="text-end">
                                                     <button class="btn btn-outline-custom btn-sm border-0"
-                                                        data-bs-toggle="modal" data-bs-target="#editModal{{ $field->id }}">
+                                                        data-bs-toggle="modal" data-bs-target="#editModal<?php echo e($field->id); ?>">
                                                         <i class="bi bi-pencil-fill"></i>
                                                     </button>
                                                 </td>
                                             </tr>
-                                        @empty
-                                            @if($unconfiguredVariables->isEmpty())
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                            <?php if($unconfiguredVariables->isEmpty()): ?>
                                                 <tr>
                                                     <td colspan="3" class="text-center py-4 text-white">No hay variables
                                                         configuradas ni detectadas en la plantilla.</td>
                                                 </tr>
-                                            @endif
-                                        @endforelse
+                                            <?php endif; ?>
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -102,11 +100,11 @@
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-dark-2 py-3 d-flex justify-content-between align-items-center">
                             <span class="text-white fw-bold">Vista Previa del Contenido</span>
-                            <span class="badge bg-primary">{{ ucfirst($template->category) }}</span>
+                            <span class="badge bg-primary"><?php echo e(ucfirst($template->category)); ?></span>
                         </div>
                         <div class="card-body">
                             <div class="bg-dark-3 p-4 rounded-3 text-white border border-secondary"
-                                style="min-height: 400px; white-space: pre-wrap;">{{ $template->content }}</div>
+                                style="min-height: 400px; white-space: pre-wrap;"><?php echo e($template->content); ?></div>
                         </div>
                     </div>
                 </div>
@@ -119,17 +117,17 @@
                     <span class="text-white fw-bold">Generar Documento</span>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('documents.generate', $template) }}" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('documents.generate', $template)); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         <!--
                             <div class="mb-4">
 
                                 <label class="form-label">Contexto (Opcional)</label>
                                 <select name="employee_id" class="form-select">
                                     <option value="">Ninguno (Solo variables globales)</option>
-                                    @foreach($employees as $employee)
-                                        <option value="{{ $employee->id }}">{{ $employee->user->name }} ({{ $employee->id_number }})</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($employee->id); ?>"><?php echo e($employee->user->name); ?> (<?php echo e($employee->id_number); ?>)</option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                                 <small class=" text-white d-block mt-2">
                                     Si seleccionas un empleado, podrás usar tags como <code>&lt;# salary #&gt;</code>, <code>&lt;# contract_type #&gt;</code>, etc.
@@ -186,12 +184,12 @@
     </style>
 
     <!-- Modals for Variables -->
-    @foreach($fields as $field)
-        <div class="modal fade" id="editModal{{ $field->id }}" tabindex="-1">
+    <?php $__currentLoopData = $fields; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="modal fade" id="editModal<?php echo e($field->id); ?>" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <form action="{{ route('company-fields.update', $field) }}" method="POST">
-                        @csrf @method('PATCH')
+                    <form action="<?php echo e(route('company-fields.update', $field)); ?>" method="POST">
+                        <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
                         <div class="modal-header">
                             <h5 class="modal-title text-white">Editar Variable</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -199,16 +197,16 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Nombre</label>
-                                <input type="text" name="name" class="form-control" value="{{ $field->name }}" required>
+                                <input type="text" name="name" class="form-control" value="<?php echo e($field->name); ?>" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Valor</label>
-                                <textarea name="value" class="form-control" rows="3">{{ $field->value }}</textarea>
+                                <textarea name="value" class="form-control" rows="3"><?php echo e($field->value); ?></textarea>
                             </div>
                             <div class="mb-3 form-check">
-                                <input type="checkbox" name="is_bold" class="form-check-input" id="isBoldCheck{{ $field->id }}"
-                                    {{ $field->is_bold ? 'checked' : '' }}>
-                                <label class="form-check-label text-white small" for="isBoldCheck{{ $field->id }}">Mostrar en
+                                <input type="checkbox" name="is_bold" class="form-check-input" id="isBoldCheck<?php echo e($field->id); ?>"
+                                    <?php echo e($field->is_bold ? 'checked' : ''); ?>>
+                                <label class="form-check-label text-white small" for="isBoldCheck<?php echo e($field->id); ?>">Mostrar en
                                     Negrita</label>
                             </div>
                         </div>
@@ -220,19 +218,19 @@
                 </div>
             </div>
         </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
     <div class="modal fade" id="addVariableModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="{{ route('company-fields.store') }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('company-fields.store')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header">
                         <h5 class="modal-title text-white">Nueva Variable Global</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" name="document_template_id" value="{{ $template->id }}">
+                        <input type="hidden" name="document_template_id" value="<?php echo e($template->id); ?>">
                         <div class="mb-3">
                             <label class="form-label">Nombre de la Variable</label>
                             <input type="text" name="name" id="newVarName" class="form-control"
@@ -256,4 +254,5 @@
         </div>
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/documents/show.blade.php ENDPATH**/ ?>
