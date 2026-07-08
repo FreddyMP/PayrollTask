@@ -14,9 +14,12 @@ class FichajeController extends Controller
     public function storeApi(Request $request)
     {
         $request->validate([
-            'id_number' => 'required|string',
-            'action' => 'required|in:clock_in,clock_out',
-            'timestamp' => 'required|date',
+            'id_number'  => 'required|string',
+            'action'     => 'required|in:clock_in,clock_out',
+            'timestamp'  => 'required|date',
+            'latitude'   => 'nullable|numeric|between:-90,90',
+            'longitude'  => 'nullable|numeric|between:-180,180',
+            'work_mode'  => 'nullable|in:presencial,remoto',
         ]);
 
         $employee = Employee::where('id_number', $request->id_number)->first();
@@ -37,10 +40,13 @@ class FichajeController extends Controller
 
             // Guardamos las horas de descanso del empleado en este registro para tener histórico inmutable
             $fichaje = Fichaje::create([
-                'employee_id' => $employee->id,
-                'clock_in' => $request->timestamp,
-                'break_start' => $employee->break_start,
-                'break_end' => $employee->break_end,
+                'employee_id'       => $employee->id,
+                'clock_in'          => $request->timestamp,
+                'break_start'       => $employee->break_start,
+                'break_end'         => $employee->break_end,
+                'work_mode'         => $request->work_mode ?? 'presencial',
+                'clock_in_latitude' => $request->latitude,
+                'clock_in_longitude'=> $request->longitude,
             ]);
 
             return response()->json(['message' => 'Entrada registrada exitosamente', 'data' => $fichaje], 201);
@@ -80,6 +86,8 @@ class FichajeController extends Controller
             $fichaje->update([
                 'clock_out' => $request->timestamp,
                 'total_hours' => $totalHours,
+                'clock_out_latitude' => $request->latitude,
+                'clock_out_longitude' => $request->longitude,
             ]);
 
             return response()->json(['message' => 'Salida registrada exitosamente', 'data' => $fichaje], 200);

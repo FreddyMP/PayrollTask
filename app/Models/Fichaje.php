@@ -13,6 +13,11 @@ class Fichaje extends Model
         'break_start',
         'break_end',
         'total_hours',
+        'work_mode',
+        'clock_in_latitude',
+        'clock_in_longitude',
+        'clock_out_latitude',
+        'clock_out_longitude',
     ];
 
     protected function casts(): array
