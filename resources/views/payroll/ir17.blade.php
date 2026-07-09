@@ -48,16 +48,10 @@
             <select name="period" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
                 @foreach($availablePeriods as $p)
                     @php
-                        $basePeriod = preg_replace('/-Q[12]$/', '', $p);
-                        $periodLabel = \Carbon\Carbon::parse($basePeriod)->translatedFormat('F Y');
-                        if (str_ends_with($p, '-Q1')) {
-                            $periodLabel .= ' — 1ª Quincena';
-                        } elseif (str_ends_with($p, '-Q2')) {
-                            $periodLabel .= ' — 2ª Quincena';
-                        }
+                        $periodLabel = \Carbon\Carbon::parse($p)->translatedFormat('F Y');
                     @endphp
                     <option value="{{ $p }}" {{ $period == $p ? 'selected' : '' }}>
-                        {{ $periodLabel }}
+                        {{ ucfirst($periodLabel) }}
                     </option>
                 @endforeach
             </select>
@@ -86,15 +80,9 @@
                     <div class="small text-white"><strong>RNC:</strong> {{ $company->rnc ?? '—' }}</div>
                     <div class="small text-white"><strong>Empresa:</strong> {{ $company->name }}</div>
                     @php
-                        $basePeriodDisplay = preg_replace('/-Q[12]$/', '', $period);
-                        $periodLabelDisplay = \Carbon\Carbon::parse($basePeriodDisplay)->translatedFormat('F Y');
-                        if (str_ends_with($period, '-Q1')) {
-                            $periodLabelDisplay .= ' — 1ª Quincena';
-                        } elseif (str_ends_with($period, '-Q2')) {
-                            $periodLabelDisplay .= ' — 2ª Quincena';
-                        }
+                        $periodLabelDisplay = \Carbon\Carbon::parse($period)->translatedFormat('F Y');
                     @endphp
-                    <div class="small" style="color: #94a3b8;"><strong>Período:</strong> {{ $periodLabelDisplay }}</div>
+                    <div class="small" style="color: #94a3b8;"><strong>Período:</strong> {{ ucfirst($periodLabelDisplay) }}</div>
                 </div>
             </div>
         </div>

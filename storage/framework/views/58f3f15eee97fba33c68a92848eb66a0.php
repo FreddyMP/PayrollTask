@@ -47,16 +47,10 @@
             <select name="period" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
                 <?php $__currentLoopData = $availablePeriods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php
-                        $basePeriod = preg_replace('/-Q[12]$/', '', $p);
-                        $periodLabel = \Carbon\Carbon::parse($basePeriod)->translatedFormat('F Y');
-                        if (str_ends_with($p, '-Q1')) {
-                            $periodLabel .= ' — 1ª Quincena';
-                        } elseif (str_ends_with($p, '-Q2')) {
-                            $periodLabel .= ' — 2ª Quincena';
-                        }
+                        $periodLabel = \Carbon\Carbon::parse($p)->translatedFormat('F Y');
                     ?>
                     <option value="<?php echo e($p); ?>" <?php echo e($period == $p ? 'selected' : ''); ?>>
-                        <?php echo e($periodLabel); ?>
+                        <?php echo e(ucfirst($periodLabel)); ?>
 
                     </option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -86,15 +80,9 @@
                     <div class="small text-white"><strong>RNC:</strong> <?php echo e($company->rnc ?? '—'); ?></div>
                     <div class="small text-white"><strong>Empresa:</strong> <?php echo e($company->name); ?></div>
                     <?php
-                        $basePeriodDisplay = preg_replace('/-Q[12]$/', '', $period);
-                        $periodLabelDisplay = \Carbon\Carbon::parse($basePeriodDisplay)->translatedFormat('F Y');
-                        if (str_ends_with($period, '-Q1')) {
-                            $periodLabelDisplay .= ' — 1ª Quincena';
-                        } elseif (str_ends_with($period, '-Q2')) {
-                            $periodLabelDisplay .= ' — 2ª Quincena';
-                        }
+                        $periodLabelDisplay = \Carbon\Carbon::parse($period)->translatedFormat('F Y');
                     ?>
-                    <div class="small" style="color: #94a3b8;"><strong>Período:</strong> <?php echo e($periodLabelDisplay); ?></div>
+                    <div class="small" style="color: #94a3b8;"><strong>Período:</strong> <?php echo e(ucfirst($periodLabelDisplay)); ?></div>
                 </div>
             </div>
         </div>

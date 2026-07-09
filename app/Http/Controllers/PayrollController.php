@@ -200,25 +200,29 @@ class PayrollController extends Controller
     {
         $company = Auth::user()->company;
         $period = $request->get('period', date('Y-m'));
+        $period = substr($period, 0, 7); // Force Y-m format
 
         $payrollData = Payroll::where('company_id', $company->id)
-            ->where('period', $period)
+            ->where('period', 'like', $period . '%')
             ->with('employee.user', 'employee.arsExtras')
             ->get();
 
-        $report = $payrollData->map(function ($p) {
-            $salary = (float) $p->gross_salary;
-            $extras = (float) ($p->extras ?? 0);
+        $grouped = $payrollData->groupBy('employee_id');
+
+        $report = $grouped->map(function ($payrolls) use ($company) {
+            $first = $payrolls->first();
+            $salary = $payrolls->sum('gross_salary');
+            $extras = $payrolls->sum('extras');
             $remuneracionBruta = $salary + $extras;
 
-            // Aportes TSS del empleado
+            // Aportes TSS del empleado (mensual)
             $sfs = $salary * 0.0304;
             $afp = $salary * 0.0287;
-            $arsExtra = $p->employee->total_ars_extra ?? 0;
+            $arsExtra = $first->employee->total_ars_extra ?? 0;
             $totalTSS = $sfs + $afp + $arsExtra;
 
-            // Renta neta imponible (anualizada)
-            $multiplier = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
+            // Renta neta imponible (anualizada, cálculo mensual siempre multiplicamos por 12)
+            $multiplier = 12;
             $baseAnual = ($remuneracionBruta * $multiplier) - ($totalTSS * $multiplier);
 
             // Escala ISR vigente
@@ -241,8 +245,8 @@ class PayrollController extends Controller
             $isrMensual = $isrAnual / $multiplier;
 
             return [
-                'cedula'             => $p->employee->id_number ?? '—',
-                'nombre'             => $p->employee->user->name,
+                'cedula'             => $first->employee->id_number ?? '—',
+                'nombre'             => $first->employee->user->name,
                 'remuneracion_bruta' => $remuneracionBruta,
                 'otros_ingresos'     => $extras,
                 'sfs'                => $sfs + $arsExtra,
@@ -254,12 +258,17 @@ class PayrollController extends Controller
                 'isr_retenido'       => $isrMensual,
                 'neto'               => $remuneracionBruta - $totalTSS - $isrMensual,
             ];
-        });
+        })->values();
 
         $availablePeriods = Payroll::where('company_id', $company->id)
             ->distinct()
             ->pluck('period')
-            ->sortDesc();
+            ->map(function ($p) {
+                return substr($p, 0, 7);
+            })
+            ->unique()
+            ->sortDesc()
+            ->values();
 
         if (!$availablePeriods->contains($period)) {
             $availablePeriods->prepend($period);
@@ -551,11 +560,14 @@ class PayrollController extends Controller
     {
         $company = Auth::user()->company;
         $period = $request->get('period', date('Y-m'));
+        $period = substr($period, 0, 7); // Force Y-m format
 
         $payrollData = Payroll::where('company_id', $company->id)
-            ->where('period', $period)
+            ->where('period', 'like', $period . '%')
             ->with('employee.user')
             ->get();
+
+        $grouped = $payrollData->groupBy('employee_id');
 
         // Topes 2026 (Basados en salario mínimo nacional de RD$ 23,223.00)
         $topes = [
@@ -564,8 +576,9 @@ class PayrollController extends Controller
             'srl' => 92892.00,  // 4 salarios
         ];
 
-        $report = $payrollData->map(function ($p) use ($topes, $company) {
-            $salary = $p->gross_salary;
+        $report = $grouped->map(function ($payrolls) use ($topes, $company) {
+            $first = $payrolls->first();
+            $salary = $payrolls->sum('gross_salary');
 
             // Bases Cotizables
             $baseSFS = min($salary, $topes['sfs']);
@@ -574,7 +587,7 @@ class PayrollController extends Controller
             $baseINFOTEP = $salary;
 
             return [
-                'employee' => $p->employee->user->name,
+                'employee' => $first->employee->user->name,
                 'salary'   => $salary,
                 // SFS (ARS)
                 'sfs_emp'  => $baseSFS * 0.0304,
@@ -587,12 +600,17 @@ class PayrollController extends Controller
                 // INFOTEP
                 'infotep_pat' => $baseINFOTEP * 0.0100,
             ];
-        });
+        })->values();
 
         $availablePeriods = Payroll::where('company_id', $company->id)
             ->distinct()
             ->pluck('period')
-            ->sortDesc();
+            ->map(function ($p) {
+                return substr($p, 0, 7);
+            })
+            ->unique()
+            ->sortDesc()
+            ->values();
 
         if (!$availablePeriods->contains($period)) {
             $availablePeriods->prepend($period);
