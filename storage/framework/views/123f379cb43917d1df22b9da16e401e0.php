@@ -720,6 +720,9 @@
             <a href="<?php echo e(route('dashboard')); ?>" class="nav-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
+            <a href="<?php echo e(route('org-chart.index')); ?>" class="nav-link <?php echo e(request()->routeIs('org-chart.*') ? 'active' : ''); ?>">
+                <i class="bi bi-diagram-3"></i> Organigrama
+            </a>
             <?php if(auth()->user()->isAdmin()): ?>
                 <div class="nav-section">Documentación</div>
                 <a href="<?php echo e(route('documents.index')); ?>"
@@ -755,13 +758,8 @@
                     class="nav-link <?php echo e(request()->routeIs('evaluations.*') ? 'active' : ''); ?>">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
                 </a>
-                <li class="nav-item">
-                    <a class="nav-link " href="<?php echo e(route('org-chart.index')); ?>">
-                        <i class="bi bi-diagram-3"></i> Organigrama
-                    </a>
-                </li>
                 <a href="<?php echo e(route('departments.index')); ?>"
-                    class="nav-link <?php echo e(request()->routeIs('departments.*', 'positions.*', 'org-chart.*') ? 'active' : ''); ?>">
+                    class="nav-link <?php echo e(request()->routeIs('departments.*', 'positions.*') ? 'active' : ''); ?>">
                     <i class="bi bi-diagram-3"></i> Departamentos
                 </a>
                 <a href="<?php echo e(route('payroll.index')); ?>"
@@ -795,6 +793,10 @@
             <a href="<?php echo e(route('requests.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('requests.*') ? 'active' : ''); ?>">
                 <i class="bi bi-send-fill"></i> Solicitudes
+            </a>
+            <a href="<?php echo e(route('incidencias.index')); ?>"
+                class="nav-link <?php echo e(request()->routeIs('incidencias.*') ? 'active' : ''); ?>">
+                <i class="bi bi-exclamation-triangle-fill"></i> Incidencias
             </a>
             <a href="<?php echo e(route('calendar.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('calendar.*') ? 'active' : ''); ?>">

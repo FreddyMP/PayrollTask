@@ -720,6 +720,9 @@
             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
+            <a href="{{ route('org-chart.index') }}" class="nav-link {{ request()->routeIs('org-chart.*') ? 'active' : '' }}">
+                <i class="bi bi-diagram-3"></i> Organigrama
+            </a>
             @if(auth()->user()->isAdmin())
                 <div class="nav-section">Documentación</div>
                 <a href="{{ route('documents.index') }}"
@@ -755,13 +758,8 @@
                     class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
                 </a>
-                <li class="nav-item">
-                    <a class="nav-link " href="{{ route('org-chart.index') }}">
-                        <i class="bi bi-diagram-3"></i> Organigrama
-                    </a>
-                </li>
                 <a href="{{ route('departments.index') }}"
-                    class="nav-link {{ request()->routeIs('departments.*', 'positions.*', 'org-chart.*') ? 'active' : '' }}">
+                    class="nav-link {{ request()->routeIs('departments.*', 'positions.*') ? 'active' : '' }}">
                     <i class="bi bi-diagram-3"></i> Departamentos
                 </a>
                 <a href="{{ route('payroll.index') }}"
@@ -795,6 +793,10 @@
             <a href="{{ route('requests.index') }}"
                 class="nav-link {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                 <i class="bi bi-send-fill"></i> Solicitudes
+            </a>
+            <a href="{{ route('incidencias.index') }}"
+                class="nav-link {{ request()->routeIs('incidencias.*') ? 'active' : '' }}">
+                <i class="bi bi-exclamation-triangle-fill"></i> Incidencias
             </a>
             <a href="{{ route('calendar.index') }}"
                 class="nav-link {{ request()->routeIs('calendar.*') ? 'active' : '' }}">

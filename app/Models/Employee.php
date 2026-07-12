@@ -106,10 +106,28 @@ class Employee extends Model
     {
         $year = $year ?? now()->year;
 
-        return $this->vacations()
-            ->where('year', $year)
-            ->whereIn('status', ['approved', 'completed'])
-            ->sum('days_taken');
+        if (!$this->user) {
+            return 0;
+        }
+
+        $requests = $this->user->requests()
+            ->where('type', 'vacation')
+            ->where('status', 'approved')
+            ->whereYear('start_date', $year)
+            ->get();
+
+        $days = 0;
+        foreach ($requests as $request) {
+            if ($request->start_date && $request->end_date) {
+                $days += \App\Models\Vacation::calculateBusinessDays(
+                    \Carbon\Carbon::parse($request->start_date),
+                    \Carbon\Carbon::parse($request->end_date),
+                    $this->company_id
+                );
+            }
+        }
+
+        return $days;
     }
 
     /**

@@ -24,6 +24,7 @@ use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\RegulationController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\FichajeController;
+use App\Http\Controllers\IncidentController;
 
 // Auth routes
 Route::get('/', function () {
@@ -240,8 +241,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{position}', [PositionController::class, 'destroy'])->name('destroy');
     });
 
-    // Org Chart (Admin+)
-    Route::middleware('role:admin,super')->prefix('organigrama')->name('org-chart.')->group(function () {
+    // Org Chart (All Users)
+    Route::prefix('organigrama')->name('org-chart.')->group(function () {
         Route::get('/', [OrgChartController::class, 'index'])->name('index');
     });
 
@@ -258,6 +259,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/{regulation}/toggle', [RegulationController::class, 'toggleStatus'])->name('toggle');
         });
     });
+
+    // Incidencias
+    Route::resource('incidencias', IncidentController::class)->except(['create', 'show', 'edit']);
 
     // Vacations (Admin+)
     Route::middleware('role:admin,super')->prefix('vacations')->name('vacations.')->group(function () {

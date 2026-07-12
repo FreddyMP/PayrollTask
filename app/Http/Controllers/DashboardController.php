@@ -22,6 +22,56 @@ class DashboardController extends Controller
         $user = Auth::user();
         $companyId = $user->company_id;
 
+        if ($user->role === 'usuario') {
+            // Usuario Dashboard Data
+            $pendingTasksCount = Task::where('company_id', $companyId)
+                ->where('assigned_to', $user->id)
+                ->where('status', '!=', 'completed')
+                ->count();
+
+            $pendingEvaluations = collect();
+            if ($user->employee) {
+                $pendingEvaluations = \App\Models\EvaluationAssignment::where('employee_id', $user->employee->id)
+                    ->where('is_completed', false)
+                    ->with('evaluation')
+                    ->get();
+            }
+
+            $myRequests = UserRequest::where('user_id', $user->id)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $activeRegulations = \App\Models\Regulation::where('company_id', $companyId)
+                ->where('is_active', true)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // Today's events
+            $todayEvents = CalendarEvent::with('links')
+                ->where('company_id', $companyId)
+                ->where('user_id', $user->id)
+                ->whereDate('event_date', Carbon::today())
+                ->orderBy('event_time')
+                ->get();
+
+            $showTodayModal = false;
+            if (!session()->has('today_modal_shown') && $todayEvents->isNotEmpty()) {
+                $showTodayModal = true;
+                session()->put('today_modal_shown', true);
+            } else if (session()->has('just_logged_in') && $todayEvents->isNotEmpty()) {
+                $showTodayModal = true;
+                session()->forget('just_logged_in');
+                session()->put('today_modal_shown', true);
+            }
+
+            return view('dashboard.usuario', compact(
+                'pendingTasksCount', 'pendingEvaluations', 'myRequests', 
+                'activeRegulations', 'todayEvents', 'showTodayModal'
+            ));
+        }
+
         // ─── KPI Cards ───────────────────────────────────────
         $totalEmployees = Employee::where('company_id', $companyId)->count();
 
