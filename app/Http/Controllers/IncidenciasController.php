@@ -7,6 +7,9 @@ use App\Models\IncidentAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\IncidentReported;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class IncidenciasController extends Controller
 {
@@ -38,6 +41,7 @@ class IncidenciasController extends Controller
             'description' => 'required|string',
             'priority' => 'required|in:low,medium,high',
             'attachments.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi,wmv|max:25600', // max 25MB
+            'url' => 'nullable|url',
         ]);
 
         $user = auth()->user();
@@ -63,6 +67,52 @@ class IncidenciasController extends Controller
                     'file_path' => $path,
                     'file_type' => $fileType,
                 ]);
+            }
+        }
+
+        if ($request->filled('url')) {
+            $url = $request->input('url');
+            try {
+                $response = Http::get($url);
+                if ($response->successful()) {
+                    $fileContent = $response->body();
+                    $pathInfo = pathinfo(parse_url($url, PHP_URL_PATH));
+                    $filename = !empty($pathInfo['basename']) ? $pathInfo['basename'] : Str::random(10);
+                    
+                    if (empty($pathInfo['extension'])) {
+                        $contentType = $response->header('Content-Type');
+                        $extension = '';
+                        if (str_contains($contentType, 'image/jpeg') || str_contains($contentType, 'image/jpg')) {
+                            $extension = '.jpg';
+                        } elseif (str_contains($contentType, 'image/png')) {
+                            $extension = '.png';
+                        } elseif (str_contains($contentType, 'image/gif')) {
+                            $extension = '.gif';
+                        } elseif (str_contains($contentType, 'video/mp4')) {
+                            $extension = '.mp4';
+                        } elseif (str_contains($contentType, 'video/quicktime')) {
+                            $extension = '.mov';
+                        }
+                        $filename .= $extension;
+                    }
+
+                    $s3Path = 'incidents/attachments/' . Str::random(40) . '_' . $filename;
+                    Storage::disk('s3')->put($s3Path, $fileContent);
+
+                    $contentType = $response->header('Content-Type') ?? '';
+                    $fileType = str_contains($contentType, 'video') ? 'video' : 'image';
+
+                    IncidentAttachment::create([
+                        'incident_id' => $incident->id,
+                        'user_id' => $user->id,
+                        'file_path' => $s3Path,
+                        'file_type' => $fileType,
+                    ]);
+                } else {
+                    logger()->error('Failed to download incident attachment from URL: ' . $url . ' status: ' . $response->status());
+                }
+            } catch (\Exception $e) {
+                logger()->error('Error processing incident URL attachment: ' . $e->getMessage());
             }
         }
 

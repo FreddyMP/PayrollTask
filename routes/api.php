@@ -7,7 +7,11 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\FichajeController;
 use App\Http\Controllers\IncidenciasController;
+use App\Http\Controllers\Api\ContactController;
 
+
+// Endpoint público para enviar correos de contacto
+Route::post('/contacto', [ContactController::class, 'send']);
 
 Route::middleware(['api.auth'])->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
