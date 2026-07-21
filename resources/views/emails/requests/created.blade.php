@@ -9,7 +9,10 @@ Se ha registrado una nueva solicitud en el sistema.
 - **Fecha de Fin:** {{ $userRequest->end_date?->format('d/m/Y') ?? 'N/A' }}
 - **Descripción:** {{ $userRequest->description ?? 'Sin descripción' }}
 @if($userRequest->attachments->count() > 0)
-- **Adjuntos:** {{ $userRequest->attachments->count() }} archivos (imágenes/videos)
+- **Adjuntos:**
+@foreach($userRequest->attachments as $attachment)
+  - [{{ $attachment->file_type === 'video' ? '🎥 Ver Video Adjunto' : '🖼️ Ver Imagen Adjunta' }}]({{ \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($attachment->file_path) }})
+@endforeach
 @endif
 
 <x-mail::button :url="route('requests.index')">

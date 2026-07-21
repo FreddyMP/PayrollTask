@@ -62,25 +62,26 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-0">
-                                <label class="form-label">Aprobador <span class="text-danger">*</span></label>
-                                <?php if($approvers->count() > 0): ?>
-                                    <select class="form-select" name="approved_by_user_id" id="approvedBy">
-                                        <option value="">— Selecciona quién aprobará las horas extra —</option>
-                                        <?php $__currentLoopData = $approvers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $approver): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($approver->id); ?>" <?php echo e(old('approved_by_user_id') == $approver->id ? 'selected' : ''); ?>>
-                                                <?php echo e($approver->name); ?> (<?php echo e(ucfirst($approver->role)); ?>)
-                                            </option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                    </select>
-                                <?php else: ?>
-                                    <div class="alert alert-danger py-2 mb-0" style="font-size: 0.82rem;">
-                                        <i class="bi bi-exclamation-triangle me-1"></i>
-                                        No hay usuarios con rol superior disponibles para aprobar. Contacta a tu administrador.
-                                    </div>
-                                <?php endif; ?>
-                            </div>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Aprobador <span class="text-danger">*</span></label>
+                        <?php if($approvers->count() > 0): ?>
+                            <select class="form-select" name="approved_by_user_id" id="approvedBy" required>
+                                <option value="">— Selecciona quién aprobará esta solicitud —</option>
+                                <?php $__currentLoopData = $approvers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $approver): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($approver->id); ?>" <?php echo e(old('approved_by_user_id') == $approver->id ? 'selected' : ''); ?>>
+                                        <?php echo e($approver->name); ?> (<?php echo e(ucfirst($approver->role)); ?>)
+                                    </option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </select>
+                        <?php else: ?>
+                            <div class="alert alert-danger py-2 mb-0" style="font-size: 0.82rem;">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                No hay usuarios con rol superior disponibles para aprobar. Contacta a tu administrador.
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="mb-3">

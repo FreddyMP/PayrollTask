@@ -54,7 +54,7 @@ class IncidenciasController extends Controller
             'priority' => $request->priority,
             'status' => 'pending',
         ]);
-
+        logger()->info('Valores recibidos: ' . $request);
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
                 $path = $file->store('incidents/attachments', 's3');

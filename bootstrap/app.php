@@ -13,13 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'api.auth' => \App\Http\Middleware\ApiAuthorizationMiddleware::class,
-            'active.company' => \App\Http\Middleware\SetActiveCompany::class,
+            'role'              => \App\Http\Middleware\RoleMiddleware::class,
+            'api.auth'          => \App\Http\Middleware\ApiAuthorizationMiddleware::class,
+            'active.company'    => \App\Http\Middleware\SetActiveCompany::class,
+            'check.subscription'=> \App\Http\Middleware\CheckSubscription::class,
         ]);
 
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\SetActiveCompany::class,
+            \App\Http\Middleware\CheckSubscription::class,
         ]);
 
         $middleware->group('api', [

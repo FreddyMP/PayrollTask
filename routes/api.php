@@ -26,6 +26,8 @@ Route::middleware(['api.auth'])->group(function () {
         Route::put('/incidencias', [IncidenciasController::class, 'update']);
         Route::get('/tasks', [TaskController::class, 'index']);
         Route::post('/fichaje', [FichajeController::class, 'storeApi']);
+        Route::get('/solicitudes', [\App\Http\Controllers\Api\SolicitudesController::class, 'index']);
+        Route::post('/solicitudes', [\App\Http\Controllers\Api\SolicitudesController::class, 'store']);
     });
 });
 

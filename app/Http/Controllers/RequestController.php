@@ -89,7 +89,7 @@ class RequestController extends Controller
             'overtime_date'       => 'required_if:type,overtime|nullable|date',
             'overtime_start'      => 'required_if:type,overtime|nullable|date_format:H:i',
             'overtime_end'        => 'required_if:type,overtime|nullable|date_format:H:i|after:overtime_start',
-            'approved_by_user_id' => 'required_if:type,overtime|nullable|exists:users,id',
+            'approved_by_user_id' => 'required|exists:users,id',
         ]);
 
         $data['user_id']   = Auth::id();

@@ -25,6 +25,7 @@ use App\Http\Controllers\RegulationController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\FichajeController;
 use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\SubscriptionController;
 
 // Auth routes
 Route::get('/', function () {
@@ -44,6 +45,10 @@ Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name(
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
+
+    // Subscription plan selection (outside subscription check, accessible even when blocked)
+    Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::post('/subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

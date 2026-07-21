@@ -72,6 +72,17 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        // Check employee limit based on subscription plan
+        $company = Auth::user()->company;
+        $currentCount = $company->employees()->count();
+        $limit = $company->getEmployeeLimit();
+
+        if ($currentCount >= $limit) {
+            return redirect()->back()->withErrors([
+                'limit' => "Has alcanzado el límite de {$limit} empleados para tu plan actual. Para agregar más empleados, actualiza tu plan de suscripción."
+            ]);
+        }
+
         $messages = [
             'email.unique' => 'Ese correo no está disponible.',
         ];

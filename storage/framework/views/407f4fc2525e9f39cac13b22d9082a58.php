@@ -23,7 +23,10 @@ Se ha registrado una nueva solicitud en el sistema.
 - **Descripción:** <?php echo new \Illuminate\Support\EncodedHtmlString($userRequest->description ?? 'Sin descripción'); ?>
 
 <?php if($userRequest->attachments->count() > 0): ?>
-- **Adjuntos:** <?php echo new \Illuminate\Support\EncodedHtmlString($userRequest->attachments->count()); ?> archivos (imágenes/videos)
+- **Adjuntos:**
+<?php $__currentLoopData = $userRequest->attachments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attachment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+  - [<?php echo new \Illuminate\Support\EncodedHtmlString($attachment->file_type === 'video' ? '🎥 Ver Video Adjunto' : '🖼️ Ver Imagen Adjunta'); ?>](<?php echo new \Illuminate\Support\EncodedHtmlString(\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($attachment->file_path)); ?>)
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 <?php endif; ?>
 
 <?php if (isset($component)) { $__componentOriginal15a5e11357468b3880ae1300c3be6c4f = $component; } ?>
