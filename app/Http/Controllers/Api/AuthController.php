@@ -46,6 +46,14 @@ class AuthController extends Controller
         $deviceName = $request->device_name ?? $request->header('User-Agent') ?? 'Unknown Device';
         $token = $user->createToken($deviceName)->plainTextToken;
         $employee = Employee::where('user_id', $user->id)->first();
+
+        // Obtener superiores de la misma empresa
+        $superiors = User::where('company_id', $user->company_id)
+            ->whereIn('role', ['super', 'admin', 'supervisor'])
+            ->where('id', '!=', $user->id)
+            ->select('id', 'name', 'email', 'role', 'position', 'avatar')
+            ->get();
+
         return response()->json([
             'token' => $token,
             'user' => [
@@ -60,6 +68,7 @@ class AuthController extends Controller
                 'company' => $user->company,
                 'employee_data' => $employee,
             ],
+            'superiors' => $superiors,
             'message' => 'Inicio de sesión exitoso.'
         ]);
     }
