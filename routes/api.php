@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\FichajeController;
 use App\Http\Controllers\IncidenciasController;
 use App\Http\Controllers\Api\ContactController;
-
+use App\Http\Controllers\Api\SolicitudesController;
 
 // Endpoint público para enviar correos de contacto
 Route::post('/contacto', [ContactController::class, 'send']);
@@ -26,8 +26,8 @@ Route::middleware(['api.auth'])->group(function () {
         Route::put('/incidencias', [IncidenciasController::class, 'update']);
         Route::get('/tasks', [TaskController::class, 'index']);
         Route::post('/fichaje', [FichajeController::class, 'storeApi']);
-        Route::get('/solicitudes', [\App\Http\Controllers\Api\SolicitudesController::class, 'index']);
-        Route::post('/solicitudes', [\App\Http\Controllers\Api\SolicitudesController::class, 'store']);
+        Route::get('/solicitudes', [SolicitudesController::class, 'index']);
+        Route::post('/solicitudes', [SolicitudesController::class, 'store']);
     });
 });
 
