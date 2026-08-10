@@ -38,6 +38,11 @@ class TaskController extends Controller
             'count' => $tasks->count()
         ]);
     }
+    public function show($id)
+    {
+        $task = Task::find($id);
+        return response()->json($task);
+    }
     public function updateStatus(Request $request)
     {
         $user = $request->user();
