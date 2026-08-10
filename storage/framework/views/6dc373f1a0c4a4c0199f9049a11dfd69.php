@@ -254,7 +254,7 @@
         </div>
         <div class="text-center mt-3 mb-1">
             <span style="color: #94a3b8; font-size: 0.875rem;">¿No tienes cuenta?</span>
-            <a href="<?php echo e(route('register')); ?>"
+            <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal"
                 style="color: #6366f1; font-size: 0.875rem; text-decoration: none; font-weight: 600;">Regístrate
                 aquí</a>
         </div>
@@ -268,6 +268,33 @@
             <p class="mt-1"><strong>Contraseña:</strong> <code>password123</code></p>
         </div>
     </div>
+
+    <!-- Modal Registro -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h5 class="modal-title fw-bold" id="registerModalLabel">
+                        <i class="bi bi-gift me-2" style="color: #a855f7;"></i>¡Prueba Gratis de 3 Meses!
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start" style="color: #cbd5e1;">
+                    <p class="mb-3">Al registrarte hoy, obtendrás <strong>3 meses de prueba totalmente gratuitos</strong> de nuestra plataforma de gestión.</p>
+                    <p class="mb-0">Después del período de prueba, se requerirá una suscripción activa para continuar utilizando nuestros servicios, la cual te permitirá seguir disfrutando de todas las características empresariales.</p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background: #334155; border: none; border-radius: 12px; color: white;">Cancelar</button>
+                    <a href="<?php echo e(route('register')); ?>" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); border: none; border-radius: 12px; font-weight: 600;">
+                        Continuar al registro <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/auth/login.blade.php ENDPATH**/ ?>

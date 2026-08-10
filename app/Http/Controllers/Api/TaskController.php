@@ -30,12 +30,28 @@ class TaskController extends Controller
             // Usuario normal: solo sus tareas asignadas
             $query->where('assigned_to', $user->id);
         }
-        
+
         $tasks = $query->latest()->get();
 
         return response()->json([
             'tasks' => $tasks,
             'count' => $tasks->count()
+        ]);
+    }
+    public function updateStatus(Request $request)
+    {
+        $user = $request->user();
+        $task = Task::find($request->task_id);
+        if ($task->assigned_to != $user->id) {
+            return response()->json([
+                'message' => 'No tienes permiso para actualizar esta tarea',
+            ], 403);
+        }
+        $task->status = $request->status;
+        $task->save();
+        return response()->json([
+            'message' => 'Tarea actualizada correctamente',
+            'task' => $task
         ]);
     }
 }
