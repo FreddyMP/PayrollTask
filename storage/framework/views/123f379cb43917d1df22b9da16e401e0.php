@@ -718,17 +718,17 @@
         <?php $company = auth()->user()->company; ?>
         <nav class="sidebar-nav">
             <div class="nav-section">Principal</div>
-            <?php if($company->hasFeature('dashboard')): ?>
+            <?php if($company?->hasFeature('dashboard')): ?>
             <a href="<?php echo e(route('dashboard')); ?>" class="nav-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
             <?php endif; ?>
-            <?php if($company->hasFeature('org_chart')): ?>
+            <?php if($company?->hasFeature('org_chart')): ?>
             <a href="<?php echo e(route('org-chart.index')); ?>" class="nav-link <?php echo e(request()->routeIs('org-chart.*') ? 'active' : ''); ?>">
                 <i class="bi bi-diagram-3"></i> Organigrama
             </a>
             <?php endif; ?>
-            <?php if(auth()->user()->isAdmin() && $company->hasFeature('documents')): ?>
+            <?php if(auth()->user()->isAdmin() && $company?->hasFeature('documents')): ?>
                 <div class="nav-section">Documentación</div>
                 <a href="<?php echo e(route('documents.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('documents.*') ? 'active' : ''); ?>">
@@ -738,55 +738,55 @@
 
             <?php if(auth()->user()->isAdmin()): ?>
                 <div class="nav-section">Administración</div>
-                <?php if($company->hasFeature('vacations')): ?>
+                <?php if($company?->hasFeature('vacations')): ?>
                 <a href="<?php echo e(route('vacations.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('vacations.*') ? 'active' : ''); ?>">
                     <i class="bi bi-calendar-check-fill"></i> Gestión de Vacaciones
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('access_logs')): ?>
+                <?php if($company?->hasFeature('access_logs')): ?>
                 <a href="<?php echo e(route('access-logs.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('access-logs.*') ? 'active' : ''); ?>">
                     <i class="bi bi-clock-history"></i> Registro de Accesos
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('recruitment')): ?>
+                <?php if($company?->hasFeature('recruitment')): ?>
                 <a href="<?php echo e(route('recruitment.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('recruitment.*') ? 'active' : ''); ?>">
                     <i class="bi bi-person-plus-fill"></i> Reclutamiento
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('employees')): ?>
+                <?php if($company?->hasFeature('employees')): ?>
                 <a href="<?php echo e(route('employees.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('employees.*') ? 'active' : ''); ?>">
                     <i class="bi bi-people-fill"></i> Empleados
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('fichaje')): ?>
+                <?php if($company?->hasFeature('fichaje')): ?>
                 <a href="<?php echo e(route('fichajes.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('fichajes.*') ? 'active' : ''); ?>">
                     <i class="bi bi-fingerprint"></i> Fichajes
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('evaluations')): ?>
+                <?php if($company?->hasFeature('evaluations')): ?>
                 <a href="<?php echo e(route('evaluations.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('evaluations.*') ? 'active' : ''); ?>">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('departments')): ?>
+                <?php if($company?->hasFeature('departments')): ?>
                 <a href="<?php echo e(route('departments.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('departments.*', 'positions.*') ? 'active' : ''); ?>">
                     <i class="bi bi-diagram-3"></i> Departamentos
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('payroll')): ?>
+                <?php if($company?->hasFeature('payroll')): ?>
                 <a href="<?php echo e(route('payroll.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('payroll.*') ? 'active' : ''); ?>">
                     <i class="bi bi-cash-stack"></i> Nómina
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('reports')): ?>
+                <?php if($company?->hasFeature('reports')): ?>
                 <a href="<?php echo e(route('reports.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>">
                     <i class="bi bi-graph-up-arrow"></i> Reportes
@@ -795,44 +795,44 @@
             <?php endif; ?>
 
             <div class="nav-section">Gestión</div>
-            <?php if($company->hasFeature('regulations')): ?>
+            <?php if($company?->hasFeature('regulations')): ?>
             <a href="<?php echo e(route('regulations.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('regulations.*') ? 'active' : ''); ?>">
                 <i class="bi bi-file-earmark-text-fill"></i> Reglamentos
             </a>
             <?php endif; ?>
-            <?php if($company->hasFeature('tasks')): ?>
+            <?php if($company?->hasFeature('tasks')): ?>
             <a href="<?php echo e(route('tasks.index')); ?>" class="nav-link <?php echo e(request()->routeIs('tasks.*') ? 'active' : ''); ?>">
                 <i class="bi bi-kanban-fill"></i> Tablero de Tareas
             </a>
             <?php endif; ?>
             <?php if(auth()->user()->isSupervisor()): ?>
-                <?php if($company->hasFeature('projects')): ?>
+                <?php if($company?->hasFeature('projects')): ?>
                 <a href="<?php echo e(route('projects.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('projects.*') ? 'active' : ''); ?>">
                     <i class="bi bi-folder-fill"></i> Proyectos
                 </a>
                 <?php endif; ?>
-                <?php if($company->hasFeature('devices')): ?>
+                <?php if($company?->hasFeature('devices')): ?>
                 <a href="<?php echo e(route('devices.index')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('devices.*') ? 'active' : ''); ?>">
                     <i class="bi bi-laptop-fill"></i> Dispositivos
                 </a>
                 <?php endif; ?>
             <?php endif; ?>
-            <?php if($company->hasFeature('requests')): ?>
+            <?php if($company?->hasFeature('requests')): ?>
             <a href="<?php echo e(route('requests.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('requests.*') ? 'active' : ''); ?>">
                 <i class="bi bi-send-fill"></i> Solicitudes
             </a>
             <?php endif; ?>
-            <?php if($company->hasFeature('incidents')): ?>
+            <?php if($company?->hasFeature('incidents')): ?>
             <a href="<?php echo e(route('incidencias.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('incidencias.*') ? 'active' : ''); ?>">
                 <i class="bi bi-exclamation-triangle-fill"></i> Incidencias
             </a>
             <?php endif; ?>
-            <?php if($company->hasFeature('calendar')): ?>
+            <?php if($company?->hasFeature('calendar')): ?>
             <a href="<?php echo e(route('calendar.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('calendar.*') ? 'active' : ''); ?>">
                 <i class="bi bi-calendar-event-fill"></i> Calendario
@@ -840,13 +840,13 @@
             <?php endif; ?>
 
             <div class="nav-section">Sistema</div>
-            <?php if($company->hasFeature('settings')): ?>
+            <?php if($company?->hasFeature('settings')): ?>
             <a href="<?php echo e(route('settings.index')); ?>"
                 class="nav-link <?php echo e(request()->routeIs('settings.*') ? 'active' : ''); ?>">
                 <i class="bi bi-gear-fill"></i> Configuraciones
             </a>
             <?php endif; ?>
-            <?php if(auth()->user()->isSuper() && $company->hasFeature('company')): ?>
+            <?php if(auth()->user()->isSuper() && $company?->hasFeature('company')): ?>
                 <a href="<?php echo e(route('company.edit')); ?>"
                     class="nav-link <?php echo e(request()->routeIs('company.*') ? 'active' : ''); ?>">
                     <i class="bi bi-building-fill"></i> Empresa
@@ -978,4 +978,5 @@
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 
-</html><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/layouts/app.blade.php ENDPATH**/ ?>

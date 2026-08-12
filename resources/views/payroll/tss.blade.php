@@ -37,7 +37,7 @@
         <li class="nav-item">
             <a class="nav-link" href="{{ route('payroll.ir17') }}"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
-                IR-3s
+                IR-3
             </a>
         </li>
     </ul>
@@ -118,7 +118,8 @@
                                     @php 
                                         $total = $row['sfs_emp'] + $row['sfs_pat'] + $row['afp_emp'] + $row['afp_pat'] + $row['srl_pat'] + $row['infotep_pat'];
                                     @endphp
-                                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" style="font-size: 0.9rem;">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold"
+                                        style="font-size: 0.9rem;">
                                         RD$ {{ number_format($total, 2) }}
                                     </span>
                                 </td>
@@ -147,7 +148,7 @@
                                 <td class="text-center">RD$ {{ number_format($report->sum('infotep_pat'), 2) }}</td>
                                 <td class="pe-4 text-end text-primary" style="font-size: 1.1rem;">
                                     @php 
-                                                                $grandTotal = $report->sum('sfs_emp') + $report->sum('sfs_pat') +
+                                                                                                                                                                $grandTotal = $report->sum('sfs_emp') + $report->sum('sfs_pat') +
                                         $report->sum('afp_emp') + $report->sum('afp_pat') +
                                         $report->sum('srl_pat') + $report->sum('infotep_pat');
                                     @endphp
@@ -158,11 +159,12 @@
                     @endif
                 </table>
 
-               </div>
+            </div>
         </div>
     </div>
 
     <div class="mt-4 text-secondary small">
-        <i class="bi bi-shield-check me-1"></i> Reporte generado según parámetros de la Tesorería de la Seguridad Social (TSS) de República Dominicana.
+        <i class="bi bi-shield-check me-1"></i> Reporte generado según parámetros de la Tesorería de la Seguridad Social
+        (TSS) de República Dominicana.
     </div>
 @endsection

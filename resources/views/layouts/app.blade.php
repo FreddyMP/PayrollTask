@@ -718,17 +718,17 @@
         @php $company = auth()->user()->company; @endphp
         <nav class="sidebar-nav">
             <div class="nav-section">Principal</div>
-            @if($company->hasFeature('dashboard'))
+            @if($company?->hasFeature('dashboard'))
             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
             @endif
-            @if($company->hasFeature('org_chart'))
+            @if($company?->hasFeature('org_chart'))
             <a href="{{ route('org-chart.index') }}" class="nav-link {{ request()->routeIs('org-chart.*') ? 'active' : '' }}">
                 <i class="bi bi-diagram-3"></i> Organigrama
             </a>
             @endif
-            @if(auth()->user()->isAdmin() && $company->hasFeature('documents'))
+            @if(auth()->user()->isAdmin() && $company?->hasFeature('documents'))
                 <div class="nav-section">Documentación</div>
                 <a href="{{ route('documents.index') }}"
                     class="nav-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">
@@ -738,55 +738,55 @@
 
             @if(auth()->user()->isAdmin())
                 <div class="nav-section">Administración</div>
-                @if($company->hasFeature('vacations'))
+                @if($company?->hasFeature('vacations'))
                 <a href="{{ route('vacations.index') }}"
                     class="nav-link {{ request()->routeIs('vacations.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar-check-fill"></i> Gestión de Vacaciones
                 </a>
                 @endif
-                @if($company->hasFeature('access_logs'))
+                @if($company?->hasFeature('access_logs'))
                 <a href="{{ route('access-logs.index') }}"
                     class="nav-link {{ request()->routeIs('access-logs.*') ? 'active' : '' }}">
                     <i class="bi bi-clock-history"></i> Registro de Accesos
                 </a>
                 @endif
-                @if($company->hasFeature('recruitment'))
+                @if($company?->hasFeature('recruitment'))
                 <a href="{{ route('recruitment.index') }}"
                     class="nav-link {{ request()->routeIs('recruitment.*') ? 'active' : '' }}">
                     <i class="bi bi-person-plus-fill"></i> Reclutamiento
                 </a>
                 @endif
-                @if($company->hasFeature('employees'))
+                @if($company?->hasFeature('employees'))
                 <a href="{{ route('employees.index') }}"
                     class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i> Empleados
                 </a>
                 @endif
-                @if($company->hasFeature('fichaje'))
+                @if($company?->hasFeature('fichaje'))
                 <a href="{{ route('fichajes.index') }}"
                     class="nav-link {{ request()->routeIs('fichajes.*') ? 'active' : '' }}">
                     <i class="bi bi-fingerprint"></i> Fichajes
                 </a>
                 @endif
-                @if($company->hasFeature('evaluations'))
+                @if($company?->hasFeature('evaluations'))
                 <a href="{{ route('evaluations.index') }}"
                     class="nav-link {{ request()->routeIs('evaluations.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i> Evaluaciones de Personal
                 </a>
                 @endif
-                @if($company->hasFeature('departments'))
+                @if($company?->hasFeature('departments'))
                 <a href="{{ route('departments.index') }}"
                     class="nav-link {{ request()->routeIs('departments.*', 'positions.*') ? 'active' : '' }}">
                     <i class="bi bi-diagram-3"></i> Departamentos
                 </a>
                 @endif
-                @if($company->hasFeature('payroll'))
+                @if($company?->hasFeature('payroll'))
                 <a href="{{ route('payroll.index') }}"
                     class="nav-link {{ request()->routeIs('payroll.*') ? 'active' : '' }}">
                     <i class="bi bi-cash-stack"></i> Nómina
                 </a>
                 @endif
-                @if($company->hasFeature('reports'))
+                @if($company?->hasFeature('reports'))
                 <a href="{{ route('reports.index') }}"
                     class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                     <i class="bi bi-graph-up-arrow"></i> Reportes
@@ -795,44 +795,44 @@
             @endif
 
             <div class="nav-section">Gestión</div>
-            @if($company->hasFeature('regulations'))
+            @if($company?->hasFeature('regulations'))
             <a href="{{ route('regulations.index') }}"
                 class="nav-link {{ request()->routeIs('regulations.*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-text-fill"></i> Reglamentos
             </a>
             @endif
-            @if($company->hasFeature('tasks'))
+            @if($company?->hasFeature('tasks'))
             <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
                 <i class="bi bi-kanban-fill"></i> Tablero de Tareas
             </a>
             @endif
             @if(auth()->user()->isSupervisor())
-                @if($company->hasFeature('projects'))
+                @if($company?->hasFeature('projects'))
                 <a href="{{ route('projects.index') }}"
                     class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}">
                     <i class="bi bi-folder-fill"></i> Proyectos
                 </a>
                 @endif
-                @if($company->hasFeature('devices'))
+                @if($company?->hasFeature('devices'))
                 <a href="{{ route('devices.index') }}"
                     class="nav-link {{ request()->routeIs('devices.*') ? 'active' : '' }}">
                     <i class="bi bi-laptop-fill"></i> Dispositivos
                 </a>
                 @endif
             @endif
-            @if($company->hasFeature('requests'))
+            @if($company?->hasFeature('requests'))
             <a href="{{ route('requests.index') }}"
                 class="nav-link {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                 <i class="bi bi-send-fill"></i> Solicitudes
             </a>
             @endif
-            @if($company->hasFeature('incidents'))
+            @if($company?->hasFeature('incidents'))
             <a href="{{ route('incidencias.index') }}"
                 class="nav-link {{ request()->routeIs('incidencias.*') ? 'active' : '' }}">
                 <i class="bi bi-exclamation-triangle-fill"></i> Incidencias
             </a>
             @endif
-            @if($company->hasFeature('calendar'))
+            @if($company?->hasFeature('calendar'))
             <a href="{{ route('calendar.index') }}"
                 class="nav-link {{ request()->routeIs('calendar.*') ? 'active' : '' }}">
                 <i class="bi bi-calendar-event-fill"></i> Calendario
@@ -840,13 +840,13 @@
             @endif
 
             <div class="nav-section">Sistema</div>
-            @if($company->hasFeature('settings'))
+            @if($company?->hasFeature('settings'))
             <a href="{{ route('settings.index') }}"
                 class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                 <i class="bi bi-gear-fill"></i> Configuraciones
             </a>
             @endif
-            @if(auth()->user()->isSuper() && $company->hasFeature('company'))
+            @if(auth()->user()->isSuper() && $company?->hasFeature('company'))
                 <a href="{{ route('company.edit') }}"
                     class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}">
                     <i class="bi bi-building-fill"></i> Empresa

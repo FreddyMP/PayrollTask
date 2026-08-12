@@ -9,6 +9,7 @@ use App\Http\Controllers\FichajeController;
 use App\Http\Controllers\IncidenciasController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\SolicitudesController;
+use App\Http\Controllers\Api\CalendarController;
 
 // Endpoint público para enviar correos de contacto
 Route::post('/contacto', [ContactController::class, 'send']);
@@ -30,6 +31,12 @@ Route::middleware(['api.auth'])->group(function () {
         Route::post('/fichaje', [FichajeController::class, 'storeApi']);
         Route::get('/solicitudes', [SolicitudesController::class, 'index']);
         Route::post('/solicitudes', [SolicitudesController::class, 'store']);
+
+        // Calendar endpoints
+        Route::get('/calendar', [CalendarController::class, 'index']);
+        Route::post('/calendar', [CalendarController::class, 'store']);
+        Route::put('/calendar/{id}', [CalendarController::class, 'update']);
+        Route::delete('/calendar/{id}', [CalendarController::class, 'destroy']);
     });
 });
 

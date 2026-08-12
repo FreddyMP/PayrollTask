@@ -139,7 +139,7 @@
                                     @if($row['otros_ingresos'] > 0)
                                         <span style="color: #34d399;">RD$ {{ number_format($row['otros_ingresos'], 2) }}</span>
                                     @else
-                                        <span class="text-white">—</span>
+                                        <span class="text-white">0.00</span>
                                     @endif
                                 </td>
                                 <td class="text-end" style="background: rgba(52, 211, 153, 0.02);">
