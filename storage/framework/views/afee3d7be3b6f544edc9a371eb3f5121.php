@@ -1,41 +1,40 @@
-@extends('layouts.app')
-@section('title', 'TSS - Tesorería de la Seguridad Social')
-@section('page-title', 'Reporte TSS')
+<?php $__env->startSection('title', 'TSS - Tesorería de la Seguridad Social'); ?>
+<?php $__env->startSection('page-title', 'Reporte TSS'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <ul class="nav nav-tabs mb-4 px-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.index') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.index')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Registros de Nómina
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.bonuses') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.bonuses')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Bonificaciones de Ley
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.benefits') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.benefits')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Prestaciones Laborales
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.christmas') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.christmas')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 Salario Navidad
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="{{ route('payroll.tss') }}"
+            <a class="nav-link active" href="<?php echo e(route('payroll.tss')); ?>"
                 style="color: white; border-bottom: 2px solid var(--primary); background: transparent; border-top: 0; border-left: 0; border-right: 0; padding: 0.75rem 1.25rem;">
                 TSS
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('payroll.ir17') }}"
+            <a class="nav-link" href="<?php echo e(route('payroll.ir17')); ?>"
                 style="color: #94a3b8; background: transparent; border: 0; padding: 0.75rem 1.25rem;">
                 IR-3
             </a>
@@ -43,17 +42,18 @@
     </ul>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <form action="{{ route('payroll.tss') }}" method="GET" class="d-flex gap-2 align-items-center">
+        <form action="<?php echo e(route('payroll.tss')); ?>" method="GET" class="d-flex gap-2 align-items-center">
             <label class="text-secondary small me-2">Período:</label>
             <select name="period" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
-                @foreach($availablePeriods as $p)
-                    @php
+                <?php $__currentLoopData = $availablePeriods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $periodLabel = \Carbon\Carbon::parse($p)->translatedFormat('F Y');
-                    @endphp
-                    <option value="{{ $p }}" {{ $period == $p ? 'selected' : '' }}>
-                        {{ ucfirst($periodLabel) }}
+                    ?>
+                    <option value="<?php echo e($p); ?>" <?php echo e($period == $p ? 'selected' : ''); ?>>
+                        <?php echo e(ucfirst($periodLabel)); ?>
+
                     </option>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
         </form>
         <div>
@@ -71,7 +71,7 @@
                 <p class="mb-0 small">
                     <strong>SFS:</strong> 3.04%/7.09% (Tope RD$ 232,230) |
                     <strong>AFP:</strong> 2.87%/7.10% (Tope RD$ 464,460) |
-                    <strong>ARL:</strong> {{ $company->srl_rate ?? '1.10' }}% (Tope RD$ 92,892) |
+                    <strong>ARL:</strong> <?php echo e($company->srl_rate ?? '1.10'); ?>% (Tope RD$ 92,892) |
                     <strong>INFOTEP:</strong> 1%
                 </p>
             </div>
@@ -94,69 +94,75 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($report as $row)
+                        <?php $__empty_1 = true; $__currentLoopData = $report; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <td class="ps-4">
-                                    <div class="fw-semibold">{{ $row['employee'] }}</div>
+                                    <div class="fw-semibold"><?php echo e($row['employee']); ?></div>
                                 </td>
-                                <td>RD$ {{ number_format($row['salary'], 2) }}</td>
+                                <td>RD$ <?php echo e(number_format($row['salary'], 2)); ?></td>
                                 <td class="text-center" style="background: rgba(244, 247, 246, 0.02);">
-                                    <div class="small text-white">E: {{ number_format($row['sfs_emp'], 2) }}</div>
-                                    <div class="fw-bold text-white">P: {{ number_format($row['sfs_pat'], 2) }}</div>
+                                    <div class="small text-white">E: <?php echo e(number_format($row['sfs_emp'], 2)); ?></div>
+                                    <div class="fw-bold text-white">P: <?php echo e(number_format($row['sfs_pat'], 2)); ?></div>
                                 </td>
                                 <td class="text-center" style="background: rgba(228, 230, 231, 0.02);">
-                                    <div class="small text-white">E: {{ number_format($row['afp_emp'], 2) }}</div>
-                                    <div class="fw-bold text-white">P: {{ number_format($row['afp_pat'], 2) }}</div>
+                                    <div class="small text-white">E: <?php echo e(number_format($row['afp_emp'], 2)); ?></div>
+                                    <div class="fw-bold text-white">P: <?php echo e(number_format($row['afp_pat'], 2)); ?></div>
                                 </td>
                                 <td class="text-center">
-                                    {{ number_format($row['srl_pat'], 2) }}
+                                    <?php echo e(number_format($row['srl_pat'], 2)); ?>
+
                                 </td>
                                 <td class="text-center">
-                                    {{ number_format($row['infotep_pat'], 2) }}
+                                    <?php echo e(number_format($row['infotep_pat'], 2)); ?>
+
                                 </td>
                                 <td class="pe-4 text-end">
-                                    @php 
+                                    <?php 
                                         $total = $row['sfs_emp'] + $row['sfs_pat'] + $row['afp_emp'] + $row['afp_pat'] + $row['srl_pat'] + $row['infotep_pat'];
-                                    @endphp
+                                    ?>
                                     <span class="badge bg-primary bg-opacity-10 text-primary fw-bold"
                                         style="font-size: 0.9rem;">
-                                        RD$ {{ number_format($total, 2) }}
+                                        RD$ <?php echo e(number_format($total, 2)); ?>
+
                                     </span>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="7" class="text-center py-5 text-dark">
                                     <i class="bi bi-folder-x fs-1 d-block mb-2"></i>
-                                    No hay registros de nómina para el período {{ $period }}.
+                                    No hay registros de nómina para el período <?php echo e($period); ?>.
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
-                    @if($report->count() > 0)
+                    <?php if($report->count() > 0): ?>
                         <tfoot style="background: rgba(255,255,255,0.03); border-top: 2px solid rgba(255,255,255,0.1);">
                             <tr class="fw-bold border-0">
                                 <td class="ps-4">TOTALES</td>
-                                <td>RD$ {{ number_format($report->sum('salary'), 2) }}</td>
+                                <td>RD$ <?php echo e(number_format($report->sum('salary'), 2)); ?></td>
                                 <td class="text-center">
-                                    RD$ {{ number_format($report->sum('sfs_emp') + $report->sum('sfs_pat'), 2) }}
+                                    RD$ <?php echo e(number_format($report->sum('sfs_emp') + $report->sum('sfs_pat'), 2)); ?>
+
                                 </td>
                                 <td class="text-center">
-                                    RD$ {{ number_format($report->sum('afp_emp') + $report->sum('afp_pat'), 2) }}
+                                    RD$ <?php echo e(number_format($report->sum('afp_emp') + $report->sum('afp_pat'), 2)); ?>
+
                                 </td>
-                                <td class="text-center">RD$ {{ number_format($report->sum('srl_pat'), 2) }}</td>
-                                <td class="text-center">RD$ {{ number_format($report->sum('infotep_pat'), 2) }}</td>
+                                <td class="text-center">RD$ <?php echo e(number_format($report->sum('srl_pat'), 2)); ?></td>
+                                <td class="text-center">RD$ <?php echo e(number_format($report->sum('infotep_pat'), 2)); ?></td>
                                 <td class="pe-4 text-end text-primary" style="font-size: 1.1rem;">
-                                    @php 
+                                    <?php 
                                                                                                                                                                                                                                                                                                                                                                                                                                 $grandTotal = $report->sum('sfs_emp') + $report->sum('sfs_pat') +
                                         $report->sum('afp_emp') + $report->sum('afp_pat') +
                                         $report->sum('srl_pat') + $report->sum('infotep_pat');
-                                    @endphp
-                                    RD$ {{ number_format($grandTotal, 2) }}
+                                    ?>
+                                    RD$ <?php echo e(number_format($grandTotal, 2)); ?>
+
                                 </td>
                             </tr>
                         </tfoot>
-                    @endif
+                    <?php endif; ?>
                 </table>
 
             </div>
@@ -167,4 +173,5 @@
         <i class="bi bi-shield-check me-1"></i> Reporte generado según parámetros de la Tesorería de la Seguridad Social
         (TSS) de República Dominicana.
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/payroll/tss.blade.php ENDPATH**/ ?>
