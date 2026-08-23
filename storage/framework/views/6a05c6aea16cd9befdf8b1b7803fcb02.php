@@ -1,45 +1,45 @@
-@extends('layouts.app')
-@section('title', 'Nueva Nómina')
-@section('page-title', 'Registrar Nómina')
+<?php $__env->startSection('title', 'Nueva Nómina'); ?>
+<?php $__env->startSection('page-title', 'Registrar Nómina'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header text-secondary"><i class="bi bi-cash-stack me-2"></i>Registrar Nómina</div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('payroll.store') }}">
-                        @csrf
-                        {{-- Empleado + Período + Fecha --}}
+                    <form method="POST" action="<?php echo e(route('payroll.store')); ?>">
+                        <?php echo csrf_field(); ?>
+                        
                         <div class="row g-3 mb-3">
                             <div class="col-md-5">
                                 <label class="form-label">Empleado</label>
                                 <select class="form-select" name="employee_id" id="employeeSelect" required>
                                     <option value="">Seleccionar...</option>
-                                    @foreach($employees as $emp)
-                                        <option value="{{ $emp->id }}" data-salary="{{ $emp->salary }}"
-                                            data-ars-extra="{{ $emp->total_ars_extra }}">{{ $emp->user->name }} —
-                                            {{ $emp->department }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($emp->id); ?>" data-salary="<?php echo e($emp->salary); ?>"
+                                            data-ars-extra="<?php echo e($emp->total_ars_extra); ?>"><?php echo e($emp->user->name); ?> —
+                                            <?php echo e($emp->department); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Período</label>
                                 <select class="form-select" name="period" id="periodInput" required>
-                                    @foreach($periods as $period)
-                                        <option value="{{ $period['value'] }}" {{ $period['value'] == $currentPeriod ? 'selected' : '' }}>
-                                            {{ $period['label'] }}
+                                    <?php $__currentLoopData = $periods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $period): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($period['value']); ?>" <?php echo e($period['value'] == $currentPeriod ? 'selected' : ''); ?>>
+                                            <?php echo e($period['label']); ?>
+
                                         </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Fecha de Pago</label>
-                                <input type="date" class="form-control" name="payment_date" value="{{ date('Y-m-d') }}">
+                                <input type="date" class="form-control" name="payment_date" value="<?php echo e(date('Y-m-d')); ?>">
                             </div>
                         </div>
 
-                        {{-- Salario --}}
+                        
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
                                 <label class="form-label">Salario Bruto</label>
@@ -48,9 +48,9 @@
                             </div>
                         </div>
 
-                        {{-- Incentivos y Descuentos Dinámicos --}}
+                        
                         <div class="row g-3 mb-4">
-                            {{-- Incentivos --}}
+                            
                             <div class="col-md-6">
                                 <div class="card shadow-sm border-success" style="border-left: 4px solid #198754;">
                                     <div class="card-body">
@@ -66,7 +66,7 @@
                                 </div>
                             </div>
 
-                            {{-- Descuentos --}}
+                            
                             <div class="col-md-6">
                                 <div class="card shadow-sm border-danger" style="border-left: 4px solid #dc3545;">
                                     <div class="card-body">
@@ -83,7 +83,7 @@
                             </div>
                         </div>
 
-                        {{-- Horas Extra Aprobadas (bloque informativo) --}}
+                        
                         <div class="rounded-3 mb-4 p-3" id="overtimeBlock"
                             style="background: rgba(251,146,60,0.07); border: 1px solid rgba(251,146,60,0.2);">
                             <div class="d-flex align-items-center gap-2 mb-3">
@@ -121,7 +121,7 @@
                                         <input type="text" class="form-control" id="overtimePayDisplay" value="—" readonly
                                             style="background: rgba(251,146,60,0.08); border-color: rgba(251,146,60,0.3); color: #fb923c; font-weight: 600; cursor: default;">
                                     </div>
-                                    {{-- Campo oculto que se envía al servidor --}}
+                                    
                                     <input type="hidden" name="overtime_pay" id="overtimePayHidden" value="0">
                                 </div>
                                 <div class="col-md-4">
@@ -163,7 +163,7 @@
                             </div>
                         </div>
 
-                        {{-- Descuentos de ley --}}
+                        
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label class="form-label">ARS (3.04%)</label>
@@ -185,16 +185,16 @@
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i>
                                 Registrar</button>
-                            <a href="{{ route('payroll.index') }}" class="btn btn-outline-custom">Cancelar</a>
+                            <a href="<?php echo e(route('payroll.index')); ?>" class="btn btn-outline-custom">Cancelar</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         $(document).ready(function () {
             // Inicializar tooltips Bootstrap
@@ -203,7 +203,7 @@
             });
 
             // Bandera de modo quincenal (pasada desde PHP)
-            const isBiweekly = {{ $isBiweekly ? 'true' : 'false' }};
+            const isBiweekly = <?php echo e($isBiweekly ? 'true' : 'false'); ?>;
             // Multiplicador: 24 para quincenal, 12 para mensual
             const multiplier = isBiweekly ? 24 : 12;
 
@@ -295,7 +295,7 @@
                 $('#overtimePayHidden').val('0');
 
                 overtimeXhr = $.ajax({
-                    url: '{{ route("payroll.apiOvertime") }}',
+                    url: '<?php echo e(route("payroll.apiOvertime")); ?>',
                     method: 'GET',
                     data: { employee_id: employeeId, period: period },
                     success: function (data) {
@@ -419,4 +419,5 @@
             });
         });
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/payroll/create.blade.php ENDPATH**/ ?>

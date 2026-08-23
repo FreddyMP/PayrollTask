@@ -416,22 +416,54 @@ class PayrollController extends Controller
             'employee_id'  => 'required|exists:employees,id',
             'period'       => 'required|string|max:20',
             'gross_salary' => 'required|numeric|min:0',
-            'extras'       => 'nullable|numeric|min:0',
-            'descuentos'   => 'nullable|numeric|min:0',
-            'ars'          => 'required|numeric|min:0',
-            'afp'          => 'required|numeric|min:0',
-            'isr'          => 'required|numeric|min:0',
             'payment_date' => 'nullable|date',
             'overtime_pay' => 'nullable|numeric|min:0',
+            'incentives'   => 'nullable|array',
+            'discounts'    => 'nullable|array',
         ]);
 
         $salary           = $data['gross_salary'];
-        $extras           = $data['extras'] ?? 0;
         $overtime_pay     = $data['overtime_pay'] ?? 0;
-        $descuentos_otros = $data['descuentos'] ?? 0;
+        
+        $total_incentives = 0;
+        $taxable_incentives = 0;
+        $incentives_details = [];
+        if (!empty($data['incentives'])) {
+            foreach ($data['incentives'] as $inc) {
+                $amount = (float) $inc['amount'];
+                $total_incentives += $amount;
+                if (!empty($inc['is_taxable'])) {
+                    $taxable_incentives += $amount;
+                }
+                $incentives_details[] = [
+                    'description' => $inc['description'],
+                    'amount' => $amount,
+                    'is_taxable' => !empty($inc['is_taxable']),
+                ];
+            }
+        }
+
+        $total_discounts = 0;
+        $tax_affecting_discounts = 0;
+        $discounts_details = [];
+        if (!empty($data['discounts'])) {
+            foreach ($data['discounts'] as $disc) {
+                $amount = (float) $disc['amount'];
+                $total_discounts += $amount;
+                if (!empty($disc['affects_taxes'])) {
+                    $tax_affecting_discounts += $amount;
+                }
+                $discounts_details[] = [
+                    'description' => $disc['description'],
+                    'amount' => $amount,
+                    'affects_taxes' => !empty($disc['affects_taxes']),
+                ];
+            }
+        }
 
         // Si hay pago de horas extra, se suma a extras
-        $total_extras = $extras + $overtime_pay;
+        $total_extras = $total_incentives + $overtime_pay;
+        $total_taxable_extras = $taxable_incentives + $overtime_pay;
 
         // Determinar multiplicador según frecuencia de nómina de la empresa
         // Mensual → 12 períodos/año | Quincenal → 24 períodos/año
@@ -444,8 +476,9 @@ class PayrollController extends Controller
         $ars = ($salary * 0.0304) + $ars_extra;
         $afp = $salary * 0.0287;
 
-        // base_imponible anualizada = ((salario + extras) * mult) - ((ARS * mult) + (AFP * mult))
-        $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+        // base_imponible anualizada = ((salario + extras gravables) * mult) - ((ARS + AFP + descuentos que afectan impuestos) * mult)
+        $base_imponible = (($salary + $total_taxable_extras) * $multiplier) - (($ars + $afp + $tax_affecting_discounts) * $multiplier);
+        if ($base_imponible < 0) $base_imponible = 0;
 
         $isrAnnual = 0;
         if ($base_imponible <= 416220) {
@@ -461,7 +494,7 @@ class PayrollController extends Controller
         $isr = $isrAnnual / $multiplier;
 
         // Total deductions = ARS + AFP + ISR + Other discounts
-        $total_deductions = $ars + $afp + $isr + $descuentos_otros;
+        $total_deductions = $ars + $afp + $isr + $total_discounts;
 
         Payroll::create([
             'employee_id'  => $data['employee_id'],
@@ -469,7 +502,9 @@ class PayrollController extends Controller
             'period'       => $data['period'],
             'gross_salary' => $salary,
             'extras'       => $total_extras,
-            'descuentos'   => $descuentos_otros,
+            'incentives_details' => $incentives_details,
+            'descuentos'   => $total_discounts,
+            'discounts_details'  => $discounts_details,
             'ars'          => $ars,
             'afp'          => $afp,
             'isr'          => $isr,
@@ -855,21 +890,53 @@ class PayrollController extends Controller
             'employee_id'  => 'required|exists:employees,id',
             'period'       => 'required|string|max:20',
             'gross_salary' => 'required|numeric|min:0',
-            'extras'       => 'nullable|numeric|min:0',
-            'descuentos'   => 'nullable|numeric|min:0',
-            'ars'          => 'required|numeric|min:0',
-            'afp'          => 'required|numeric|min:0',
-            'isr'          => 'required|numeric|min:0',
             'payment_date' => 'nullable|date',
             'overtime_pay' => 'nullable|numeric|min:0',
+            'incentives'   => 'nullable|array',
+            'discounts'    => 'nullable|array',
         ]);
 
         $salary           = $data['gross_salary'];
-        $extras           = $data['extras'] ?? 0;
         $overtime_pay     = $data['overtime_pay'] ?? 0;
-        $descuentos_otros = $data['descuentos'] ?? 0;
 
-        $total_extras = $extras + $overtime_pay;
+        $total_incentives = 0;
+        $taxable_incentives = 0;
+        $incentives_details = [];
+        if (!empty($data['incentives'])) {
+            foreach ($data['incentives'] as $inc) {
+                $amount = (float) $inc['amount'];
+                $total_incentives += $amount;
+                if (!empty($inc['is_taxable'])) {
+                    $taxable_incentives += $amount;
+                }
+                $incentives_details[] = [
+                    'description' => $inc['description'],
+                    'amount' => $amount,
+                    'is_taxable' => !empty($inc['is_taxable']),
+                ];
+            }
+        }
+
+        $total_discounts = 0;
+        $tax_affecting_discounts = 0;
+        $discounts_details = [];
+        if (!empty($data['discounts'])) {
+            foreach ($data['discounts'] as $disc) {
+                $amount = (float) $disc['amount'];
+                $total_discounts += $amount;
+                if (!empty($disc['affects_taxes'])) {
+                    $tax_affecting_discounts += $amount;
+                }
+                $discounts_details[] = [
+                    'description' => $disc['description'],
+                    'amount' => $amount,
+                    'affects_taxes' => !empty($disc['affects_taxes']),
+                ];
+            }
+        }
+
+        $total_extras = $total_incentives + $overtime_pay;
+        $total_taxable_extras = $taxable_incentives + $overtime_pay;
 
         $company     = Auth::user()->company;
         $multiplier  = ($company->payroll_frequency === 'biweekly') ? 24 : 12;
@@ -879,7 +946,8 @@ class PayrollController extends Controller
         $ars = ($salary * 0.0304) + $ars_extra;
         $afp = $salary * 0.0287;
 
-        $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
+        $base_imponible = (($salary + $total_taxable_extras) * $multiplier) - (($ars + $afp + $tax_affecting_discounts) * $multiplier);
+        if ($base_imponible < 0) $base_imponible = 0;
 
         $isrAnnual = 0;
         if ($base_imponible <= 416220) {
@@ -893,14 +961,16 @@ class PayrollController extends Controller
         }
 
         $isr = $isrAnnual / $multiplier;
-        $total_deductions = $ars + $afp + $isr + $descuentos_otros;
+        $total_deductions = $ars + $afp + $isr + $total_discounts;
 
         $payroll->update([
             'employee_id'  => $data['employee_id'],
             'period'       => $data['period'],
             'gross_salary' => $salary,
             'extras'       => $total_extras,
-            'descuentos'   => $descuentos_otros,
+            'incentives_details' => $incentives_details,
+            'descuentos'   => $total_discounts,
+            'discounts_details'  => $discounts_details,
             'ars'          => $ars,
             'afp'          => $afp,
             'isr'          => $isr,

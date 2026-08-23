@@ -1,129 +1,130 @@
-@extends('layouts.app')
-@section('title', 'Editar Nómina')
-@section('page-title', 'Editar Nómina')
+<?php $__env->startSection('title', 'Editar Nómina'); ?>
+<?php $__env->startSection('page-title', 'Editar Nómina'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="row justify-content-center">
     <div class="col-lg-8">
          <div class="card">
             <div class="card-header text-secondary"><i class="bi bi-pencil me-2"></i>Editar Nómina</div>
             <div class="card-body">
-                <form method="POST" action="{{ route('payroll.update', $payroll) }}">
-                    @csrf @method('PATCH')
-                    {{-- Empleado + Período + Fecha --}}
+                <form method="POST" action="<?php echo e(route('payroll.update', $payroll)); ?>">
+                    <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
+                    
                     <div class="row g-3 mb-3">
                         <div class="col-md-5">
                             <label class="form-label">Empleado</label>
                             <select class="form-select" name="employee_id" id="employeeSelect" required>
                                 <option value="">Seleccionar...</option>
-                                @foreach($employees as $emp)
-                                <option value="{{ $emp->id }}" 
-                                        data-salary="{{ $emp->salary }}" 
-                                        data-ars-extra="{{ $emp->total_ars_extra }}"
-                                        {{ $payroll->employee_id == $emp->id ? 'selected' : '' }}>
-                                    {{ $emp->user->name }} — {{ $emp->department }}
+                                <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($emp->id); ?>" 
+                                        data-salary="<?php echo e($emp->salary); ?>" 
+                                        data-ars-extra="<?php echo e($emp->total_ars_extra); ?>"
+                                        <?php echo e($payroll->employee_id == $emp->id ? 'selected' : ''); ?>>
+                                    <?php echo e($emp->user->name); ?> — <?php echo e($emp->department); ?>
+
                                 </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Período</label>
                             <select class="form-select" name="period" id="periodInput" required>
-                                @foreach($periods as $period)
-                                <option value="{{ $period['value'] }}" {{ $period['value'] == $payroll->period ? 'selected' : '' }}>
-                                    {{ $period['label'] }}
+                                <?php $__currentLoopData = $periods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $period): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($period['value']); ?>" <?php echo e($period['value'] == $payroll->period ? 'selected' : ''); ?>>
+                                    <?php echo e($period['label']); ?>
+
                                 </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Fecha de Pago</label>
-                            <input type="date" class="form-control" name="payment_date" value="{{ $payroll->payment_date ? $payroll->payment_date->format('Y-m-d') : date('Y-m-d') }}">
+                            <input type="date" class="form-control" name="payment_date" value="<?php echo e($payroll->payment_date ? $payroll->payment_date->format('Y-m-d') : date('Y-m-d')); ?>">
                         </div>
                     </div>
 
-                    {{-- Salario --}}
+                    
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label">Salario Bruto</label>
-                            <input type="number" step="0.01" class="form-control" name="gross_salary" id="grossSalary" required value="{{ $payroll->gross_salary }}">
+                            <input type="number" step="0.01" class="form-control" name="gross_salary" id="grossSalary" required value="<?php echo e($payroll->gross_salary); ?>">
                         </div>
                     </div>
 
-                    {{-- Incentivos y Descuentos Dinámicos --}}
+                    
                     <div class="row g-3 mb-4">
-                        {{-- Incentivos --}}
+                        
                         <div class="col-md-6">
                             <div class="card shadow-sm border-success" style="border-left: 4px solid #198754;">
                                 <div class="card-body">
                                     <h6 class="card-title text-success mb-3"><i class="bi bi-arrow-up-circle me-1"></i> Incentivos / Extras</h6>
                                     <div id="incentivesContainer">
-                                        @if(is_array($payroll->incentives_details))
-                                            @foreach($payroll->incentives_details as $idx => $inc)
+                                        <?php if(is_array($payroll->incentives_details)): ?>
+                                            <?php $__currentLoopData = $payroll->incentives_details; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $inc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="row g-2 mb-2 align-items-center incentive-row">
                                                 <div class="col-sm-5">
-                                                    <input type="text" class="form-control form-control-sm" name="incentives[{{ $idx }}][description]" placeholder="Descripción" value="{{ $inc['description'] ?? '' }}" required>
+                                                    <input type="text" class="form-control form-control-sm" name="incentives[<?php echo e($idx); ?>][description]" placeholder="Descripción" value="<?php echo e($inc['description'] ?? ''); ?>" required>
                                                 </div>
                                                 <div class="col-sm-3">
-                                                    <input type="number" step="0.01" class="form-control form-control-sm incentive-amount" name="incentives[{{ $idx }}][amount]" placeholder="Monto" value="{{ $inc['amount'] ?? 0 }}" required>
+                                                    <input type="number" step="0.01" class="form-control form-control-sm incentive-amount" name="incentives[<?php echo e($idx); ?>][amount]" placeholder="Monto" value="<?php echo e($inc['amount'] ?? 0); ?>" required>
                                                 </div>
                                                 <div class="col-sm-3 text-center">
                                                     <div class="form-check form-check-inline m-0">
-                                                        <input class="form-check-input incentive-taxable" type="checkbox" name="incentives[{{ $idx }}][is_taxable]" value="1" id="incTax_{{ $idx }}" {{ !empty($inc['is_taxable']) ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="incTax_{{ $idx }}"><small>Gravable</small></label>
+                                                        <input class="form-check-input incentive-taxable" type="checkbox" name="incentives[<?php echo e($idx); ?>][is_taxable]" value="1" id="incTax_<?php echo e($idx); ?>" <?php echo e(!empty($inc['is_taxable']) ? 'checked' : ''); ?>>
+                                                        <label class="form-check-label text-white" for="incTax_<?php echo e($idx); ?>"><small>Gravable</small></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-1 text-end">
                                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="$(this).closest('.row').remove(); calculateTaxes();"><i class="bi bi-trash"></i></button>
                                                 </div>
                                             </div>
-                                            @endforeach
-                                        @endif
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-outline-success mt-2" onclick="addIncentiveRow()">+ Agregar Incentivo</button>
                                     <div class="mt-3 text-white fw-bold">Total Incentivos: RD$ <span id="totalIncentivesDisplay">0.00</span></div>
-                                    <input type="hidden" name="extras" id="extras" value="{{ $payroll->extras }}">
+                                    <input type="hidden" name="extras" id="extras" value="<?php echo e($payroll->extras); ?>">
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Descuentos --}}
+                        
                         <div class="col-md-6">
                             <div class="card shadow-sm border-danger" style="border-left: 4px solid #dc3545;">
                                 <div class="card-body">
                                     <h6 class="card-title text-danger mb-3"><i class="bi bi-arrow-down-circle me-1"></i> Otros Descuentos</h6>
                                     <div id="discountsContainer">
-                                        @if(is_array($payroll->discounts_details))
-                                            @foreach($payroll->discounts_details as $idx => $disc)
+                                        <?php if(is_array($payroll->discounts_details)): ?>
+                                            <?php $__currentLoopData = $payroll->discounts_details; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $disc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="row g-2 mb-2 align-items-center discount-row">
                                                 <div class="col-sm-5">
-                                                    <input type="text" class="form-control form-control-sm" name="discounts[{{ $idx }}][description]" placeholder="Descripción" value="{{ $disc['description'] ?? '' }}" required>
+                                                    <input type="text" class="form-control form-control-sm" name="discounts[<?php echo e($idx); ?>][description]" placeholder="Descripción" value="<?php echo e($disc['description'] ?? ''); ?>" required>
                                                 </div>
                                                 <div class="col-sm-3">
-                                                    <input type="number" step="0.01" class="form-control form-control-sm discount-amount" name="discounts[{{ $idx }}][amount]" placeholder="Monto" value="{{ $disc['amount'] ?? 0 }}" required>
+                                                    <input type="number" step="0.01" class="form-control form-control-sm discount-amount" name="discounts[<?php echo e($idx); ?>][amount]" placeholder="Monto" value="<?php echo e($disc['amount'] ?? 0); ?>" required>
                                                 </div>
                                                 <div class="col-sm-3 text-center">
                                                     <div class="form-check form-check-inline m-0">
-                                                        <input class="form-check-input discount-taxable" type="checkbox" name="discounts[{{ $idx }}][affects_taxes]" value="1" id="discTax_{{ $idx }}" {{ !empty($disc['affects_taxes']) ? 'checked' : '' }}>
-                                                        <label class="form-check-label" for="discTax_{{ $idx }}"><small>Afecta ISR</small></label>
+                                                        <input class="form-check-input discount-taxable" type="checkbox" name="discounts[<?php echo e($idx); ?>][affects_taxes]" value="1" id="discTax_<?php echo e($idx); ?>" <?php echo e(!empty($disc['affects_taxes']) ? 'checked' : ''); ?>>
+                                                        <label class="form-check-label" for="discTax_<?php echo e($idx); ?>"><small>Afecta ISR</small></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-1 text-end">
                                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="$(this).closest('.row').remove(); calculateTaxes();"><i class="bi bi-trash"></i></button>
                                                 </div>
                                             </div>
-                                            @endforeach
-                                        @endif
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="addDiscountRow()">+ Agregar Descuento</button>
                                     <div class="mt-3 text-white fw-bold">Total Descuentos: RD$ <span id="totalDiscountsDisplay">0.00</span></div>
-                                    <input type="hidden" name="descuentos" id="descuentos" value="{{ $payroll->descuentos }}">
+                                    <input type="hidden" name="descuentos" id="descuentos" value="<?php echo e($payroll->descuentos); ?>">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Horas Extra Aprobadas (bloque informativo) --}}
+                    
                     <div class="rounded-3 mb-4 p-3" id="overtimeBlock" style="background: rgba(251,146,60,0.07); border: 1px solid rgba(251,146,60,0.2);">
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <i class="bi bi-clock-fill" style="color: #fb923c;"></i>
@@ -155,7 +156,7 @@
                                     <input type="text" class="form-control" id="overtimePayDisplay" value="—" readonly
                                            style="background: rgba(251,146,60,0.08); border-color: rgba(251,146,60,0.3); color: #fb923c; font-weight: 600; cursor: default;">
                                 </div>
-                                {{-- Campo oculto que se envía al servidor --}}
+                                
                                 <input type="hidden" name="overtime_pay" id="overtimePayHidden" value="0">
                             </div>
                             <div class="col-md-4">
@@ -188,34 +189,34 @@
                         </div>
                     </div>
 
-                    {{-- Descuentos de ley --}}
+                    
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
                             <label class="form-label">ARS (3.04%)</label>
-                            <input type="number" step="0.01" class="form-control bg-light text-secondary" name="ars" id="ars" readonly value="{{ $payroll->ars }}">
+                            <input type="number" step="0.01" class="form-control bg-light text-secondary" name="ars" id="ars" readonly value="<?php echo e($payroll->ars); ?>">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">AFP (2.87%)</label>
-                            <input type="number" step="0.01" class="form-control bg-light text-secondary" name="afp" id="afp" readonly value="{{ $payroll->afp }}">
+                            <input type="number" step="0.01" class="form-control bg-light text-secondary" name="afp" id="afp" readonly value="<?php echo e($payroll->afp); ?>">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">ISR</label>
-                            <input type="number" step="0.01" class="form-control bg-light text-secondary" name="isr" id="isr" readonly value="{{ $payroll->isr }}">
+                            <input type="number" step="0.01" class="form-control bg-light text-secondary" name="isr" id="isr" readonly value="<?php echo e($payroll->isr); ?>">
                         </div>
                     </div>
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i> Actualizar</button>
-                        <a href="{{ route('payroll.index') }}" class="btn btn-outline-custom">Cancelar</a>
+                        <a href="<?php echo e(route('payroll.index')); ?>" class="btn btn-outline-custom">Cancelar</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).ready(function() {
     // Inicializar tooltips Bootstrap
@@ -224,7 +225,7 @@ $(document).ready(function() {
     });
 
     // Bandera de modo quincenal (pasada desde PHP)
-    const isBiweekly = {{ $isBiweekly ? 'true' : 'false' }};
+    const isBiweekly = <?php echo e($isBiweekly ? 'true' : 'false'); ?>;
     // Multiplicador: 24 para quincenal, 12 para mensual
     const multiplier = isBiweekly ? 24 : 12;
 
@@ -316,7 +317,7 @@ $(document).ready(function() {
         $('#overtimePayHidden').val('0');
 
         overtimeXhr = $.ajax({
-            url: '{{ route("payroll.apiOvertime") }}',
+            url: '<?php echo e(route("payroll.apiOvertime")); ?>',
             method: 'GET',
             data: { employee_id: employeeId, period: period },
             success: function(data) {
@@ -443,4 +444,6 @@ $(document).ready(function() {
     loadOvertimeData();
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/payroll/edit.blade.php ENDPATH**/ ?>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Payroll extends Model
 {
     protected $fillable = [
-        'employee_id', 'company_id', 'period', 'gross_salary', 'extras', 'descuentos',
+        'employee_id', 'company_id', 'period', 'gross_salary', 'extras', 'incentives_details', 'descuentos', 'discounts_details',
         'ars', 'afp', 'isr', 'deductions', 'net_salary', 'payment_date', 'receipt_path', 'status',
     ];
 
@@ -23,6 +23,8 @@ class Payroll extends Model
             'isr' => 'decimal:2',
             'deductions' => 'decimal:2',
             'net_salary' => 'decimal:2',
+            'incentives_details' => 'array',
+            'discounts_details' => 'array',
         ];
     }
 
