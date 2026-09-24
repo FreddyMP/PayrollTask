@@ -251,22 +251,21 @@
                 ¿Olvidaste tu contraseña?
             </a>
         </div>
-<<<<<<< HEAD
-        <div class="text-center mt-3 mb-1">
+        <<<<<<< HEAD <div class="text-center mt-3 mb-1">
             <span style="color: #94a3b8; font-size: 0.875rem;">¿No tienes cuenta?</span>
             <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal"
                 style="color: #6366f1; font-size: 0.875rem; text-decoration: none; font-weight: 600;">Regístrate
                 aquí</a>
-=======
-        <div class="demo-info">
-            <h6><i class="bi bi-info-circle me-1"></i>Credenciales Demo</h6>
-            <p><strong>Super:</strong> <code>admin@techcorp.com</code></p>
-            <p><strong>Admin:</strong> <code>maria@techcorp.com</code></p>
-            <p><strong>Supervisor:</strong> <code>juan@techcorp.com</code></p>
-            <p><strong>Usuario:</strong> <code>ana@techcorp.com</code></p>
-            <p class="mt-1"><strong>Contraseña:</strong> <code>password123</code></p>
->>>>>>> demo
-        </div>
+            =======
+            <div class="demo-info">
+                <h6><i class="bi bi-info-circle me-1"></i>Credenciales Demo</h6>
+                <p><strong>Super:</strong> <code>admin@techcorp.com</code></p>
+                <p><strong>Admin:</strong> <code>maria@techcorp.com</code></p>
+                <p><strong>Supervisor:</strong> <code>juan@techcorp.com</code></p>
+                <p><strong>Usuario:</strong> <code>ana@techcorp.com</code></p>
+                <p class="mt-1"><strong>Contraseña:</strong> <code>password123</code></p>
+                >>>>>>> demo
+            </div>
     </div>
 
     <!-- Modal Registro -->
