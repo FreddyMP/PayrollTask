@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'referente' => [
+            'driver' => 'session',
+            'provider' => 'referentes',
+        ],
     ],
 
     /*
@@ -67,10 +71,10 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'referentes' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Referente::class,
+        ],
     ],
 
     /*

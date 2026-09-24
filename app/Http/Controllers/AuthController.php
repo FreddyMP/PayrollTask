@@ -47,24 +47,35 @@ class AuthController extends Controller
                 })
             ],
             'password' => 'required|string|min:8|confirmed',
+            'referral_code' => 'nullable|string|max:20',
         ], $messages);
+
+        // Resolve referente from referral code if provided
+        $referente = null;
+        if ($request->filled('referral_code')) {
+            $referente = \App\Models\Referente::where('codigo_referido', strtoupper($request->referral_code))
+                ->where('status', 'active')
+                ->first();
+        }
 
         try {
             DB::beginTransaction();
 
             $company = Company::create([
-                'name' => $request->company_name,
-                'status' => 'active',
-                'plan' => 'basic',
+                'name'        => $request->company_name,
+                'status'      => 'active',
+                'plan'        => 'basic',
+                'referral_code'  => $referente ? $referente->codigo_referido : null,
+                'referente_id'   => $referente ? $referente->id : null,
             ]);
 
             $user = User::create([
                 'company_id' => $company->id,
-                'name' => $request->name,
-                'email' => strtolower($request->email),
-                'password' => Hash::make($request->password),
-                'role' => 'super',
-                'status' => 'active',
+                'name'       => $request->name,
+                'email'      => strtolower($request->email),
+                'password'   => Hash::make($request->password),
+                'role'       => 'super',
+                'status'     => 'active',
             ]);
 
             DB::commit();
@@ -72,8 +83,8 @@ class AuthController extends Controller
             Auth::login($user);
 
             AccessLog::create([
-                'user_id' => $user->id,
-                'login_at' => now(),
+                'user_id'    => $user->id,
+                'login_at'   => now(),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -87,6 +98,7 @@ class AuthController extends Controller
             return back()->withErrors(['error' => 'Hubo un error al procesar el registro. Por favor intente de nuevo.'])->withInput();
         }
     }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([

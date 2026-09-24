@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.auth'          => \App\Http\Middleware\ApiAuthorizationMiddleware::class,
             'active.company'    => \App\Http\Middleware\SetActiveCompany::class,
             'check.subscription'=> \App\Http\Middleware\CheckSubscription::class,
+            'auth.referente'    => \App\Http\Middleware\AuthReferente::class,
         ]);
 
         $middleware->appendToGroup('web', [

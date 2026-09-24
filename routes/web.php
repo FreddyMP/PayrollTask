@@ -279,3 +279,24 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{vacation}', [VacationController::class, 'destroy'])->name('destroy');
     });
 });
+
+// ============================================================
+// Referentes - Portal de Referidos (separate from main auth)
+// ============================================================
+use App\Http\Controllers\ReferenteController;
+
+Route::prefix('referentes')->name('referentes.')->group(function () {
+    // Public routes (guests only)
+    Route::get('/registro', [ReferenteController::class, 'showRegister'])->name('register');
+    Route::post('/registro', [ReferenteController::class, 'register'])->name('register.post');
+    Route::get('/acceso', [ReferenteController::class, 'showLogin'])->name('login');
+    Route::post('/acceso', [ReferenteController::class, 'login'])->name('login.post');
+
+    // Protected routes
+    Route::middleware('auth.referente')->group(function () {
+        Route::get('/dashboard', [ReferenteController::class, 'dashboard'])->name('dashboard');
+        Route::post('/datos-bancarios', [ReferenteController::class, 'saveBankingInfo'])->name('banking.save');
+        Route::post('/salir', [ReferenteController::class, 'logout'])->name('logout');
+    });
+});
+

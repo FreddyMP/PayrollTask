@@ -357,15 +357,16 @@
             <p>Registra tu empresa y comienza a gestionar</p>
         </div>
 
-        @if($errors->any())
+        <?php if($errors->any()): ?>
             <div class="alert mb-3">
                 <i class="bi bi-exclamation-circle me-1"></i>
-                {{ $errors->first() }}
-            </div>
-        @endif
+                <?php echo e($errors->first()); ?>
 
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="<?php echo e(route('register')); ?>">
+            <?php echo csrf_field(); ?>
 
             <div class="section-title">Datos de la Empresa</div>
 
@@ -373,7 +374,7 @@
                 <label class="form-label">Nombre de la Compañía</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-building"></i></span>
-                    <input type="text" class="form-control" name="company_name" value="{{ old('company_name') }}"
+                    <input type="text" class="form-control" name="company_name" value="<?php echo e(old('company_name')); ?>"
                            placeholder="Mi Empresa S.R.L" required autofocus style="border-radius: 0 12px 12px 0">
                 </div>
             </div>
@@ -384,7 +385,7 @@
                 <label class="form-label">Nombre Completo</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control" name="name" value="{{ old('name') }}"
+                    <input type="text" class="form-control" name="name" value="<?php echo e(old('name')); ?>"
                            placeholder="Juan Pérez" required style="border-radius: 0 12px 12px 0">
                 </div>
             </div>
@@ -393,7 +394,7 @@
                 <label class="form-label">Correo Electrónico</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" name="email" value="{{ old('email') }}"
+                    <input type="email" class="form-control" name="email" value="<?php echo e(old('email')); ?>"
                            placeholder="admin@empresa.com" required style="border-radius: 0 12px 12px 0">
                 </div>
             </div>
@@ -426,7 +427,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
                     <input type="text" class="form-control" name="referral_code" id="referralCodeInput"
-                           value="{{ old('referral_code', request('ref')) }}"
+                           value="<?php echo e(old('referral_code', request('ref'))); ?>"
                            placeholder="Ej: JUAN4B7K" style="border-radius: 0 12px 12px 0; text-transform: uppercase">
                 </div>
                 <div id="referralMsg" class="mt-1" style="font-size:0.78rem;"></div>
@@ -452,7 +453,7 @@
 
 
         <div class="login-footer">
-            ¿Ya tienes una cuenta? <a href="{{ route('login') }}">Inicia Sesión</a>
+            ¿Ya tienes una cuenta? <a href="<?php echo e(route('login')); ?>">Inicia Sesión</a>
         </div>
 
     </div>
@@ -596,3 +597,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/auth/register.blade.php ENDPATH**/ ?>

@@ -11,6 +11,7 @@ class Company extends Model
         'saturday_rest', 'sunday_rest', 'srl_rate', 'payroll_frequency',
         'bonus_payment_method', 'bonus_biweekly_split',
         'subscription_plan', 'subscription_selected_at',
+        'referral_code', 'referente_id',
     ];
 
     protected $casts = [
@@ -142,5 +143,10 @@ class Company extends Model
     public function regulations()
     {
         return $this->hasMany(Regulation::class);
+    }
+
+    public function referente()
+    {
+        return $this->belongsTo(\App\Models\Referente::class, 'referente_id');
     }
 }
