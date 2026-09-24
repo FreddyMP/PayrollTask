@@ -24,6 +24,7 @@ Route::middleware(['api.auth'])->group(function () {
 
         Route::get('/incidencias', [IncidenciasController::class, 'index']);
         Route::post('/incidencias', [IncidenciasController::class, 'store']);
+
         Route::put('/incidencias', [IncidenciasController::class, 'update']);
         Route::get('/tasks', [TaskController::class, 'index']);
         Route::get('/task/{id}', [TaskController::class, 'show']);

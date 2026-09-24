@@ -1,12 +1,10 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Historial de Vacaciones'); ?>
+<?php $__env->startSection('page-title', 'Historial de Vacaciones'); ?>
 
-@section('title', 'Historial de Vacaciones')
-@section('page-title', 'Historial de Vacaciones')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="row mb-4">
         <div class="col-12">
-            <a href="{{ route('vacations.index') }}" class="btn btn-outline-custom btn-sm">
+            <a href="<?php echo e(route('vacations.index')); ?>" class="btn btn-outline-custom btn-sm">
                 <i class="bi bi-arrow-left me-2"></i>Volver a Vacaciones
             </a>
         </div>
@@ -24,27 +22,29 @@
                                     <i class="bi bi-person-circle text-white fs-3"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-white mb-1">{{ $employee->user->name ?? 'N/A' }}</h4>
-                                    <p class="text-white mb-2">{{ $employee->user->email ?? 'N/A' }}</p>
+                                    <h4 class="text-white mb-1"><?php echo e($employee->user->name ?? 'N/A'); ?></h4>
+                                    <p class="text-white mb-2"><?php echo e($employee->user->email ?? 'N/A'); ?></p>
                                     <div class="d-flex gap-3 flex-wrap">
                                         <span class="badge badge-status badge-supervisor">
                                             <i class="bi bi-briefcase me-1"></i>
-                                            {{ $employee->position->name ?? 'N/A' }}
+                                            <?php echo e($employee->position->name ?? 'N/A'); ?>
+
                                         </span>
                                         <span class="badge badge-status badge-info">
                                             <i class="bi bi-building me-1"></i>
-                                            {{ $employee->department_rel->name ?? $employee->department ?? 'N/A' }}
+                                            <?php echo e($employee->department_rel->name ?? $employee->department ?? 'N/A'); ?>
+
                                         </span>
                                         <span class="badge badge-status badge-active">
                                             <i class="bi bi-calendar-event me-1"></i>
-                                            {{ $employee->years_of_service }} años de antigüedad
+                                            <?php echo e($employee->years_of_service); ?> años de antigüedad
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                            <a href="{{ route('vacations.create', ['employee_id' => $employee->id]) }}"
+                            <a href="<?php echo e(route('vacations.create', ['employee_id' => $employee->id])); ?>"
                                 class="btn btn-primary-custom">
                                 <i class="bi bi-plus-circle me-2"></i>Registrar Vacaciones
                             </a>
@@ -66,9 +66,10 @@
                         </div>
                         <div>
                             <h6 class="text-white small mb-0">Días Correspondientes</h6>
-                            <h3 class="text-white mb-0">{{ $employee->vacation_days_entitled }}</h3>
+                            <h3 class="text-white mb-0"><?php echo e($employee->vacation_days_entitled); ?></h3>
                             <small class="text-white">
-                                {{ $employee->years_of_service >= 5 ? '5+ años' : '< 5 años' }}
+                                <?php echo e($employee->years_of_service >= 5 ? '5+ años' : '< 5 años'); ?>
+
                             </small>
                         </div>
                     </div>
@@ -83,8 +84,8 @@
                             <i class="bi bi-check-circle text-white fs-5"></i>
                         </div>
                         <div>
-                            <h6 class="text-white small mb-0">Días Tomados ({{ now()->year }})</h6>
-                            <h3 class="text-white mb-0">{{ $employee->getVacationDaysTaken() }}</h3>
+                            <h6 class="text-white small mb-0">Días Tomados (<?php echo e(now()->year); ?>)</h6>
+                            <h3 class="text-white mb-0"><?php echo e($employee->getVacationDaysTaken()); ?></h3>
                         </div>
                     </div>
                 </div>
@@ -99,7 +100,7 @@
                         </div>
                         <div>
                             <h6 class="text-white small mb-0">Días Restantes</h6>
-                            <h3 class="text-white mb-0">{{ $employee->getVacationDaysRemaining() }}</h3>
+                            <h3 class="text-white mb-0"><?php echo e($employee->getVacationDaysRemaining()); ?></h3>
                         </div>
                     </div>
                 </div>
@@ -117,12 +118,13 @@
                     </h6>
                 </div>
                 <div class="card-body p-0">
-                    @forelse($vacations as $year => $yearVacations)
+                    <?php $__empty_1 = true; $__currentLoopData = $vacations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $year => $yearVacations): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <div class="p-4 border-bottom border-secondary">
                             <h6 class="text-white mb-3">
-                                <i class="bi bi-calendar3 me-2"></i>Año {{ $year }}
+                                <i class="bi bi-calendar3 me-2"></i>Año <?php echo e($year); ?>
+
                                 <span class="badge badge-status badge-info ms-2">
-                                    {{ collect($yearVacations)->sum('days_taken') }} días tomados
+                                    <?php echo e(collect($yearVacations)->sum('days_taken')); ?> días tomados
                                 </span>
                             </h6>
 
@@ -139,20 +141,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($yearVacations as $vacation)
+                                        <?php $__currentLoopData = $yearVacations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vacation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <i class="bi bi-calendar-range text-primary me-2"></i>
                                                         <div>
                                                             <strong class="text-dark">
-                                                                {{ \Carbon\Carbon::parse($vacation['start_date'])->format('d/m/Y') }}
+                                                                <?php echo e(\Carbon\Carbon::parse($vacation['start_date'])->format('d/m/Y')); ?>
+
                                                                 -
-                                                                {{ \Carbon\Carbon::parse($vacation['end_date'])->format('d/m/Y') }}
+                                                                <?php echo e(\Carbon\Carbon::parse($vacation['end_date'])->format('d/m/Y')); ?>
+
                                                             </strong>
                                                             <br>
                                                             <small class="text-dark">
-                                                                {{ \Carbon\Carbon::parse($vacation['start_date'])->diffInDays(\Carbon\Carbon::parse($vacation['end_date'])) + 1 }}
+                                                                <?php echo e(\Carbon\Carbon::parse($vacation['start_date'])->diffInDays(\Carbon\Carbon::parse($vacation['end_date'])) + 1); ?>
+
                                                                 días naturales
                                                             </small>
                                                         </div>
@@ -160,78 +165,80 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge badge-status badge-completed">
-                                                        {{ $vacation['days_taken'] }} días hábiles
+                                                        <?php echo e($vacation['days_taken']); ?> días hábiles
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    @if($vacation['source'] === 'request_module')
+                                                    <?php if($vacation['source'] === 'request_module'): ?>
                                                         <span class="badge source-badge source-request"
                                                             title="Solicitado desde el módulo de Permisos">
                                                             <i class="bi bi-file-earmark-check me-1"></i>Permisos
                                                         </span>
-                                                    @else
+                                                    <?php else: ?>
                                                         <span class="badge source-badge source-vacation"
                                                             title="Registrado directamente en Gestión de Vacaciones">
                                                             <i class="bi bi-calendar2-check me-1"></i>Vacaciones
                                                         </span>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    @if($vacation['notes'])
-                                                        <small class="text-dark">{{ Str::limit($vacation['notes'], 50) }}</small>
-                                                    @else
+                                                    <?php if($vacation['notes']): ?>
+                                                        <small class="text-dark"><?php echo e(Str::limit($vacation['notes'], 50)); ?></small>
+                                                    <?php else: ?>
                                                         <small class="text-dark">-</small>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td>
                                                     <small class="text-dark">
-                                                        {{ $vacation['created_by'] }}
+                                                        <?php echo e($vacation['created_by']); ?>
+
                                                         <br>
-                                                        {{ \Carbon\Carbon::parse($vacation['created_at'])->format('d/m/Y') }}
+                                                        <?php echo e(\Carbon\Carbon::parse($vacation['created_at'])->format('d/m/Y')); ?>
+
                                                     </small>
                                                 </td>
                                                 <td class="text-center">
-                                                    @if($vacation['source'] === 'vacation_module')
+                                                    <?php if($vacation['source'] === 'vacation_module'): ?>
                                                         <div class="btn-group btn-group-sm">
-                                                            <a href="{{ route('vacations.edit', $vacation['vacation_id']) }}"
+                                                            <a href="<?php echo e(route('vacations.edit', $vacation['vacation_id'])); ?>"
                                                                 class="btn btn-outline-custom btn-sm" title="Editar">
                                                                 <i class="bi bi-pencil"></i>
                                                             </a>
-                                                            <form action="{{ route('vacations.destroy', $vacation['vacation_id']) }}"
+                                                            <form action="<?php echo e(route('vacations.destroy', $vacation['vacation_id'])); ?>"
                                                                 method="POST" class="d-inline"
                                                                 onsubmit="return confirm('¿Eliminar este registro de vacaciones?')">
-                                                                @csrf
-                                                                @method('DELETE')
+                                                                <?php echo csrf_field(); ?>
+                                                                <?php echo method_field('DELETE'); ?>
                                                                 <button type="submit" class="btn btn-outline-danger btn-sm"
                                                                     title="Eliminar">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </form>
                                                         </div>
-                                                    @else
-                                                        <a href="{{ route('requests.index') }}" class="btn btn-outline-secondary btn-sm"
+                                                    <?php else: ?>
+                                                        <a href="<?php echo e(route('requests.index')); ?>" class="btn btn-outline-secondary btn-sm"
                                                             title="Ver en módulo de Permisos">
                                                             <i class="bi bi-box-arrow-up-right"></i>
                                                         </a>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="text-center py-5">
                             <i class="bi bi-calendar-x display-4 text-white d-block mb-3"></i>
                             <h6 class="text-white mb-2">No hay registros de vacaciones</h6>
                             <p class="text-white mb-4">Este empleado aún no ha tomado vacaciones</p>
-                            <a href="{{ route('vacations.create', ['employee_id' => $employee->id]) }}"
+                            <a href="<?php echo e(route('vacations.create', ['employee_id' => $employee->id])); ?>"
                                 class="btn btn-primary-custom">
                                 <i class="bi bi-plus-circle me-2"></i>Registrar Primera Vacación
                             </a>
                         </div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -277,4 +284,5 @@
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/vacations/show.blade.php ENDPATH**/ ?>

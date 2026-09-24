@@ -9,13 +9,14 @@
         <p>Se ha recibido un nuevo mensaje de contacto con los siguientes detalles:</p>
         
         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-            <p style="margin: 5px 0;"><strong>Nombre:</strong> {{ $name }}</p>
-            <p style="margin: 5px 0;"><strong>Teléfono:</strong> {{ $phone }}</p>
-            <p style="margin: 5px 0;"><strong>Correo:</strong> {{ $email }}</p>
+            <p style="margin: 5px 0;"><strong>Nombre:</strong> <?php echo e($name); ?></p>
+            <p style="margin: 5px 0;"><strong>Teléfono:</strong> <?php echo e($phone); ?></p>
+            <p style="margin: 5px 0;"><strong>Correo:</strong> <?php echo e($email); ?></p>
         </div>
 
         <h3 style="color: #444; border-bottom: 1px solid #eee; padding-bottom: 5px;">Mensaje:</h3>
-        <p style="white-space: pre-line;">{{ $messageContent }}</p>
+        <p style="white-space: pre-line;"><?php echo e($messageContent); ?></p>
     </div>
 </body>
 </html>
+<?php /**PATH C:\Users\Freddy\Desktop\proyectos\anti\resources\views/emails/contact.blade.php ENDPATH**/ ?>

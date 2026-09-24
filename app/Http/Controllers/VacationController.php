@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\UserRequest;
 use App\Models\Vacation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -126,11 +127,68 @@ class VacationController extends Controller
             abort(403);
         }
 
-        $vacations = $employee->vacations()
+        // Vacaciones registradas directamente en el módulo de gestión de vacaciones
+        $moduleVacations = collect($employee->vacations()
             ->with(['approver', 'creator'])
             ->orderBy('start_date', 'desc')
             ->get()
-            ->groupBy('year');
+            ->map(function ($v) {
+                return [
+                    'id'          => $v->id,
+                    'source'      => 'vacation_module',
+                    'start_date'  => $v->start_date,
+                    'end_date'    => $v->end_date,
+                    'days_taken'  => $v->days_taken,
+                    'year'        => $v->year,
+                    'notes'       => $v->notes,
+                    'status'      => $v->status,
+                    'created_by'  => $v->creator->name ?? 'N/A',
+                    'created_at'  => $v->created_at,
+                    'approved_by' => $v->approver->name ?? 'N/A',
+                    'vacation_id' => $v->id,
+                ];
+            })->values()->all());
+
+        // Vacaciones aprobadas provenientes del módulo de permisos (requests)
+        $permissionVacations = collect();
+        if ($employee->user) {
+            $permissionVacations = collect(UserRequest::where('user_id', $employee->user_id)
+                ->where('company_id', $employee->company_id)
+                ->where('type', 'vacation')
+                ->where('status', 'approved')
+                ->whereNotNull('start_date')
+                ->whereNotNull('end_date')
+                ->with(['reviewer'])
+                ->orderBy('start_date', 'desc')
+                ->get()
+                ->map(function ($r) use ($employee) {
+                    $startDate = Carbon::parse($r->start_date);
+                    $endDate   = Carbon::parse($r->end_date);
+                    $daysTaken = Vacation::calculateBusinessDays($startDate, $endDate, $employee->company_id);
+
+                    return [
+                        'id'          => 'req_' . $r->id,
+                        'source'      => 'request_module',
+                        'start_date'  => $startDate,
+                        'end_date'    => $endDate,
+                        'days_taken'  => $daysTaken,
+                        'year'        => $startDate->year,
+                        'notes'       => $r->description,
+                        'status'      => $r->status,
+                        'created_by'  => $employee->user->name ?? 'N/A',
+                        'created_at'  => $r->created_at,
+                        'approved_by' => $r->reviewer->name ?? 'N/A',
+                        'vacation_id' => null,
+                    ];
+                })->values()->all());
+        }
+
+        // Unir ambas colecciones base, ordenar por fecha desc y agrupar por año
+        $vacations = $moduleVacations
+            ->merge($permissionVacations)
+            ->sortByDesc('start_date')
+            ->groupBy('year')
+            ->sortKeysDesc();
 
         return view('vacations.show', compact('employee', 'vacations'));
     }
