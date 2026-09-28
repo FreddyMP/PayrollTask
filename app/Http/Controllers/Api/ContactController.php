@@ -31,20 +31,22 @@ class ContactController extends Controller
         }
 
         try {
+
+            dd("llega hasta aqui 1");
             Mail::to($targetEmail)->send(new ContactMail(
                 $request->nombre,
                 $request->telefono,
                 $request->correo,
                 $request->mensaje
             ));
-
+            dd("llega hasta aqui 2");
             return response()->json([
                 'success' => true,
                 'message' => 'Mensaje de contacto enviado correctamente.'
             ], 200);
         } catch (\Exception $e) {
             logger()->error('Error enviando correo de contacto API: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al enviar el mensaje de contacto.',
