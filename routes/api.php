@@ -12,9 +12,10 @@ use App\Http\Controllers\Api\SolicitudesController;
 use App\Http\Controllers\Api\CalendarController;
 
 // Endpoint público para enviar correos de contacto
-Route::post('/contacto', [ContactController::class, 'send']);
+
 
 Route::middleware(['api.auth'])->group(function () {
+    Route::post('/contacto', [ContactController::class, 'send']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
