@@ -14,22 +14,23 @@ class ContactController extends Controller
      */
     public function send(Request $request)
     {
+        dd("llega hasta aqui -3");
         $request->validate([
             'nombre' => 'required|string|max:255',
             'telefono' => 'required|string|max:50',
             'correo' => 'required|email|max:255',
             'mensaje' => 'required|string',
         ]);
-
+        dd("llega hasta aqui -2");
         $targetEmail = env('INCIDENTS_EMAIL_ADDRESS');
-
+        dd("llega hasta aqui -1");
         if (!$targetEmail) {
             return response()->json([
                 'success' => false,
                 'message' => 'El correo de incidencias no está configurado en el servidor.'
             ], 500);
         }
-
+        dd("llega hasta aqui 0");
         try {
 
             dd("llega hasta aqui 1");
