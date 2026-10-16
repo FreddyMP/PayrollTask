@@ -25,10 +25,15 @@ class CompanyController extends Controller
             'payroll_frequency' => 'nullable|in:monthly,biweekly',
             'bonus_payment_method' => 'nullable|in:payroll,separate',
             'bonus_biweekly_split' => 'nullable|in:both,q1,q2',
+            'vacation_payment_enabled' => 'nullable|boolean',
+            'vacation_payment_method'  => 'nullable|in:payroll,separate',
             'logo'              => 'nullable|image|mimes:jpeg,png,jpg|max:2048|dimensions:max_width=600,max_height=500',
         ]);
 
         $company = Auth::user()->company;
+
+        // Handle boolean for vacation_payment_enabled if checkbox / boolean input
+        $data['vacation_payment_enabled'] = $request->boolean('vacation_payment_enabled', true);
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
@@ -57,7 +62,14 @@ class CompanyController extends Controller
             'payroll_frequency' => 'required|in:monthly,biweekly',
             'bonus_payment_method' => 'required|in:payroll,separate',
             'bonus_biweekly_split' => 'nullable|in:both,q1,q2',
+            'vacation_payment_enabled' => 'nullable|boolean',
+            'vacation_payment_method'  => 'nullable|in:payroll,separate',
         ]);
+
+        $data['vacation_payment_enabled'] = $request->boolean('vacation_payment_enabled', true);
+        if (!$data['vacation_payment_enabled']) {
+            $data['vacation_payment_method'] = 'payroll';
+        }
 
         Auth::user()->company->update($data);
 

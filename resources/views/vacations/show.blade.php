@@ -132,6 +132,8 @@
                                         <tr>
                                             <th>Período</th>
                                             <th>Días</th>
+                                            <th>Monto Bruto</th>
+                                            <th>Estado Pago</th>
                                             <th>Origen</th>
                                             <th>Notas</th>
                                             <th>Registrado por</th>
@@ -164,6 +166,34 @@
                                                     </span>
                                                 </td>
                                                 <td>
+                                                    <strong class="text-success">
+                                                        RD$ {{ number_format($vacation['amount'], 2) }}
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    @if($vacation['is_paid'])
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle"
+                                                            title="Pagado el {{ $vacation['paid_at'] ? $vacation['paid_at']->format('d/m/Y') : '' }}">
+                                                            <i class="bi bi-check-circle-fill me-1"></i>Pagado
+                                                        </span>
+                                                    @elseif(($company->vacation_payment_method ?? 'payroll') === 'payroll')
+                                                        <span class="badge bg-indigo-subtle text-primary border border-primary-subtle"
+                                                            style="font-size: 0.75rem;">
+                                                            <i class="bi bi-calendar-event me-1"></i>En Nómina
+                                                        </span>
+                                                    @elseif($vacation['is_eligible'])
+                                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle"
+                                                            style="font-size: 0.75rem;">
+                                                            <i class="bi bi-hourglass-top me-1"></i>Listo para pago
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-secondary-subtle text-white-50"
+                                                            style="font-size: 0.75rem;">
+                                                            <i class="bi bi-clock me-1"></i>Pendiente
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
                                                     @if($vacation['source'] === 'request_module')
                                                         <span class="badge source-badge source-request"
                                                             title="Solicitado desde el módulo de Permisos">
@@ -178,7 +208,7 @@
                                                 </td>
                                                 <td>
                                                     @if($vacation['notes'])
-                                                        <small class="text-dark">{{ Str::limit($vacation['notes'], 50) }}</small>
+                                                        <small class="text-dark">{{ Str::limit($vacation['notes'], 40) }}</small>
                                                     @else
                                                         <small class="text-dark">-</small>
                                                     @endif
@@ -193,6 +223,17 @@
                                                 <td class="text-center">
                                                     @if($vacation['source'] === 'vacation_module')
                                                         <div class="btn-group btn-group-sm">
+                                                            @if(!$vacation['is_paid'] && ($company->vacation_payment_method ?? 'payroll') === 'separate' && $vacation['is_eligible'])
+                                                                <form action="{{ route('vacations.pay-single', $vacation['vacation_id']) }}"
+                                                                    method="POST" class="d-inline"
+                                                                    onsubmit="return confirm('¿Procesar pago de vacaciones de {{ $vacation['days_taken'] }} días (RD$ {{ number_format($vacation['amount'], 2) }}) y enviar volante al empleado?')">
+                                                                    @csrf
+                                                                    <button type="submit" class="btn btn-outline-success btn-sm"
+                                                                        title="Pagar vacaciones y enviar volante">
+                                                                        <i class="bi bi-cash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                             <a href="{{ route('vacations.edit', $vacation['vacation_id']) }}"
                                                                 class="btn btn-outline-custom btn-sm" title="Editar">
                                                                 <i class="bi bi-pencil"></i>

@@ -273,6 +273,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [VacationController::class, 'index'])->name('index');
         Route::get('/create', [VacationController::class, 'create'])->name('create');
         Route::post('/', [VacationController::class, 'store'])->name('store');
+        Route::post('/pay-approved', [VacationController::class, 'payApproved'])->name('pay-approved');
+        Route::post('/{vacation}/pay', [VacationController::class, 'paySingle'])->name('pay-single');
         Route::get('/employee/{employee}', [VacationController::class, 'show'])->name('show');
         Route::get('/{vacation}/edit', [VacationController::class, 'edit'])->name('edit');
         Route::patch('/{vacation}', [VacationController::class, 'update'])->name('update');

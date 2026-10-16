@@ -123,6 +123,27 @@
                                     quincenal.</small>
                             </div>
                         </div>
+
+                        {{-- Configuración de Vacaciones --}}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-umbrella me-1"></i>¿Pagar Vacaciones como Ingreso Adicional?</label>
+                                <select class="form-select" name="vacation_payment_enabled" id="vacation_payment_enabled">
+                                    <option value="1" @selected(old('vacation_payment_enabled', $company->vacation_payment_enabled ?? true) == true)>Sí, pagar adicionales</option>
+                                    <option value="0" @selected(old('vacation_payment_enabled', $company->vacation_payment_enabled ?? true) == false)>No</option>
+                                </select>
+                                <small class="text-white">Calculado en base a 14 días (< 5 años) o 18 días (>= 5 años) proporcional.</small>
+                            </div>
+                            <div class="col-md-6" id="vacation_method_container">
+                                <label class="form-label"><i class="bi bi-credit-card-2-front me-1"></i>Modalidad de Pago de Vacaciones</label>
+                                <select class="form-select" name="vacation_payment_method" id="vacation_payment_method">
+                                    <option value="payroll" @selected(old('vacation_payment_method', $company->vacation_payment_method ?? 'payroll') === 'payroll')>Pagar con la Nómina (Quincena/Mes)</option>
+                                    <option value="separate" @selected(old('vacation_payment_method', $company->vacation_payment_method ?? 'payroll') === 'separate')>Pago Independiente</option>
+                                </select>
+                                <small class="text-white">Si es independiente, se pagan vía botón "Pagar vacaciones aprobadas" con volante.</small>
+                            </div>
+                        </div>
+
                         <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i> Guardar
                             Cambios</button>
                     </form>
@@ -171,6 +192,20 @@
                 payrollFrequency.addEventListener('change', toggleBonusSplit);
                 bonusPaymentMethod.addEventListener('change', toggleBonusSplit);
                 toggleBonusSplit();
+            }
+
+            const vacationEnabled = document.getElementById('vacation_payment_enabled');
+            const vacationMethodContainer = document.getElementById('vacation_method_container');
+
+            function toggleVacationMethod() {
+                if (vacationEnabled && vacationMethodContainer) {
+                    vacationMethodContainer.style.display = vacationEnabled.value === '1' ? 'block' : 'none';
+                }
+            }
+
+            if (vacationEnabled) {
+                vacationEnabled.addEventListener('change', toggleVacationMethod);
+                toggleVacationMethod();
             }
         });
     </script>

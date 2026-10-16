@@ -457,6 +457,35 @@
                         </div>
                     </div>
 
+                    <!-- PASO 4: Método de Pago de Vacaciones -->
+                    <div class="pf-section" id="step4" style="display:none;">
+                        <div class="pf-step-title"><i class="bi bi-4-circle-fill me-2"></i>Pago de Vacaciones (Ingreso Adicional)</div>
+                        <div class="pf-options">
+                            <label class="pf-option" data-step="4" data-value="payroll">
+                                <input type="radio" name="pf_vacation_method" value="payroll" hidden>
+                                <div class="pf-option-icon"
+                                    style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(79,70,229,0.1));color:#6366f1;">
+                                    <i class="bi bi-calendar2-week"></i></div>
+                                <div class="pf-option-content">
+                                    <span class="pf-option-label">Pagar con la Nómina</span>
+                                    <span class="pf-option-desc">Se añade como extra gravable en la quincena o mensualidad</span>
+                                </div>
+                                <div class="pf-check"><i class="bi bi-check-circle-fill"></i></div>
+                            </label>
+                            <label class="pf-option" data-step="4" data-value="separate">
+                                <input type="radio" name="pf_vacation_method" value="separate" hidden>
+                                <div class="pf-option-icon"
+                                    style="background:linear-gradient(135deg,rgba(236,72,153,0.15),rgba(219,39,119,0.1));color:#ec4899;">
+                                    <i class="bi bi-cash-coin"></i></div>
+                                <div class="pf-option-content">
+                                    <span class="pf-option-label">Pago Independiente</span>
+                                    <span class="pf-option-desc">Pago por adelantado vía botón "Pagar vacaciones aprobadas" con volante</span>
+                                </div>
+                                <div class="pf-check"><i class="bi bi-check-circle-fill"></i></div>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="pf-warning">
                         <i class="bi bi-info-circle-fill me-2" style="color:#06b6d4;"></i>
                         <span>Esta configuración puede modificarse después desde <strong>Configuración de
@@ -469,6 +498,8 @@
                         <input type="hidden" name="payroll_frequency" id="pfFrequency" value="">
                         <input type="hidden" name="bonus_payment_method" id="pfBonusMethod" value="">
                         <input type="hidden" name="bonus_biweekly_split" id="pfBonusSplit" value="">
+                        <input type="hidden" name="vacation_payment_enabled" id="pfVacationEnabled" value="1">
+                        <input type="hidden" name="vacation_payment_method" id="pfVacationMethod" value="payroll">
                         <button type="submit" class="pf-btn-confirm" id="pfConfirmBtn" disabled>
                             <i class="bi bi-check-lg me-2"></i>Confirmar y Continuar
                         </button>
@@ -976,14 +1007,17 @@
                     const step1 = document.getElementById('step1');
                     const step2 = document.getElementById('step2');
                     const step3 = document.getElementById('step3');
+                    const step4 = document.getElementById('step4');
                     const confirmBtn = document.getElementById('pfConfirmBtn');
                     const pfFrequency = document.getElementById('pfFrequency');
                     const pfBonusMethod = document.getElementById('pfBonusMethod');
                     const pfBonusSplit = document.getElementById('pfBonusSplit');
+                    const pfVacationMethod = document.getElementById('pfVacationMethod');
 
                     let selectedFrequency = null;
                     let selectedBonusMethod = null;
                     let selectedBonusSplit = null;
+                    let selectedVacationMethod = null;
 
                     // Manejar selección de opciones
                     document.querySelectorAll('.pf-option').forEach(option => {
@@ -1025,13 +1059,17 @@
                                     step3.style.display = 'none';
                                     selectedBonusSplit = null;
                                     pfBonusSplit.value = '';
-                                    // Si no necesita paso 3, habilitar botón
-                                    enableButton();
                                 }
+                                // Mostrar paso 4 (Vacaciones)
+                                step4.style.display = 'block';
                             } else if (step === '3') {
                                 selectedBonusSplit = value;
                                 pfBonusSplit.value = value;
-                                enableButton();
+                                // Mostrar paso 4 (Vacaciones)
+                                step4.style.display = 'block';
+                            } else if (step === '4') {
+                                selectedVacationMethod = value;
+                                pfVacationMethod.value = value;
                             }
 
                             checkCompletion();
@@ -1042,7 +1080,7 @@
                         // Verificar si todos los pasos necesarios están completos
                         const step3Visible = step3.style.display !== 'none';
 
-                        if (selectedFrequency && selectedBonusMethod) {
+                        if (selectedFrequency && selectedBonusMethod && selectedVacationMethod) {
                             if (step3Visible && !selectedBonusSplit) {
                                 // Paso 3 visible pero no seleccionado
                                 disableButton();

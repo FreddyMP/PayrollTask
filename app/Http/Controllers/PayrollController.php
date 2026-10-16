@@ -7,6 +7,7 @@ use App\Models\Payroll;
 use App\Models\UserRequest;
 use App\Models\Holiday;
 use App\Models\Company;
+use App\Models\Vacation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -402,11 +403,53 @@ class PayrollController extends Controller
             }
         }
 
+        // Vacaciones aprobadas a pagar con nómina
+        $vacationData = [
+            'vacation_days' => 0,
+            'vacation_pay'  => 0,
+            'vacations'     => [],
+        ];
+
+        if ($company->vacation_payment_enabled && ($company->vacation_payment_method ?? 'payroll') === 'payroll') {
+            $vacQuery = Vacation::where('company_id', $user->company_id)
+                ->where('employee_id', $employee->id)
+                ->where('status', 'approved')
+                ->where('is_paid', false)
+                ->whereYear('start_date', $year)
+                ->whereMonth('start_date', $month);
+
+            if ($quincena === 'Q1') {
+                $vacQuery->whereDay('start_date', '<=', 15);
+            } elseif ($quincena === 'Q2') {
+                $vacQuery->whereDay('start_date', '>', 15);
+            }
+
+            $vacations = $vacQuery->get();
+            $totalVacDays = 0;
+            $totalVacPay = 0;
+
+            foreach ($vacations as $v) {
+                $totalVacDays += $v->days_taken;
+                $pay = round($v->days_taken * ($monthlySalary / 23.83), 2);
+                $totalVacPay += $pay;
+                $vacationData['vacations'][] = [
+                    'id'          => $v->id,
+                    'days'        => $v->days_taken,
+                    'amount'      => $pay,
+                    'description' => 'Vacaciones',
+                ];
+            }
+
+            $vacationData['vacation_days'] = $totalVacDays;
+            $vacationData['vacation_pay']  = round($totalVacPay, 2);
+        }
+
         return response()->json([
             'overtime_hours' => round($totalHours, 2),
             'overtime_pay'   => round($totalOvertimePay, 2),
             'hourly_rate'    => round($hourlyRate, 4),
             'details'        => $details,
+            'vacation_data'  => $vacationData,
         ]);
     }
 
@@ -690,12 +733,17 @@ class PayrollController extends Controller
             // Calculate overtime pay for the period
             $overtime_pay = $this->calculateOvertimePay($employee, $period, $company);
 
+            // Calculate vacation pay for the period (if paid with payroll)
+            $vacation_data = $this->calculateVacationData($employee, $period, $company);
+            $vacation_pay = $vacation_data['total_pay'];
+            $incentives_details = $vacation_data['incentives'];
+
             // Calculate taxes
             $ars_extra = $employee->total_ars_extra ?? 0;
             $ars = ($salary * 0.0304) + $ars_extra;
             $afp = $salary * 0.0287;
 
-            $total_extras = $overtime_pay;
+            $total_extras = $overtime_pay + $vacation_pay;
             $base_imponible = (($salary + $total_extras) * $multiplier) - (($ars * $multiplier) + ($afp * $multiplier));
 
             $isrAnnual = 0;
@@ -713,25 +761,79 @@ class PayrollController extends Controller
             $total_deductions = $ars + $afp + $isr;
 
             Payroll::create([
-                'employee_id'  => $employee->id,
-                'company_id'   => $company->id,
-                'period'       => $period,
-                'gross_salary' => $salary,
-                'extras'       => $total_extras,
-                'descuentos'   => 0,
-                'ars'          => $ars,
-                'afp'          => $afp,
-                'isr'          => $isr,
-                'deductions'   => $total_deductions,
-                'net_salary'   => ($salary + $total_extras) - $total_deductions,
-                'payment_date' => null,
-                'status'       => 'pending',
+                'employee_id'        => $employee->id,
+                'company_id'         => $company->id,
+                'period'             => $period,
+                'gross_salary'       => $salary,
+                'extras'             => $total_extras,
+                'incentives_details' => $incentives_details,
+                'descuentos'         => 0,
+                'ars'                => $ars,
+                'afp'                => $afp,
+                'isr'                => $isr,
+                'deductions'         => $total_deductions,
+                'net_salary'         => ($salary + $total_extras) - $total_deductions,
+                'payment_date'       => null,
+                'status'             => 'pending',
             ]);
 
             $generatedCount++;
         }
 
         return redirect()->route('payroll.index')->with('success', "Se generaron {$generatedCount} nóminas automáticamente. {$skippedCount} empleados ya tenían nómina para este período.");
+    }
+
+    private function calculateVacationData($employee, $period, $company)
+    {
+        if (!$company->vacation_payment_enabled || ($company->vacation_payment_method ?? 'payroll') !== 'payroll') {
+            return ['total_pay' => 0, 'incentives' => []];
+        }
+
+        $quincena = null;
+        if (preg_match('/^(\d{4}-\d{2})-(Q[12])$/', $period, $m)) {
+            $basePeriod = $m[1];
+            $quincena   = $m[2];
+        } else {
+            $basePeriod = $period;
+        }
+
+        [$year, $month] = explode('-', $basePeriod);
+        $year = (int) $year;
+        $month = (int) $month;
+
+        $query = Vacation::where('company_id', $company->id)
+            ->where('employee_id', $employee->id)
+            ->where('status', 'approved')
+            ->where('is_paid', false)
+            ->whereYear('start_date', $year)
+            ->whereMonth('start_date', $month);
+
+        if ($quincena === 'Q1') {
+            $query->whereDay('start_date', '<=', 15);
+        } elseif ($quincena === 'Q2') {
+            $query->whereDay('start_date', '>', 15);
+        }
+
+        $vacations = $query->get();
+        $totalPay = 0;
+        $incentives = [];
+
+        foreach ($vacations as $v) {
+            $pay = round($v->days_taken * ($employee->salary / 23.83), 2);
+            $totalPay += $pay;
+            $incentives[] = [
+                'description' => 'Vacaciones',
+                'amount'      => $pay,
+                'is_taxable'  => true,
+                'is_locked'   => true,
+                'vacation_id' => $v->id,
+            ];
+        }
+
+        return [
+            'total_pay'  => $totalPay,
+            'incentives' => $incentives,
+        ];
     }
 
     private function calculateOvertimePay($employee, $period, $company)

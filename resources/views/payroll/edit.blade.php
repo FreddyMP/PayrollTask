@@ -60,22 +60,41 @@
                                     <div id="incentivesContainer">
                                         @if(is_array($payroll->incentives_details))
                                             @foreach($payroll->incentives_details as $idx => $inc)
-                                            <div class="row g-2 mb-2 align-items-center incentive-row">
-                                                <div class="col-sm-5">
-                                                    <input type="text" class="form-control form-control-sm" name="incentives[{{ $idx }}][description]" placeholder="Descripción" value="{{ $inc['description'] ?? '' }}" required>
-                                                </div>
-                                                <div class="col-sm-3">
-                                                    <input type="number" step="0.01" class="form-control form-control-sm incentive-amount" name="incentives[{{ $idx }}][amount]" placeholder="Monto" value="{{ $inc['amount'] ?? 0 }}" required>
-                                                </div>
-                                                <div class="col-sm-3 text-center">
-                                                    <div class="form-check form-check-inline m-0">
-                                                        <input class="form-check-input incentive-taxable" type="checkbox" name="incentives[{{ $idx }}][is_taxable]" value="1" id="incTax_{{ $idx }}" {{ !empty($inc['is_taxable']) ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="incTax_{{ $idx }}"><small>Gravable</small></label>
+                                            <div class="row g-2 mb-2 align-items-center incentive-row" @if(!empty($inc['is_locked']) || ($inc['description'] ?? '') === 'Vacaciones') style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 6px;" @endif>
+                                                @if(!empty($inc['is_locked']) || ($inc['description'] ?? '') === 'Vacaciones')
+                                                    <div class="col-sm-5">
+                                                        <input type="text" class="form-control form-control-sm text-white" name="incentives[{{ $idx }}][description]" value="{{ $inc['description'] ?? 'Vacaciones' }}" readonly style="background: #1e293b; font-weight: 600;">
+                                                        <small class="text-info d-block" style="font-size: 0.72rem;"><i class="bi bi-umbrella me-1"></i>Vacaciones (Concepto de Ley)</small>
                                                     </div>
-                                                </div>
-                                                <div class="col-sm-1 text-end">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="$(this).closest('.row').remove(); calculateTaxes();"><i class="bi bi-trash"></i></button>
-                                                </div>
+                                                    <div class="col-sm-3">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm text-success fw-bold incentive-amount" name="incentives[{{ $idx }}][amount]" value="{{ $inc['amount'] ?? 0 }}" readonly style="background: #1e293b;">
+                                                    </div>
+                                                    <div class="col-sm-3 text-center">
+                                                        <div class="form-check form-check-inline m-0">
+                                                            <input class="form-check-input incentive-taxable" type="checkbox" name="incentives[{{ $idx }}][is_taxable]" value="1" id="incTax_{{ $idx }}" checked onclick="return false;">
+                                                            <label class="form-check-label text-warning" for="incTax_{{ $idx }}"><small><i class="bi bi-shield-lock me-1"></i>Gravable</small></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-1 text-end">
+                                                        <span class="badge bg-secondary-subtle text-white-50" title="Concepto inmodificable"><i class="bi bi-lock-fill"></i></span>
+                                                    </div>
+                                                @else
+                                                    <div class="col-sm-5">
+                                                        <input type="text" class="form-control form-control-sm" name="incentives[{{ $idx }}][description]" placeholder="Descripción" value="{{ $inc['description'] ?? '' }}" required>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm incentive-amount" name="incentives[{{ $idx }}][amount]" placeholder="Monto" value="{{ $inc['amount'] ?? 0 }}" required>
+                                                    </div>
+                                                    <div class="col-sm-3 text-center">
+                                                        <div class="form-check form-check-inline m-0">
+                                                            <input class="form-check-input incentive-taxable" type="checkbox" name="incentives[{{ $idx }}][is_taxable]" value="1" id="incTax_{{ $idx }}" {{ !empty($inc['is_taxable']) ? 'checked' : '' }}>
+                                                            <label class="form-check-label text-white" for="incTax_{{ $idx }}"><small>Gravable</small></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-1 text-end">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="$(this).closest('.row').remove(); calculateTaxes();"><i class="bi bi-trash"></i></button>
+                                                    </div>
+                                                @endif
                                             </div>
                                             @endforeach
                                         @endif

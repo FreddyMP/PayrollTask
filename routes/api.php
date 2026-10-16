@@ -10,12 +10,23 @@ use App\Http\Controllers\IncidenciasController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\SolicitudesController;
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\EvaluationController;
 
 // Endpoint público para enviar correos de contacto
 Route::post('/contacto', [ContactController::class, 'send']);
 
 Route::middleware(['api.auth'])->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
+
+    // API de Evaluaciones (para terceros y aplicaciones móviles/web)
+    Route::prefix('evaluations')->group(function () {
+        Route::get('/', [EvaluationController::class, 'index']);
+        Route::get('/{id}', [EvaluationController::class, 'show']);
+        Route::post('/{id}/submit', [EvaluationController::class, 'submit']);
+        Route::post('/{id}/answers', [EvaluationController::class, 'submit']);
+        Route::get('/{id}/responses', [EvaluationController::class, 'responses']);
+    });
+
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', function (Request $request) {

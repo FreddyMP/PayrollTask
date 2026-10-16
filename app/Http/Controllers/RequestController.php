@@ -147,6 +147,37 @@ class RequestController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        // Si se aprueba una solicitud de vacaciones, sincronizar con la tabla de vacaciones
+        if ($data['status'] === 'approved' && $userRequest->type === 'vacation' && $userRequest->start_date && $userRequest->end_date) {
+            $employee = \App\Models\Employee::where('user_id', $userRequest->user_id)
+                ->where('company_id', $userRequest->company_id)
+                ->first();
+
+            if ($employee) {
+                $startDate = \Carbon\Carbon::parse($userRequest->start_date);
+                $endDate = \Carbon\Carbon::parse($userRequest->end_date);
+                $daysTaken = \App\Models\Vacation::calculateBusinessDays($startDate, $endDate, $userRequest->company_id);
+
+                \App\Models\Vacation::firstOrCreate(
+                    [
+                        'employee_id' => $employee->id,
+                        'company_id'  => $userRequest->company_id,
+                        'start_date'  => $startDate->format('Y-m-d'),
+                        'end_date'    => $endDate->format('Y-m-d'),
+                    ],
+                    [
+                        'days_taken'  => $daysTaken,
+                        'year'        => $startDate->year,
+                        'notes'       => $userRequest->description,
+                        'status'      => 'approved',
+                        'approved_by' => Auth::id(),
+                        'approved_at' => now(),
+                        'created_by'  => $userRequest->user_id,
+                    ]
+                );
+            }
+        }
+
         // Notificar al usuario solicitante
         Mail::to($userRequest->user->email)->send(new UserRequestReviewed($userRequest));
 

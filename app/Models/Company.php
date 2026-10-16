@@ -10,12 +10,14 @@ class Company extends Model
         'name', 'rnc', 'email', 'phone', 'address', 'logo', 'plan', 'status',
         'saturday_rest', 'sunday_rest', 'srl_rate', 'payroll_frequency',
         'bonus_payment_method', 'bonus_biweekly_split',
+        'vacation_payment_enabled', 'vacation_payment_method',
         'subscription_plan', 'subscription_selected_at',
         'referral_code', 'referente_id',
     ];
 
     protected $casts = [
         'subscription_selected_at' => 'datetime',
+        'vacation_payment_enabled' => 'boolean',
     ];
 
     /**

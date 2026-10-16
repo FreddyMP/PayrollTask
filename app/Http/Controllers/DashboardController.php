@@ -212,7 +212,8 @@ class DashboardController extends Controller
         // mostramos el modal obligatorio de selección (no se puede cerrar sin elegir).
         $showPayrollFrequencyModal = $user->isSuper()
             && (is_null($user->company?->payroll_frequency)
-                || is_null($user->company?->bonus_payment_method));
+                || is_null($user->company?->bonus_payment_method)
+                || is_null($user->company?->vacation_payment_method));
 
         // ─── Task stats (keep for compatibility) ─────────────
         $taskStats = [

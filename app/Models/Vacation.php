@@ -17,6 +17,14 @@ class Vacation extends Model
         'year',
         'notes',
         'status',
+        'is_paid',
+        'paid_at',
+        'payment_payroll_id',
+        'payment_amount',
+        'payment_ars',
+        'payment_afp',
+        'payment_isr',
+        'payment_net',
         'approved_by',
         'approved_at',
         'created_by',
@@ -26,11 +34,43 @@ class Vacation extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'approved_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'is_paid' => 'boolean',
+        'payment_amount' => 'decimal:2',
+        'payment_ars' => 'decimal:2',
+        'payment_afp' => 'decimal:2',
+        'payment_isr' => 'decimal:2',
+        'payment_net' => 'decimal:2',
     ];
 
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function payroll(): BelongsTo
+    {
+        return $this->belongsTo(Payroll::class, 'payment_payroll_id');
+    }
+
+    public function getCalculatedAmountAttribute(): float
+    {
+        $salary = $this->employee?->salary ?? 0;
+        return round($this->days_taken * ($salary / 23.83), 2);
+    }
+
+    public function isEligibleForPayment(): bool
+    {
+        if ($this->status !== 'approved' || $this->is_paid) {
+            return false;
+        }
+
+        if (!$this->start_date) {
+            return false;
+        }
+
+        // Vacaciones con inicio de disfrute máximo a 5 días posteriores a hoy (o ya iniciadas)
+        return $this->start_date->lte(now()->addDays(5)->endOfDay());
     }
 
     public function company(): BelongsTo

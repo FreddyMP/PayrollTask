@@ -131,6 +131,38 @@ class Employee extends Model
     }
 
     /**
+     * Salario ordinario diario según legislación dominicana (Salario mensual / 23.83)
+     */
+    public function getDailySalaryAttribute(): float
+    {
+        return round(($this->salary ?? 0) / 23.83, 2);
+    }
+
+    /**
+     * Monto total que le corresponde por vacaciones al año
+     */
+    public function getVacationPayEntitledAttribute(): float
+    {
+        return round($this->daily_salary * $this->vacation_days_entitled, 2);
+    }
+
+    /**
+     * Monto a pagar por una cantidad específica de días de vacaciones
+     */
+    public function getVacationPayForDays(int $days): float
+    {
+        return round($this->daily_salary * $days, 2);
+    }
+
+    /**
+     * Monto correspondiente a los días tomados en un año específico
+     */
+    public function getVacationPayTaken(int $year = null): float
+    {
+        return round($this->daily_salary * $this->getVacationDaysTaken($year), 2);
+    }
+
+    /**
      * Obtiene los días de vacaciones restantes en un año específico
      */
     public function getVacationDaysRemaining(int $year = null): int

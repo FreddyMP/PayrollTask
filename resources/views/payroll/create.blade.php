@@ -301,13 +301,42 @@
                     success: function (data) {
                         $('#overtimeLoadingMsg').hide();
 
+                        // Quitar filas automáticas de vacaciones previas
+                        $('.vacation-auto-row').remove();
+
+                        if (data.vacation_data && data.vacation_data.vacations && data.vacation_data.vacations.length > 0) {
+                            data.vacation_data.vacations.forEach(function(vac, i) {
+                                let idx = $('.incentive-row').length + i;
+                                let vacRow = `
+                                <div class="row g-2 mb-2 align-items-center incentive-row vacation-auto-row" style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 6px;">
+                                    <div class="col-sm-5">
+                                        <input type="text" class="form-control form-control-sm text-white" name="incentives[${idx}][description]" value="Vacaciones" readonly style="background: #1e293b; font-weight: 600;">
+                                        <small class="text-info d-block" style="font-size: 0.72rem;"><i class="bi bi-umbrella me-1"></i>Vacaciones (${vac.days} días hábiles)</small>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="number" step="0.01" class="form-control form-control-sm text-success fw-bold incentive-amount" name="incentives[${idx}][amount]" value="${parseFloat(vac.amount).toFixed(2)}" readonly style="background: #1e293b;">
+                                    </div>
+                                    <div class="col-sm-3 text-center">
+                                        <div class="form-check form-check-inline m-0">
+                                            <input class="form-check-input incentive-taxable" type="checkbox" name="incentives[${idx}][is_taxable]" value="1" id="incTax_${idx}" checked onclick="return false;">
+                                            <label class="form-check-label text-warning" for="incTax_${idx}"><small><i class="bi bi-shield-lock me-1"></i>Gravable</small></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 text-end">
+                                        <span class="badge bg-secondary-subtle text-white-50" title="Concepto de ley inmodificable"><i class="bi bi-lock-fill"></i></span>
+                                    </div>
+                                </div>
+                                `;
+                                $('#incentivesContainer').prepend(vacRow);
+                            });
+                        }
+
                         if (data.overtime_hours > 0) {
                             $('#overtimeHoursDisplay').val(data.overtime_hours.toFixed(2));
                             $('#overtimePayDisplay').val(
                                 parseFloat(data.overtime_pay).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             );
                             $('#overtimePayHidden').val(data.overtime_pay);
-                            calculateTaxes();
 
                             if (data.details) {
                                 $('#detailDiurnas').text(data.details.diurnas.toFixed(2));
@@ -324,6 +353,7 @@
                             $('#overtimeEmptyMsg').show();
                             $('#overtimeDetails').attr('style', 'display: none !important;');
                         }
+                        calculateTaxes();
                     },
                     error: function (xhr) {
                         if (xhr.statusText !== 'abort') {
@@ -335,6 +365,7 @@
             }
 
             function resetOvertimeDisplay() {
+                $('.vacation-auto-row').remove();
                 $('#overtimeHoursDisplay').val('—');
                 $('#overtimePayDisplay').val('—');
                 $('#overtimePayHidden').val('0');

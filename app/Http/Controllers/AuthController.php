@@ -48,6 +48,8 @@ class AuthController extends Controller
             ],
             'password' => 'required|string|min:8|confirmed',
             'referral_code' => 'nullable|string|max:20',
+            'vacation_payment_enabled' => 'nullable|boolean',
+            'vacation_payment_method' => 'nullable|in:payroll,separate',
         ], $messages);
 
         // Resolve referente from referral code if provided
@@ -61,12 +63,17 @@ class AuthController extends Controller
         try {
             DB::beginTransaction();
 
+            $vacationEnabled = $request->boolean('vacation_payment_enabled', true);
+            $vacationMethod = $vacationEnabled ? ($request->input('vacation_payment_method', 'payroll')) : 'payroll';
+
             $company = Company::create([
-                'name'        => $request->company_name,
-                'status'      => 'active',
-                'plan'        => 'basic',
-                'referral_code'  => $referente ? $referente->codigo_referido : null,
-                'referente_id'   => $referente ? $referente->id : null,
+                'name'                     => $request->company_name,
+                'status'                   => 'active',
+                'plan'                     => 'basic',
+                'vacation_payment_enabled' => $vacationEnabled,
+                'vacation_payment_method'  => $vacationMethod,
+                'referral_code'            => $referente ? $referente->codigo_referido : null,
+                'referente_id'             => $referente ? $referente->id : null,
             ]);
 
             $user = User::create([

@@ -420,6 +420,45 @@
                     </div>
                 </div>
             </div>
+            <!-- Configuración de Vacaciones -->
+            <div class="section-title"><i class="bi bi-umbrella me-1"></i>Pago de Vacaciones</div>
+            
+            <div class="mb-3">
+                <label class="form-label">¿Pagar vacaciones como ingresos adicionales?</label>
+                <div class="d-flex gap-3 mt-1">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="vacation_payment_enabled" id="vacation_enabled_yes" value="1" {{ old('vacation_payment_enabled', '1') == '1' ? 'checked' : '' }} onchange="toggleVacationMethodRegister(true)">
+                        <label class="form-check-label text-white" for="vacation_enabled_yes">
+                            Sí, pagar adicionales
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="vacation_payment_enabled" id="vacation_enabled_no" value="0" {{ old('vacation_payment_enabled') === '0' ? 'checked' : '' }} onchange="toggleVacationMethodRegister(false)">
+                        <label class="form-check-label text-white" for="vacation_enabled_no">
+                            No
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3" id="vacationMethodRegisterContainer" style="{{ old('vacation_payment_enabled', '1') == '0' ? 'display: none;' : '' }}">
+                <label class="form-label">Modalidad de Pago de Vacaciones</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-wallet2"></i></span>
+                    <select class="form-control" name="vacation_payment_method" id="vacation_payment_method_register" style="border-radius: 0 12px 12px 0;">
+                        <option value="payroll" {{ old('vacation_payment_method', 'payroll') == 'payroll' ? 'selected' : '' }}>
+                            Con la Nómina (Quincenal / Mensual)
+                        </option>
+                        <option value="separate" {{ old('vacation_payment_method') == 'separate' ? 'selected' : '' }}>
+                            Pago Independiente (Comprobante separado)
+                        </option>
+                    </select>
+                </div>
+                <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">
+                    Se calculará según antigüedad: 14 días (1-5 años) o 18 días (5+ años) divisibles proporcionalmente.
+                </small>
+            </div>
+
             <!-- Referral Code -->
             <div class="mb-3" id="referralSection">
                 <label class="form-label">Código de Referido <span class="text-muted">(opcional)</span></label>
@@ -551,6 +590,13 @@
                 });
             }
         });
+
+        function toggleVacationMethodRegister(enabled) {
+            const container = document.getElementById('vacationMethodRegisterContainer');
+            if (container) {
+                container.style.display = enabled ? 'block' : 'none';
+            }
+        }
 
         // ── Terms modal ──────────────────────────────────────────
         const openTermsBtn  = document.getElementById('openTermsBtn');

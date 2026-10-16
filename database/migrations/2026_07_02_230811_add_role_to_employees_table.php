@@ -16,11 +16,13 @@ return new class extends Migration
         });
 
         // Initialize role column from users table for existing records
-        DB::statement('
-            UPDATE employees e
-            INNER JOIN users u ON e.user_id = u.id
-            SET e.role = u.role
-        ');
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'mysql') {
+            DB::statement('
+                UPDATE employees e
+                INNER JOIN users u ON e.user_id = u.id
+                SET e.role = u.role
+            ');
+        }
     }
 
     /**
